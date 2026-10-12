@@ -2167,3 +2167,55 @@ Footer
 
 
 }
+
+/* File Select Button */
+
+
+.file-select-btn {
+
+
+display:inline-block;
+
+
+margin-top:20px;
+
+
+padding:12px 25px;
+
+
+background:#e2e8f0;
+
+
+color:#334155;
+
+
+border-radius:10px;
+
+
+cursor:pointer;
+
+
+font-weight:bold;
+
+
+}
+
+
+
+.file-select-btn:hover {
+
+
+background:#cbd5e1;
+
+
+}
+
+
+
+.file-select-btn input {
+
+
+display:none;
+
+
+}

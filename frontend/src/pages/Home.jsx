@@ -211,8 +211,9 @@ function Home(){
 
           desc="Reduce file size easily."
 
-          />
+          onClick={()=>navigate("/compress")}
 
+          />
 
 
           <ToolCard

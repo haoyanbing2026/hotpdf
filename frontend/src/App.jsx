@@ -22,8 +22,9 @@ import Merge from "./pages/Merge"
 
 import Convert from "./pages/Convert"
 
-import Privacy from "./pages/Privacy"
+import Compress from "./pages/Compress"
 
+import Privacy from "./pages/Privacy"
 
 import "./App.css"
 
@@ -67,6 +68,11 @@ element={<Merge />}
 <Route
 path="/convert"
 element={<Convert />}
+/>
+
+<Route
+path="/compress"
+element={<Compress />}
 />
 
 <Route
