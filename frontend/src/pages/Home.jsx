@@ -1,108 +1,267 @@
 import {
-
-useNavigate
-
+  useNavigate
 } from "react-router-dom"
-
 
 import ToolCard from "../components/ToolCard"
 
 
-
 function Home(){
 
-
-const navigate=useNavigate()
-
+  const navigate = useNavigate()
 
 
-return (
+  return (
 
-<div className="home">
-
-
-<h1>
-
-📄 PDF工具箱
-
-</h1>
+    <div className="home">
 
 
-<p>
+      {/* Hero */}
 
-快速、安全处理PDF文件
+      <section className="hero">
 
-</p>
+        <div className="hero-text">
 
-
-
-<div className="tools">
-
-
-
-<ToolCard
-
-icon="✂️"
-
-title="PDF拆分"
-
-desc="选择页面拆分PDF"
-
-onClick={()=>navigate("/split")}
-
-/>
+          <h1>
+            Manage your PDFs
+            <br />
+            smarter and faster.
+          </h1>
 
 
+          <p>
+            HotPDF helps students and professionals
+            organize, compress and convert documents easily.
+          </p>
 
 
-<ToolCard
+          <button
+            className="primary-btn"
+            onClick={()=>navigate("/split")}
+          >
+            Upload PDF
+          </button>
 
-icon="📎"
 
-title="PDF合并"
+          <div className="trust">
 
-desc="多个文件合并"
+            🔒 No registration required
+            <br />
 
-onClick={()=>navigate("/merge")}
+            🗑 Files automatically deleted
 
-/>
+          </div>
+
+
+        </div>
 
 
 
+        {/* 产品展示卡 */}
 
-<ToolCard
-
-icon="📝"
-
-title="PDF转Word"
-
-desc="转换成可编辑文档"
-
-onClick={()=>navigate("/convert")}
-
-/>
+        <div className="pdf-demo">
 
 
+          <div className="pdf-title">
 
-<ToolCard
+            📄 Physics_Notes.pdf
 
-icon="📦"
-
-title="PDF压缩"
-
-desc="降低文件大小"
-
-/>
+          </div>
 
 
+          <div className="pdf-info">
 
-</div>
+            120 pages
+            <br/>
+            25.6 MB
+
+          </div>
 
 
-</div>
+          <div className="demo-buttons">
 
-)
+            <span>
+              ✂️ Split
+            </span>
 
+            <span>
+              📦 Compress
+            </span>
+
+
+          </div>
+
+
+          <div className="convert-demo">
+
+            📝 Convert PDF
+
+          </div>
+
+
+        </div>
+
+
+      </section>
+
+
+
+      {/* 使用场景 */}
+
+      <section className="scenarios">
+
+
+        <h2>
+          Built for the way you work
+        </h2>
+
+
+        <div className="scenario-box">
+
+
+          <div>
+
+            📚
+
+            <h3>
+              Study
+            </h3>
+
+            <p>
+              Organize textbooks,
+              lecture notes and assignments.
+            </p>
+
+          </div>
+
+
+
+          <div>
+
+            💼
+
+            <h3>
+              Work
+            </h3>
+
+
+            <p>
+              Manage reports,
+              contracts and documents.
+            </p>
+
+          </div>
+
+
+        </div>
+
+
+      </section>
+
+
+
+
+
+      {/* 工具 */}
+
+      <section>
+
+
+        <h2>
+          What can HotPDF do?
+        </h2>
+
+
+        <div className="tools">
+
+
+          <ToolCard
+
+          icon="✂️"
+
+          title="Split PDF"
+
+          desc="Extract only the pages you need."
+
+          onClick={()=>navigate("/split")}
+
+          />
+
+
+
+          <ToolCard
+
+          icon="📎"
+
+          title="Merge PDF"
+
+          desc="Combine multiple documents."
+
+          onClick={()=>navigate("/merge")}
+
+          />
+
+
+
+          <ToolCard
+
+          icon="📦"
+
+          title="Compress PDF"
+
+          desc="Reduce file size easily."
+
+          />
+
+
+
+          <ToolCard
+
+          icon="📝"
+
+          title="Convert PDF"
+
+          desc="Make documents editable."
+
+          onClick={()=>navigate("/convert")}
+
+          />
+
+
+        </div>
+
+
+      </section>
+
+
+
+
+
+      {/* 安全 */}
+
+      <section className="security">
+
+
+        <h2>
+          Your files stay private.
+        </h2>
+
+
+        <p>
+          🔒 Secure processing
+          <br/>
+          ⚡ Fast processing
+          <br/>
+          🗑 Automatic deletion
+        </p>
+
+
+      </section>
+
+
+
+    </div>
+
+  )
 
 }
 
