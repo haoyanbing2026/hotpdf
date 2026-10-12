@@ -892,6 +892,9 @@ max-width:1000px;
 .preview-card{
 
 
+width:180px;
+
+
 background:white;
 
 
@@ -917,7 +920,7 @@ cursor:pointer;
 .preview-card img{
 
 
-width:160px;
+width:150px;
 
 
 height:auto;
@@ -932,6 +935,9 @@ border:1px solid #ddd;
 
 .preview-card p{
 
+    font-size:18px;
+
+    font-weight:600;
 
 margin:10px 0 0;
 

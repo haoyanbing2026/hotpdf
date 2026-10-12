@@ -362,7 +362,9 @@ Select pages to split
 
 </h3>
 
-
+<p className="select-tip">
+Choose the pages you want to extract.
+</p>
 
 
 

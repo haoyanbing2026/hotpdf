@@ -213,7 +213,7 @@ alt={`page ${item.page}`}
 
 <p>
 
-第 {item.page} 页
+Page {item.page}
 
 </p>
 
