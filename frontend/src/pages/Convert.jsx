@@ -18,6 +18,9 @@ const [filename,setFilename] = useState("")
 const [message,setMessage] = useState("")
 
 
+const [error,setError] = useState("")
+
+
 const [downloadUrl,setDownloadUrl] = useState("")
 
 
@@ -30,20 +33,30 @@ const [loading,setLoading] = useState(false)
 
 
 
-// 上传PDF
+
+// Upload PDF
 
 async function uploadPDF(){
+
+
+setError("")
+
+setMessage("")
+
+setDownloadUrl("")
+
 
 
 if(!file){
 
 
-setMessage(
-"请先选择PDF文件"
+setError(
+"Please select a PDF file first."
 )
 
 
 return
+
 
 }
 
@@ -52,10 +65,15 @@ return
 const formData = new FormData()
 
 
+
 formData.append(
+
 "file",
+
 file
+
 )
+
 
 
 
@@ -84,9 +102,6 @@ const data = await res.json()
 
 
 
-console.log(data)
-
-
 
 if(data.filename){
 
@@ -95,7 +110,9 @@ setFilename(data.filename)
 
 
 setMessage(
-"上传成功，可以开始转换"
+
+"Upload completed. Ready to convert."
+
 )
 
 
@@ -104,8 +121,10 @@ setMessage(
 else{
 
 
-setMessage(
-"上传失败"
+setError(
+
+"Upload failed."
+
 )
 
 
@@ -121,8 +140,10 @@ catch(error){
 console.log(error)
 
 
-setMessage(
-"服务器连接失败"
+setError(
+
+"Server connection failed."
+
 )
 
 
@@ -139,17 +160,23 @@ setMessage(
 
 
 
-// 转换Word
+// Convert PDF to Word
 
 async function convertWord(){
+
+
+
+setError("")
 
 
 
 if(!filename){
 
 
-setMessage(
-"请先上传PDF"
+setError(
+
+"Please upload a PDF first."
+
 )
 
 
@@ -195,9 +222,6 @@ const data = await res.json()
 
 
 
-console.log(data)
-
-
 
 
 if(data.filename){
@@ -205,9 +229,10 @@ if(data.filename){
 
 
 setMessage(
-"PDF已经成功转换为Word"
-)
 
+"PDF has been successfully converted to Word."
+
+)
 
 
 
@@ -217,7 +242,7 @@ setResultInfo({
 filename:data.filename,
 
 
-size:data.size || "未知"
+size:data.size || "Unknown"
 
 
 })
@@ -242,9 +267,9 @@ setDownloadUrl(
 else{
 
 
-setMessage(
+setError(
 
-data.message || "转换失败"
+data.message || "Conversion failed."
 
 )
 
@@ -262,8 +287,10 @@ catch(error){
 console.log(error)
 
 
-setMessage(
-"转换失败"
+setError(
+
+"Conversion failed."
+
 )
 
 
@@ -294,9 +321,19 @@ return (
 
 <h1>
 
-📝 PDF转Word
+📝 Convert PDF to Word
 
 </h1>
+
+
+
+<p>
+
+Convert your PDF documents into editable Word files.
+
+</p>
+
+
 
 
 
@@ -313,12 +350,13 @@ setFile(files[0])
 
 setMessage("")
 
+setError("")
+
 
 }}
 
 
 />
-
 
 
 
@@ -359,9 +397,10 @@ onClick={uploadPDF}
 
 >
 
-上传PDF
+Upload PDF
 
 </button>
+
 
 
 
@@ -389,16 +428,17 @@ loading
 
 ?
 
-"正在转换..."
+"Converting..."
 
 :
 
-"开始转换"
+"Convert to Word"
 
 }
 
 
 </button>
+
 
 
 
@@ -415,7 +455,7 @@ loading &&
 <div className="loading-box">
 
 
-正在处理PDF，请稍候...
+Processing PDF, please wait...
 
 
 </div>
@@ -433,42 +473,49 @@ loading &&
 
 {
 
-message &&
+error &&
 
 
-<ResultCard
+<div className="error-message">
 
 
-title={
+⚠️ {error}
 
-downloadUrl
 
-?
+</div>
 
-"🎉 转换完成"
-
-:
-
-"提示"
 
 }
 
 
 
-message={message}
 
+
+
+
+
+
+{
+
+downloadUrl &&
+
+
+<ResultCard
+
+
+title="🎉 Conversion completed"
+
+
+message={message}
 
 
 info={resultInfo}
 
 
-
 downloadUrl={downloadUrl}
 
 
-
-downloadText="下载Word文件"
-
+downloadText="Download Word File"
 
 
 />
