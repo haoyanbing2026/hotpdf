@@ -103,6 +103,7 @@ const data = await res.json()
 
 
 
+
 if(data.filename){
 
 
@@ -160,6 +161,7 @@ setError(
 
 
 
+
 // Convert PDF to Word
 
 async function convertWord(){
@@ -167,6 +169,8 @@ async function convertWord(){
 
 
 setError("")
+
+
 
 
 
@@ -184,6 +188,7 @@ return
 
 
 }
+
 
 
 
@@ -337,6 +342,7 @@ Turn PDF documents into editable Word files.
 
 
 
+
 <UploadBox
 
 
@@ -362,26 +368,6 @@ setError("")
 
 
 
-{
-
-file &&
-
-
-<div className="file-selected">
-
-
-📄 {file.name}
-
-
-</div>
-
-
-}
-
-
-
-
-
 
 
 <button
@@ -398,6 +384,31 @@ onClick={uploadPDF}
 Upload PDF
 
 </button>
+
+
+
+
+
+
+
+
+{
+
+message && !downloadUrl &&
+
+
+<div className="success-message">
+
+
+✅ {message}
+
+
+</div>
+
+
+}
+
+
 
 
 
@@ -523,16 +534,20 @@ downloadText="Download Word File"
 
 
 
+
+
+
+
+
+
 </div>
 
 
 )
 
 
-
-
-
 }
+
 
 
 export default Convert
