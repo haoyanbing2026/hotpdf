@@ -1,24 +1,34 @@
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
+
+
 
 function Footer(){
 
 
 return (
 
+
 <footer className="footer">
+
 
 
 <div className="footer-brand">
 
 
 <h2>
+
 🔥 HotPDF
+
 </h2>
 
 
+
 <p>
-Your PDF assistant
-for study and work.
+
+Your smart PDF assistant
+<br />
+for students and professionals.
+
 </p>
 
 
@@ -26,34 +36,55 @@ for study and work.
 
 
 
+
+
+
+
 <div className="footer-links">
 
 
+
 <div>
 
+
 <h3>
+
 Tools
+
 </h3>
 
 
-<a>
+
+<Link to="/split">
+
 Split PDF
-</a>
+
+</Link>
 
 
-<a>
+
+<Link to="/merge">
+
 Merge PDF
-</a>
+
+</Link>
 
 
-<a>
+
+<Link to="/compress">
+
 Compress PDF
-</a>
+
+</Link>
 
 
-<a>
+
+<Link to="/convert">
+
 Convert PDF
-</a>
+
+</Link>
+
 
 
 </div>
@@ -61,31 +92,39 @@ Convert PDF
 
 
 
+
+
+
 <div>
 
+
 <h3>
+
 Company
+
 </h3>
 
-
-<a>
-About
-</a>
 
 
 <Link to="/privacy">
+
 Privacy
+
 </Link>
 
-<a>
-Terms
-</a>
 
 
 </div>
 
 
+
+
+
 </div>
+
+
+
+
 
 
 
@@ -97,6 +136,9 @@ All rights reserved.
 
 
 </div>
+
+
+
 
 
 </footer>
