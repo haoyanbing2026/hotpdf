@@ -25,7 +25,9 @@ const [selectedPages,setSelectedPages] = useState([])
 
 const [message,setMessage] = useState("")
 
+
 const [resultInfo,setResultInfo] = useState({})
+
 
 const [downloadUrl,setDownloadUrl] = useState("")
 
@@ -33,7 +35,7 @@ const [downloadUrl,setDownloadUrl] = useState("")
 
 
 
-// 上传PDF
+// Upload PDF
 
 async function uploadPDF(){
 
@@ -42,10 +44,13 @@ setMessage("")
 
 setDownloadUrl("")
 
+
 if(!file){
 
 
-setMessage("请先选择PDF文件")
+setMessage(
+"Please select a PDF file first."
+)
 
 
 return
@@ -116,11 +121,8 @@ setPages(pageList)
 
 
 
-// 这里只提示上传成功
+setMessage("")
 
-setMessage(
-""
-)
 
 
 }
@@ -129,7 +131,7 @@ else{
 
 setMessage(
 
-"上传失败"
+"Upload failed."
 
 )
 
@@ -145,7 +147,8 @@ setMessage(
 
 
 
-// 拆分PDF
+
+// Split PDF
 
 async function splitPDF(){
 
@@ -155,7 +158,7 @@ if(!filename){
 
 setMessage(
 
-"请先上传PDF"
+"Please upload a PDF first."
 
 )
 
@@ -172,7 +175,7 @@ if(selectedPages.length===0){
 
 setMessage(
 
-"请选择页面"
+"Please select pages to split."
 
 )
 
@@ -181,6 +184,7 @@ return
 
 
 }
+
 
 
 
@@ -208,7 +212,7 @@ if(data.filename){
 
 
 setMessage(
-"PDF拆分完成"
+"PDF split completed."
 )
 
 
@@ -219,7 +223,7 @@ filename:data.filename,
 
 pages:selectedPages.length,
 
-size:data.size || "未知"
+size:data.size || "Unknown"
 
 })
 
@@ -239,7 +243,7 @@ else{
 
 setMessage(
 
-"拆分失败"
+"Split failed."
 
 )
 
@@ -252,14 +256,17 @@ setMessage(
 
 
 
+
+
 return (
 
 <div className="page">
 
 
+
 <h1>
 
-✂️ PDF拆分
+✂️ Split PDF
 
 </h1>
 
@@ -293,10 +300,9 @@ onClick={uploadPDF}
 
 >
 
-上传PDF
+Upload PDF
 
 </button>
-
 
 
 
@@ -342,11 +348,15 @@ pages.length>0 &&
 
 
 
+
+
 <h3>
 
-选择拆分页面
+Select pages to split
 
 </h3>
+
+
 
 
 
@@ -354,7 +364,7 @@ pages.length>0 &&
 <div className="select-info">
 
 
-已选择：
+Selected:
 
 {
 
@@ -362,11 +372,11 @@ selectedPages.length===0
 
 ?
 
-"未选择"
+"No pages selected"
 
 :
 
-selectedPages.join("、")+" 页"
+selectedPages.join(", ")+" page(s)"
 
 }
 
@@ -378,7 +388,12 @@ selectedPages.join("、")+" 页"
 
 
 
+
+
+
 <div className="select-buttons">
+
+
 
 
 
@@ -399,9 +414,12 @@ setSelectedPages(pages)
 
 >
 
-全选
+Select All
 
 </button>
+
+
+
 
 
 
@@ -425,13 +443,17 @@ setSelectedPages([])
 
 >
 
-取消全部
+Clear Selection
 
 </button>
 
 
 
+
+
 </div>
+
+
 
 
 
@@ -450,9 +472,10 @@ onClick={splitPDF}
 
 >
 
-开始拆分
+Split PDF
 
 </button>
+
 
 
 
@@ -479,10 +502,10 @@ message &&
 <ResultCard
 
 
-title="拆分完成"
+title="Split completed"
 
 
-message="你的PDF已经成功拆分"
+message="Your PDF has been successfully split."
 
 
 info={resultInfo}
@@ -491,13 +514,15 @@ info={resultInfo}
 downloadUrl={downloadUrl}
 
 
-downloadText="下载拆分PDF"
+downloadText="Download Split PDF"
 
 
 />
 
 
 }
+
+
 
 
 
