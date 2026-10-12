@@ -22,6 +22,7 @@ import Merge from "./pages/Merge"
 
 import Convert from "./pages/Convert"
 
+import Privacy from "./pages/Privacy"
 
 
 import "./App.css"
@@ -68,6 +69,10 @@ path="/convert"
 element={<Convert />}
 />
 
+<Route
+path="/privacy"
+element={<Privacy />}
+/>
 
 </Routes>
 
