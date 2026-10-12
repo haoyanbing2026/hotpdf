@@ -32,7 +32,9 @@ e.target.files
 )
 
 
+
 setFiles(selected)
+
 
 
 if(onUpload){
@@ -105,6 +107,7 @@ drag
 }
 
 
+
 onDragOver={(e)=>{
 
 
@@ -138,19 +141,23 @@ onDrop={dropFiles}
 
 
 
+
 <h3>
 
-拖放PDF文件到这里
+Drop your PDF file here
 
 </h3>
 
 
 
+
 <p>
 
-或者点击选择文件
+or click to select a file
 
 </p>
+
+
 
 
 
@@ -177,6 +184,8 @@ onChange={selectFiles}
 
 
 
+
+
 <label
 
 htmlFor="pdf-upload"
@@ -186,9 +195,11 @@ className="primary-btn"
 
 >
 
-选择文件
+Choose File
 
 </label>
+
+
 
 
 
@@ -225,6 +236,8 @@ files.map((file,index)=>(
 
 
 }
+
+
 
 
 

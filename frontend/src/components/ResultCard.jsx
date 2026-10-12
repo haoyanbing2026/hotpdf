@@ -6,7 +6,7 @@ message,
 
 downloadUrl,
 
-downloadText="下载文件",
+downloadText="Download File",
 
 info={}
 
@@ -16,6 +16,7 @@ info={}
 return (
 
 <div className="result-card">
+
 
 
 <div className="result-header">
@@ -28,6 +29,7 @@ return (
 </div>
 
 
+
 <h2>
 
 {title}
@@ -36,6 +38,8 @@ return (
 
 
 </div>
+
+
 
 
 
@@ -52,17 +56,20 @@ return (
 
 
 
+
 {
 
 info.filename &&
+
 
 <div className="info-row">
 
 <span>
 
-📄 文件名
+📄 File name
 
 </span>
+
 
 <strong>
 
@@ -70,9 +77,14 @@ info.filename &&
 
 </strong>
 
+
 </div>
 
+
 }
+
+
+
 
 
 
@@ -82,23 +94,30 @@ info.filename &&
 
 info.pages &&
 
+
 <div className="info-row">
 
 <span>
 
-📑 页数
+📑 Pages
 
 </span>
 
+
 <strong>
 
-{info.pages} 页
+{info.pages}
 
 </strong>
 
+
 </div>
 
+
 }
+
+
+
 
 
 
@@ -108,13 +127,15 @@ info.pages &&
 
 info.size &&
 
+
 <div className="info-row">
 
 <span>
 
-💾 大小
+💾 Size
 
 </span>
+
 
 <strong>
 
@@ -122,9 +143,15 @@ info.size &&
 
 </strong>
 
+
 </div>
 
+
 }
+
+
+
+
 
 
 

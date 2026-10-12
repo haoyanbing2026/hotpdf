@@ -1,137 +1,157 @@
 import { Link } from "react-router-dom"
 
 
+
 function Navbar(){
 
 
 return (
 
+
 <nav className="navbar">
 
 
-    {/* Logo */}
 
-    <Link 
-      to="/"
-      className="brand"
-    >
+{/* Logo */}
 
-        <div className="logo">
+<Link
 
-            🔥 HotPDF
+to="/"
 
-        </div>
+className="brand"
 
+>
 
-        <div className="brand-sub">
 
-            PDF Assistant
+<div className="logo">
 
-        </div>
+🔥 HotPDF
 
+</div>
 
-    </Link>
 
+<div className="brand-sub">
 
+PDF Assistant
 
+</div>
 
-    {/* Navigation */}
 
-    <div className="nav-links">
+</Link>
 
 
-        <Link to="/">
-            Home
-        </Link>
 
 
 
-        <div className="nav-dropdown">
 
+{/* Navigation */}
 
-            <span>
-                Tools ▾
-            </span>
 
+<div className="nav-links">
 
-            <div className="dropdown-menu">
 
 
-                <Link to="/split">
+<Link to="/">
 
-                    ✂️ Split PDF
+Home
 
-                </Link>
+</Link>
 
 
 
-                <Link to="/merge">
 
-                    📎 Merge PDF
 
-                </Link>
 
+<div className="nav-dropdown">
 
 
-                <Link to="/convert">
+<span>
 
-                    📝 Convert PDF
+PDF Tools ▾
 
-                </Link>
+</span>
 
 
-                <Link to="/compress">
 
-                    📦 Compress PDF
 
-                </Link>
+<div className="dropdown-menu">
 
 
-            </div>
 
+<Link to="/split">
 
-        </div>
+✂️ Split PDF
 
+</Link>
 
 
 
-        <Link to="/study">
 
-            Study
 
-        </Link>
+<Link to="/merge">
 
+📎 Merge PDF
 
+</Link>
 
-        <Link to="/work">
 
-            Work
 
-        </Link>
 
 
+<Link to="/convert">
 
-        <Link to="/about">
+📝 Convert PDF
 
-            About
+</Link>
 
-        </Link>
 
 
 
 
-        <Link 
-          to="/split"
-          className="nav-upload"
-        >
+<Link to="/compress">
 
-            Upload PDF
+📦 Compress PDF
 
-        </Link>
+</Link>
 
 
 
-    </div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<Link
+
+to="/split"
+
+className="nav-upload"
+
+>
+
+
+Upload PDF
+
+
+</Link>
+
+
+
+
+
+
+</div>
+
+
 
 
 </nav>
