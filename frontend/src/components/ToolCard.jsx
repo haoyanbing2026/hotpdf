@@ -37,6 +37,7 @@ onClick={onClick}
 </h3>
 
 
+
 <p>
 
 {desc}
@@ -44,18 +45,18 @@ onClick={onClick}
 </p>
 
 
-<button>
 
-开始使用
+<div className="tool-action">
 
-</button>
+Try now →
+
+</div>
 
 
 
 </div>
 
 )
-
 
 }
 
