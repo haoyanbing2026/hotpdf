@@ -2493,10 +2493,106 @@ display:none;
 
 }
 
+/* =========================
+   Upload polish v3
+========================= */
+
+
+.tool-subtitle {
+
+    margin-bottom:25px;
+
+}
+
+
+
+.upload-box {
+
+    padding:30px;
+
+}
+
+
+
+.upload-box p {
+
+    margin-bottom:20px;
+
+}
+
+
+
+.upload-box .primary-btn {
+
+    position:relative;
+
+    margin-top:25px;
+
+    display:inline-block;
+
+}
+
 .page h1 {
 
     color:#1e293b;
 
     font-weight:700;
+
+}
+
+.upload-box .primary-btn {
+
+    position:relative;
+
+    margin-top:25px;
+
+    display:inline-block;
+
+}
+
+.upload-box p {
+
+    margin-bottom:20px;
+
+}
+
+/* Fix upload button layout */
+
+.upload-box {
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+}
+
+
+.upload-box h3 {
+
+    margin-bottom:15px;
+
+}
+
+
+.upload-box p {
+
+    margin-bottom:25px;
+
+}
+
+
+.upload-box label.primary-btn {
+
+    position:static;
+
+    margin-top:0;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
 
 }
