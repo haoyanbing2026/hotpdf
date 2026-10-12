@@ -4,6 +4,7 @@ import {
 
 import ToolCard from "../components/ToolCard"
 import HowItWorks from "../components/HowItWorks"
+import Footer from "../components/Footer"
 
 
 function Home(){
@@ -259,6 +260,10 @@ function Home(){
 
 
       </section>
+
+      {/* 页脚 */}
+
+      <Footer />
 
 
 

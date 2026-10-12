@@ -11,12 +11,20 @@ BrowserRouter
 
 import App from './App.jsx'
 
+import Privacy from "./pages/Privacy"
+
 
 ReactDOM.createRoot(
 
 document.getElementById('root')
 
 ).render(
+
+
+<Route
+path="/privacy"
+element={<Privacy />}
+/>
 
 
 <BrowserRouter>
