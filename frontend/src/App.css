@@ -2219,3 +2219,55 @@ display:none;
 
 
 }
+
+
+/* Merge PDF improvements */
+
+.merge-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.merge-actions button {
+  background: #e2e8f0;
+  color: #334155;
+  transition: 0.2s;
+}
+
+.merge-actions button:hover:not(:disabled) {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.merge-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.merge-count {
+  margin-top: 20px;
+  color: #64748b;
+}
+
+.error-message {
+  margin: 20px auto;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .merge-item {
+    flex-wrap: wrap;
+  }
+
+  .merge-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .file-name {
+    overflow-wrap: anywhere;
+  }
+}
