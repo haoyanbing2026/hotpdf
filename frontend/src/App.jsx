@@ -11,6 +11,8 @@ Route
 import Navbar from "./components/Navbar"
 
 
+import Footer from "./components/Footer"
+
 
 import Home from "./pages/Home"
 
@@ -40,52 +42,37 @@ return (
 <Navbar />
 
 
-
 <Routes>
 
 
 <Route
-
 path="/"
-
 element={<Home />}
-
 />
 
 
-
 <Route
-
 path="/split"
-
 element={<Split />}
-
 />
 
 
-
 <Route
-
 path="/merge"
-
 element={<Merge />}
-
 />
-
 
 
 <Route
-
 path="/convert"
-
 element={<Convert />}
-
 />
-
 
 
 </Routes>
 
+
+<Footer />
 
 
 </>
