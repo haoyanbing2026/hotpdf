@@ -3,6 +3,7 @@ import {
 } from "react-router-dom"
 
 import ToolCard from "../components/ToolCard"
+import HowItWorks from "../components/HowItWorks"
 
 
 function Home(){
@@ -234,8 +235,10 @@ function Home(){
 
 
 
-
-
+      {/* 怎样工作 */}
+    
+      <HowItWorks />
+    
       {/* 安全 */}
 
       <section className="security">
