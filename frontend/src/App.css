@@ -2,6 +2,18 @@
    全局
 ========================= */
 
+html,
+body,
+#root {
+
+    width:100%;
+
+    min-height:100%;
+
+    margin:0;
+
+}
+
 * {
     box-sizing: border-box;
 }
@@ -2032,26 +2044,15 @@ Footer
 
 .footer {
 
-
-    margin-top:120px;
-
+    margin-top:100px;
 
     padding:50px 60px;
 
+    background:#f8fafc;
 
-    background:white;
-
-
-    color:#1e293b;
-
-
-    border-top:
-
-    1px solid #e2e8f0;
-
+    border-top:1px solid #e2e8f0;
 
 }
-
 
 
 .footer-brand h2 {
