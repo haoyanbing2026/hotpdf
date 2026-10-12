@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 import os
 import uuid
 import fitz
+import subprocess
 
 
 app = FastAPI()
@@ -403,92 +404,98 @@ async def download(
 
 
 # =========================
-# PDF压缩
+# PDF压缩 Ghostscript
 # =========================
+
+import subprocess
 
 
 @app.post("/compress")
-
-async def compress_pdf(
-
-    filename:str
-
-):
+async def compress_pdf(filename: str):
 
 
-    source=f"{UPLOAD_DIR}/{filename}"
+    source = f"{UPLOAD_DIR}/{filename}"
 
 
     if not os.path.exists(source):
 
         return {
-
             "message":"文件不存在"
-
         }
 
 
 
-    doc=fitz.open(source)
+    output_name = f"compressed_{uuid.uuid4().hex}.pdf"
+
+
+    output = f"{UPLOAD_DIR}/{output_name}"
 
 
 
-    output_name=f"compressed_{uuid.uuid4().hex}.pdf"
+    command = [
+
+        "gs",
+
+        "-sDEVICE=pdfwrite",
+
+        "-dCompatibilityLevel=1.4",
+
+        "-dPDFSETTINGS=/ebook",
+
+        "-dNOPAUSE",
+
+        "-dQUIET",
+
+        "-dBATCH",
+
+        f"-sOutputFile={output}",
+
+        source
+
+    ]
 
 
-    output=f"{UPLOAD_DIR}/{output_name}"
 
-
-
-    doc.save(
-
-        output,
-
-        garbage=4,
-
-        deflate=True,
-
-        clean=True
-
+    subprocess.run(
+        command,
+        check=True
     )
 
 
-    doc.close()
+
+    original_size = os.path.getsize(source) / 1024 / 1024
+
+
+    compressed_size = os.path.getsize(output) / 1024 / 1024
 
 
 
-    original_size=os.path.getsize(source)/1024/1024
+    saved = 0
 
 
-    compressed_size=os.path.getsize(output)/1024/1024
+    if original_size > 0:
 
-
-
-    saved=0
-
-
-    if original_size>0:
-
-        saved=(1-compressed_size/original_size)*100
+        saved = (
+            1 - compressed_size / original_size
+        ) * 100
 
 
 
     return {
 
 
-        "filename":output_name,
+        "filename": output_name,
 
 
-        "original_size":round(original_size,2),
+        "original_size": round(original_size,2),
 
 
-        "compressed_size":round(compressed_size,2),
+        "compressed_size": round(compressed_size,2),
 
 
-        "saved":round(saved,1),
+        "saved": round(saved,1),
 
 
         "message":"压缩成功"
-
 
     }
