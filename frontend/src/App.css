@@ -349,7 +349,7 @@ font-weight:bold;
 .page {
 
 
-    padding:50px;
+    padding:40px 20px;
 
     text-align:center;
 
@@ -382,7 +382,7 @@ font-weight:bold;
     background:white;
 
 
-    width:500px;
+    width:480px;
 
 
     max-width:90%;
@@ -391,7 +391,7 @@ font-weight:bold;
     margin:30px auto;
 
 
-    padding:35px;
+    padding:30px;
 
 
     border-radius:20px;
@@ -826,11 +826,9 @@ display:none;
 .upload-box .primary-btn{
 
 
-display:inline-block;
+background:#e2e8f0;
 
-
-margin-top:20px;
-
+color:#2563eb;
 
 }
 
@@ -2042,6 +2040,8 @@ Footer
 
 .footer {
 
+    margin-top:80px;
+    
     width:100%;
 
     padding:50px 40px;
@@ -2270,4 +2270,233 @@ display:none;
   .file-name {
     overflow-wrap: anywhere;
   }
+}
+
+/* =========================
+   HotPDF Tool Page v2
+========================= */
+
+
+.tool-title {
+
+    font-size:42px;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.tool-subtitle {
+
+    font-size:18px;
+
+    color:#64748b;
+
+    margin:0 auto 40px;
+
+    max-width:600px;
+
+}
+
+
+
+
+
+
+/* Upload Area */
+
+.upload-box {
+
+
+    width:520px;
+
+    max-width:90%;
+
+    padding:35px;
+
+
+    border:2px dashed #dbeafe;
+
+
+    border-radius:24px;
+
+
+    background:white;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.06);
+
+
+}
+
+
+
+
+
+
+.upload-icon {
+
+
+    font-size:48px;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+
+.upload-box h3 {
+
+
+    font-size:28px;
+
+    color:#0f172a;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+
+.upload-box p {
+
+
+    font-size:18px;
+
+    color:#64748b;
+
+
+}
+
+
+
+
+
+
+
+/* Choose File button */
+
+.upload-box .primary-btn {
+
+
+    background:#e2e8f0;
+
+    color:#2563eb;
+
+
+}
+
+
+
+.upload-box .primary-btn:hover {
+
+
+    background:#dbeafe;
+
+
+}
+
+
+
+
+
+
+/* Main action button */
+
+.page > .primary-btn {
+
+
+    margin-top:30px;
+
+    padding:14px 35px;
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+/* Error message */
+
+.error-message {
+
+
+    margin:20px auto;
+
+    color:#dc2626;
+
+    font-weight:500;
+
+
+}
+
+
+
+
+
+
+
+/* Mobile */
+
+@media(max-width:600px){
+
+
+    .tool-title{
+
+        font-size:32px;
+
+    }
+
+
+
+    .tool-subtitle{
+
+        font-size:16px;
+
+    }
+
+
+
+    .upload-box{
+
+        padding:25px;
+
+    }
+
+
+
+    .upload-box h3{
+
+        font-size:22px;
+
+    }
+
+
+}
+
+.page h1 {
+
+    color:#1e293b;
+
+    font-weight:700;
+
 }

@@ -264,12 +264,18 @@ return (
 
 
 
-<h1>
+<h1 className="tool-title">
 
 ✂️ Split PDF
 
 </h1>
 
+
+<p className="tool-subtitle">
+
+Extract selected pages from your PDF quickly and easily.
+
+</p>
 
 
 

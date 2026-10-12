@@ -319,20 +319,18 @@ return (
 
 
 
-<h1>
+<h1 className="tool-title">
 
 📝 Convert PDF to Word
 
 </h1>
 
 
+<p className="tool-subtitle">
 
-<p>
-
-Convert your PDF documents into editable Word files.
+Turn PDF documents into editable Word files.
 
 </p>
-
 
 
 

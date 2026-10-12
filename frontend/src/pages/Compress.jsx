@@ -102,15 +102,18 @@ return (
 <div className="page">
 
 
-<h1>
-Compress PDF
+<h1 className="tool-title">
+
+📦 Compress PDF
+
 </h1>
 
 
-<p>
-Reduce PDF file size while keeping quality.
-</p>
+<p className="tool-subtitle">
 
+Reduce PDF size while keeping good quality.
+
+</p>
 
 
 <div className="upload-box">

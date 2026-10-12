@@ -109,13 +109,19 @@ function Merge() {
   return (
     <div className="page">
 
-      <h1>📎 Merge PDF</h1>
+      <h1 className="tool-title">
 
-      <p>
-        Combine multiple PDF files into one document.
-        Arrange your files in the order you prefer.
+      📎 Merge PDF
+
+      </h1>
+
+
+      <p className="tool-subtitle">
+
+      Combine multiple PDF files into one document.
+
       </p>
-
+    
       <UploadBox
         multiple
         onUpload={handleUpload}
