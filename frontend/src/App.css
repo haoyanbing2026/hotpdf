@@ -2035,11 +2035,19 @@ Footer
 
     margin-top:120px;
 
-    padding:50px;
 
-    background:#0f172a;
+    padding:50px 60px;
 
-    color:white;
+
+    background:white;
+
+
+    color:#1e293b;
+
+
+    border-top:
+
+    1px solid #e2e8f0;
 
 
 }
@@ -2059,11 +2067,10 @@ Footer
 .footer-brand p {
 
 
-    color:#cbd5e1;
+    color:#64748b;
 
 
 }
-
 
 
 .footer-links {
@@ -2107,7 +2114,7 @@ Footer
 .footer-links a {
 
 
-    color:#cbd5e1;
+    color:#64748b;
 
     text-decoration:none;
 
@@ -2119,7 +2126,7 @@ Footer
 .footer-links a:hover {
 
 
-    color:white;
+    color:#2563eb;
 
 
 }
@@ -2135,7 +2142,7 @@ Footer
 
     border-top:
 
-    1px solid #334155;
+     1px solid #e2e8f0;
 
 
     color:#94a3b8;
