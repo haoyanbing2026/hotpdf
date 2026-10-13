@@ -1,43 +1,14 @@
+import { useState } from "react"
+
+import axios from "axios"
+
 import ToolHeader from "../components/ToolHeader"
 
 import UploadBox from "../components/UploadBox"
 
 import ResultCard from "../components/ResultCard"
 
-import PDFThumbnail from "../components/PDFThumbnail"
-
-import useMergePDF from "../hooks/useMergePDF"
-
 import createPDFResult from "../utils/pdfResult"
-
-
-
-
-function Merge(){
-
-
-
-const {
-
-
-files,
-
-setFiles,
-
-filename,
-
-loading,
-
-message,
-
-error,
-
-mergePDF
-
-
-}=useMergePDF()
-
-
 
 
 
@@ -47,35 +18,26 @@ const API_URL = import.meta.env.VITE_API_URL
 
 
 
-
-
-function handleUpload(selected){
-
-
-setFiles(Array.from(selected || []))
-
-
-}
+function Merge(){
 
 
 
+const [files,setFiles] = useState([])
 
 
+const [progress,setProgress] = useState(0)
 
 
+const [loading,setLoading] = useState(false)
 
 
-function removeFile(index){
+const [resultInfo,setResultInfo] = useState({})
 
 
-setFiles(prev =>
-
-prev.filter((_,i)=>i!==index)
-
-)
+const [downloadUrl,setDownloadUrl] = useState("")
 
 
-}
+const [error,setError] = useState("")
 
 
 
@@ -91,27 +53,23 @@ function moveUp(index){
 if(index===0)return
 
 
-
-setFiles(prev=>{
-
-
-const list=[...prev]
+const list=[...files]
 
 
-;[list[index-1],list[index]]
-
-=
-
-[list[index],list[index-1]]
+const temp=list[index]
 
 
-return list
+list[index]=list[index-1]
 
 
-})
+list[index-1]=temp
+
+
+setFiles(list)
 
 
 }
+
 
 
 
@@ -123,30 +81,235 @@ return list
 function moveDown(index){
 
 
-if(index >= files.length-1)return
+if(index===files.length-1)return
+
+
+const list=[...files]
+
+
+const temp=list[index]
+
+
+list[index]=list[index+1]
+
+
+list[index+1]=temp
+
+
+setFiles(list)
+
+
+}
 
 
 
-setFiles(prev=>{
 
 
-const list=[...prev]
 
 
-;[list[index],list[index+1]]
-
-=
-
-[list[index+1],list[index]]
 
 
-return list
+async function mergePDF(){
+
+
+
+setError("")
+
+
+setResultInfo({})
+
+
+setDownloadUrl("")
+
+
+
+
+
+if(files.length<2){
+
+
+setError(
+
+"Please select at least two PDF files."
+
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
+
+setLoading(true)
+
+
+setProgress(0)
+
+
+
+
+
+
+
+
+try{
+
+
+
+const formData=new FormData()
+
+
+
+files.forEach(file=>{
+
+
+formData.append(
+
+"files",
+
+file
+
+)
 
 
 })
 
 
+
+
+
+
+
+const res=await axios.post(
+
+`${API_URL}/merge`,
+
+formData,
+
+{
+
+
+onUploadProgress:(event)=>{
+
+
+if(event.total){
+
+
+const percent=Math.round(
+
+event.loaded*100/event.total
+
+)
+
+
+setProgress(percent)
+
+
 }
+
+
+
+}
+
+
+
+}
+
+)
+
+
+
+
+
+
+
+const data=res.data
+
+
+
+
+
+
+
+if(data.filename){
+
+
+
+setResultInfo(
+
+createPDFResult({
+
+filename:data.filename,
+
+pages:data.pages || "",
+
+size:data.size || ""
+
+})
+
+)
+
+
+
+
+
+
+setDownloadUrl(
+
+`${API_URL}/download/${encodeURIComponent(data.filename)}`
+
+)
+
+
+
+}
+
+else{
+
+
+throw new Error(
+
+"Merge failed."
+
+)
+
+
+}
+
+
+
+}
+
+catch(err){
+
+
+setError(
+
+err.message || "Merge failed."
+
+)
+
+
+}
+
+finally{
+
+
+setLoading(false)
+
+
+}
+
+
+
+}
+
 
 
 
@@ -165,7 +328,6 @@ return (
 
 
 
-
 <ToolHeader
 
 
@@ -176,7 +338,6 @@ title="Merge PDF"
 
 
 description="Combine multiple PDF files into one document."
-
 
 />
 
@@ -191,10 +352,23 @@ description="Combine multiple PDF files into one document."
 <UploadBox
 
 
-multiple
+multiple={true}
 
 
-onUpload={handleUpload}
+onUpload={(selectedFiles)=>{
+
+
+setFiles(selectedFiles)
+
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+}}
 
 
 />
@@ -213,29 +387,15 @@ files.length>0 &&
 
 
 
-<div className="file-manager">
-
-
-
+<div className="merge-file-list">
 
 
 
 <h3>
 
-Arrange Your Files
+File order
 
 </h3>
-
-
-
-
-
-
-<p>
-
-Use the arrows to change the order of your PDFs.
-
-</p>
 
 
 
@@ -251,47 +411,32 @@ files.map((file,index)=>(
 
 <div
 
-className="merge-item"
+className="merge-file-item"
 
-key={`${file.name}-${file.size}-${index}`}
+key={index}
 
 >
 
 
 
-<PDFThumbnail
-
-file={file}
-
-/>
-
-
-
-
-
-
-<div className="file-name">
+<span>
 
 📄 {file.name}
 
-</div>
+</span>
 
 
 
 
 
 
-
-
-<div className="merge-actions">
-
-
+<div>
 
 
 
 <button
 
-type="button"
+className="small-btn"
 
 onClick={()=>moveUp(index)}
 
@@ -308,10 +453,9 @@ disabled={index===0}
 
 
 
-
 <button
 
-type="button"
+className="small-btn"
 
 onClick={()=>moveDown(index)}
 
@@ -325,38 +469,21 @@ disabled={index===files.length-1}
 
 
 
-
-
-
-
-<button
-
-type="button"
-
-onClick={()=>removeFile(index)}
-
->
-
-Remove
-
-</button>
-
-
-
-
+</div>
 
 
 
 </div>
 
-
-
-
-
-</div>
 
 
 ))
+
+}
+
+
+
+</div>
 
 
 }
@@ -367,16 +494,40 @@ Remove
 
 
 
-<p className="merge-count">
 
 
-{files.length} PDF files selected
+{
 
+progress>0 && progress<100 &&
+
+
+<div className="upload-progress">
+
+
+<div className="progress-bar">
+
+
+<div
+
+className="progress-inner"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+/>
+
+
+</div>
+
+
+<p>
+
+Uploading {progress}%
 
 </p>
-
-
-
 
 
 </div>
@@ -401,7 +552,7 @@ className="primary-btn"
 onClick={mergePDF}
 
 
-disabled={loading || files.length<2}
+disabled={loading}
 
 
 >
@@ -410,15 +561,17 @@ disabled={loading || files.length<2}
 
 {
 
+
 loading
 
 ?
 
-"Merging PDFs..."
+"Merging..."
 
 :
 
 "Merge PDF"
+
 
 }
 
@@ -436,13 +589,13 @@ loading
 
 {
 
-message &&
+error &&
 
 
-<div className="success-message">
+<div className="error-message">
 
 
-✅ {message}
+⚠️ {error}
 
 
 </div>
@@ -460,59 +613,23 @@ message &&
 
 {
 
-error &&
-
-
-<p
-
-className="error-message"
-
-role="alert"
-
->
-
-
-⚠️ {error}
-
-
-</p>
-
-
-}
-
-
-
-
-
-
-
-
-
-{
-
-filename &&
+downloadUrl &&
 
 
 
 <ResultCard
 
 
-title="Merge completed!"
+title="🎉 Merge completed"
 
 
-message="Your PDF files have been successfully combined."
+message="Your PDF files have been merged successfully."
 
 
-info={createPDFResult({
-
-filename:filename,
-
-pages:"Combined document"
-
-})}
+info={resultInfo}
 
 
-downloadUrl={`${API_URL}/download/${encodeURIComponent(filename)}`}
+downloadUrl={downloadUrl}
 
 
 downloadText="Download Merged PDF"
@@ -520,6 +637,7 @@ downloadText="Download Merged PDF"
 
 
 />
+
 
 
 }

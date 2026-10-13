@@ -5,23 +5,50 @@
 
 .tool-header {
 
+
     margin-bottom:40px;
 
+
+    text-align:center;
+
+
 }
+
 
 
 
 .tool-header .tool-title {
 
+
     display:flex;
+
 
     justify-content:center;
 
+
     align-items:center;
+
 
     gap:12px;
 
+
+    font-size:42px;
+
+
+    font-weight:700;
+
+
+    color:#0f172a;
+
+
+    margin-bottom:15px;
+
+
 }
+
+
+
+
 
 
 /* =========================
@@ -31,109 +58,285 @@
 
 .page {
 
-    padding:40px 20px;
+
+    width:100%;
+
+
+    max-width:1200px;
+
+
+    margin:0 auto;
+
+
+    padding:40px 20px 80px;
+
 
     text-align:center;
 
+
 }
 
+
+
+
+
+
+/* =========================
+   Tool Title
+========================= */
 
 
 .tool-title {
 
+
     font-size:42px;
+
 
     font-weight:700;
 
+
     color:#0f172a;
+
 
     margin-bottom:15px;
 
+
 }
+
+
+
 
 
 
 .tool-subtitle {
 
+
     font-size:18px;
+
 
     color:#64748b;
 
-    max-width:600px;
 
-    margin:0 auto 30px;
+    max-width:700px;
+
+
+    margin:0 auto 35px;
+
+
+    line-height:1.6;
+
 
 }
 
 
 
-/* Main buttons */
+
+
+
+/* =========================
+   Buttons
+========================= */
 
 
 .primary-btn {
 
+
     background:#2563eb;
+
 
     color:white;
 
-    padding:12px 30px;
 
-    border-radius:10px;
+    padding:14px 36px;
+
+
+    border-radius:12px;
+
+
+    font-size:18px;
+
 
     transition:.2s;
 
+
+    margin:20px auto;
+
+
 }
+
+
 
 
 
 .primary-btn:hover {
 
+
     background:#1d4ed8;
 
+
 }
+
+
+
+
+
+
+.primary-btn:disabled {
+
+
+    background:#94a3b8;
+
+
+    cursor:not-allowed;
+
+
+}
+
+
+
+
 
 
 
 .secondary-btn {
 
+
     background:#e2e8f0;
+
 
     color:#334155;
 
+
     padding:12px 25px;
+
 
     border-radius:10px;
 
+
+    font-size:16px;
+
+
     transition:.2s;
 
+
 }
+
+
 
 
 
 .secondary-btn:hover {
 
+
     background:#cbd5e1;
+
 
 }
 
 
 
-/* Error */
+
+
+
+/* =========================
+   Tool Content Area
+========================= */
+
+
+.tool-content {
+
+
+    width:100%;
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    align-items:center;
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Error
+========================= */
 
 
 .error-message {
 
+
     margin:20px auto;
+
 
     color:#dc2626;
 
+
+    font-size:18px;
+
+
     font-weight:500;
+
+
+    text-align:center;
+
 
 }
 
 
 
-/* Loading */
+
+
+
+/* =========================
+   Success
+========================= */
+
+
+.success-message {
+
+
+    margin:20px auto;
+
+
+    padding:15px 25px;
+
+
+    background:#dcfce7;
+
+
+    color:#166534;
+
+
+    border-radius:12px;
+
+
+    width:max-content;
+
+
+    max-width:90%;
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Loading
+========================= */
 
 
 .loading-box {
@@ -146,6 +349,9 @@
 
 
     width:350px;
+
+
+    max-width:90%;
 
 
     padding:20px;
@@ -161,6 +367,81 @@
 
 
     font-weight:bold;
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Tool Cards
+========================= */
+
+
+.tool-card {
+
+
+    background:white;
+
+
+    border-radius:20px;
+
+
+    padding:30px;
+
+
+    box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Responsive
+========================= */
+
+
+@media(max-width:768px){
+
+
+    .tool-header .tool-title,
+    .tool-title {
+
+
+        font-size:32px;
+
+
+    }
+
+
+
+
+    .tool-subtitle {
+
+
+        font-size:16px;
+
+
+    }
+
+
+
+
+    .page {
+
+
+        padding:30px 15px 60px;
+
+
+    }
+
 
 
 }

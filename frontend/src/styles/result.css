@@ -9,7 +9,7 @@
     background:white;
 
 
-    width:420px;
+    width:480px;
 
 
     max-width:90%;
@@ -35,6 +35,8 @@
 
 
 }
+
+
 
 
 
@@ -72,6 +74,12 @@ to {
 
 
 
+
+/* =========================
+   Header
+========================= */
+
+
 .result-header {
 
 
@@ -81,10 +89,15 @@ to {
     align-items:center;
 
 
+    justify-content:center;
+
+
     gap:15px;
 
 
 }
+
+
 
 
 
@@ -95,6 +108,9 @@ to {
 
 
     font-size:24px;
+
+
+    margin:0;
 
 
 }
@@ -143,6 +159,12 @@ to {
 
 
 
+
+/* =========================
+   Message
+========================= */
+
+
 .result-message {
 
 
@@ -152,8 +174,28 @@ to {
     margin:20px 0;
 
 
+    line-height:1.6;
+
+
 }
 
+
+
+
+
+
+/* =========================
+   Information
+========================= */
+
+
+.result-info {
+
+
+    margin-top:20px;
+
+
+}
 
 
 
@@ -184,6 +226,8 @@ to {
 
 
 
+
+
 .info-row span {
 
 
@@ -197,13 +241,15 @@ to {
 
 
 
+
+
 .info-row strong {
 
 
     color:#0f172a;
 
 
-    max-width:220px;
+    max-width:260px;
 
 
     overflow:hidden;
@@ -224,6 +270,35 @@ to {
 
 
 
+
+.file-name-text {
+
+
+    display:block;
+
+
+    max-width:260px;
+
+
+    overflow:hidden;
+
+
+    text-overflow:ellipsis;
+
+
+    white-space:nowrap;
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Download Button
+========================= */
 
 
 .download-btn {
@@ -253,7 +328,12 @@ to {
     font-weight:bold;
 
 
+    transition:.2s;
+
+
 }
+
+
 
 
 
@@ -268,6 +348,11 @@ to {
 
 
 
+
+
+/* =========================
+   Success Message
+========================= */
 
 
 .success-message {

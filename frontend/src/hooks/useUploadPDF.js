@@ -1,5 +1,7 @@
 import { useState } from "react"
 
+import axios from "axios"
+
 
 
 function useUploadPDF(){
@@ -9,25 +11,19 @@ function useUploadPDF(){
 const [file,setFile] = useState(null)
 
 
-
 const [filename,setFilename] = useState("")
-
 
 
 const [pages,setPages] = useState([])
 
 
-
 const [size,setSize] = useState(0)
-
 
 
 const [loading,setLoading] = useState(false)
 
 
-
-const [message,setMessage] = useState("")
-
+const [progress,setProgress] = useState(0)
 
 
 const [error,setError] = useState("")
@@ -46,7 +42,9 @@ if(!file){
 
 
 setError(
+
 "Please select a PDF file first."
+
 )
 
 
@@ -59,12 +57,17 @@ return null
 
 
 
+
+
 setLoading(true)
 
 
 setError("")
 
-setMessage("")
+
+setProgress(0)
+
+
 
 
 
@@ -76,7 +79,6 @@ try{
 
 
 const formData = new FormData()
-
 
 
 formData.append(
@@ -93,19 +95,46 @@ file
 
 
 
-const res = await fetch(
 
+const res = await axios.post(
 
 `${import.meta.env.VITE_API_URL}/upload`,
 
+formData,
+
 {
 
-method:"POST",
 
-body:formData
+onUploadProgress:(event)=>{
+
+
+if(event.total){
+
+
+
+const percent=Math.round(
+
+(event.loaded * 100) /
+
+event.total
+
+)
+
+
+
+setProgress(percent)
+
+
 
 }
 
+
+
+}
+
+
+
+}
 
 )
 
@@ -115,7 +144,8 @@ body:formData
 
 
 
-const data = await res.json()
+
+const data=res.data
 
 
 
@@ -130,15 +160,12 @@ if(data.filename){
 setFilename(data.filename)
 
 
-
-setSize(data.size)
-
+setSize(data.size || 0)
 
 
 
 
 
-// convert page number to array
 
 const pageList=[]
 
@@ -154,26 +181,16 @@ i++
 
 ){
 
+
 pageList.push(i)
+
 
 }
 
 
 
-
-
 setPages(pageList)
 
-
-
-
-
-
-setMessage(
-
-"Upload completed."
-
-)
 
 
 
@@ -186,48 +203,31 @@ return data
 
 }
 
-
-
 else{
 
 
-
-setError(
+throw new Error(
 
 "Upload failed."
 
 )
 
 
-
-return null
-
-
 }
 
 
 
 }
-
-
-
-
-
 
 catch(err){
 
 
 
-console.log(err)
-
-
-
 setError(
 
-"Server connection failed."
+err.message || "Upload failed."
 
 )
-
 
 
 return null
@@ -235,9 +235,6 @@ return null
 
 
 }
-
-
-
 
 
 
@@ -259,10 +256,12 @@ setLoading(false)
 
 
 
+
 return {
 
 
 file,
+
 
 setFile,
 
@@ -279,13 +278,14 @@ size,
 loading,
 
 
-message,
+progress,
 
 
 error,
 
 
 uploadPDF
+
 
 
 }

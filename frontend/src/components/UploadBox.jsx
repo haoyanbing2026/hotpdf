@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
+import axios from "axios"
 
 
 
@@ -6,81 +7,249 @@ function UploadBox({
 
     onUpload,
 
-    multiple=false,
-
-    accept=".pdf"
+    multiple=false
 
 }){
 
 
-const [files,setFiles]=useState([])
+const inputRef = useRef(null)
 
 
-const [drag,setDrag]=useState(false)
+const [dragging,setDragging] = useState(false)
+
+
+const [files,setFiles] = useState([])
+
+
+const [error,setError] = useState("")
+
+
+const [progress,setProgress] = useState(0)
 
 
 
 
 
-function selectFiles(e){
 
 
-const selected = Array.from(
+function handleFiles(selectedFiles){
 
-e.target.files
+
+
+const fileArray = Array.from(selectedFiles)
+
+
+
+const pdfFiles = fileArray.filter(
+
+file => file.type === "application/pdf"
 
 )
 
 
 
-setFiles(selected)
 
 
 
-if(onUpload){
+if(pdfFiles.length===0){
 
-onUpload(selected)
+
+setError(
+
+"Please select PDF files only."
+
+)
+
+
+return
+
 
 }
 
 
+
+
+
+
+
+setError("")
+
+
+setProgress(0)
+
+
+setFiles(pdfFiles)
+
+
+
+
+
+
+onUpload(
+
+multiple
+
+?
+
+pdfFiles
+
+:
+
+pdfFiles[0]
+
+)
+
+
+
 }
 
 
 
 
 
-function dropFiles(e){
+
+
+
+
+function handleChange(e){
+
+
+handleFiles(e.target.files)
+
+
+}
+
+
+
+
+
+
+
+
+
+function handleDrop(e){
 
 
 e.preventDefault()
 
 
-
-setDrag(false)
-
+setDragging(false)
 
 
-const dropped = Array.from(
+handleFiles(e.dataTransfer.files)
 
-e.dataTransfer.files
+
+}
+
+
+
+
+
+
+
+
+
+function removeFiles(){
+
+
+
+setFiles([])
+
+
+setProgress(0)
+
+
+setError("")
+
+
+
+onUpload(
+
+multiple
+
+?
+
+[]
+
+:
+
+null
+
+)
+
+
+}
+
+
+
+
+
+
+
+
+
+async function uploadWithProgress(url,formData){
+
+
+
+try{
+
+
+
+await axios.post(
+
+url,
+
+formData,
+
+{
+
+onUploadProgress:(event)=>{
+
+
+const percent=Math.round(
+
+(event.loaded * 100) /
+
+event.total
+
+)
+
+
+setProgress(percent)
+
+
+
+}
+
+}
 
 )
 
 
 
-setFiles(dropped)
+}
+
+catch(err){
 
 
+setError(
 
-if(onUpload){
+"Upload failed."
 
-onUpload(dropped)
+)
+
 
 }
 
 
+
+
+
+
 }
+
+
 
 
 
@@ -90,22 +259,14 @@ onUpload(dropped)
 
 return (
 
+
 <div
 
 className={
 
-drag
-
-?
-
-"upload-box drag"
-
-:
-
-"upload-box"
+`upload-box ${dragging ? "dragging":""}`
 
 }
-
 
 
 onDragOver={(e)=>{
@@ -113,18 +274,17 @@ onDragOver={(e)=>{
 
 e.preventDefault()
 
-setDrag(true)
+setDragging(true)
 
 
 }}
 
 
-
-onDragLeave={()=>setDrag(false)}
-
+onDragLeave={()=>setDragging(false)}
 
 
-onDrop={dropFiles}
+onDrop={handleDrop}
+
 
 
 >
@@ -132,11 +292,16 @@ onDrop={dropFiles}
 
 
 
+
+
+
 <div className="upload-icon">
 
-📂
+📄
 
 </div>
+
+
 
 
 
@@ -147,6 +312,9 @@ onDrop={dropFiles}
 Drop your PDF file here
 
 </h3>
+
+
+
 
 
 
@@ -162,42 +330,40 @@ or click to select a file
 
 
 
-<input
 
+<button
 
-id="pdf-upload"
+className="file-select-btn"
 
-
-type="file"
-
-
-accept={accept}
-
-
-multiple={multiple}
-
-
-onChange={selectFiles}
-
-
-/>
-
-
-
-
-
-<label
-
-htmlFor="pdf-upload"
-
-
-className="primary-btn"
+onClick={()=>inputRef.current.click()}
 
 >
 
 Choose File
 
-</label>
+</button>
+
+
+
+
+
+
+
+<input
+
+ref={inputRef}
+
+type="file"
+
+accept="application/pdf"
+
+multiple={multiple}
+
+hidden
+
+onChange={handleChange}
+
+/>
 
 
 
@@ -211,7 +377,8 @@ Choose File
 files.length>0 &&
 
 
-<div className="file-list">
+<div className="selected-files">
+
 
 
 {
@@ -219,11 +386,19 @@ files.length>0 &&
 files.map((file,index)=>(
 
 
-<p key={index}>
+<div
+
+className="selected-file"
+
+key={index}
+
+>
+
 
 📄 {file.name}
 
-</p>
+
+</div>
 
 
 ))
@@ -232,6 +407,27 @@ files.map((file,index)=>(
 }
 
 
+
+
+
+
+
+<button
+
+className="upload-action-btn"
+
+onClick={removeFiles}
+
+>
+
+Remove
+
+</button>
+
+
+
+
+
 </div>
 
 
@@ -241,12 +437,115 @@ files.map((file,index)=>(
 
 
 
+
+
+
+
+{
+
+progress>0 && progress<100 &&
+
+
+
+<div className="upload-progress">
+
+
+<div className="progress-bar">
+
+
+<div
+
+className="progress-inner"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+/>
+
+
 </div>
+
+
+
+
+
+<p>
+
+Uploading {progress}%
+
+</p>
+
+
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+
+{
+
+progress===100 &&
+
+
+
+<div className="success-message">
+
+Upload completed
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+
+{
+
+error &&
+
+
+<div className="error-message">
+
+
+⚠️ {error}
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+</div>
+
 
 )
 
 
 }
+
 
 
 export default UploadBox

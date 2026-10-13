@@ -21,7 +21,6 @@ function Convert(){
 const [downloadUrl,setDownloadUrl] = useState("")
 
 
-
 const [resultInfo,setResultInfo] = useState({})
 
 
@@ -40,11 +39,11 @@ filename,
 
 uploadPDF,
 
-message,
+loading,
 
-error,
+progress,
 
-loading
+error
 
 }=useUploadPDF()
 
@@ -54,10 +53,6 @@ loading
 
 
 
-
-
-// Convert PDF to Word
-
 async function convertWord(){
 
 
@@ -66,16 +61,11 @@ setDownloadUrl("")
 
 
 
-
-
 if(!filename){
-
 
 return
 
-
 }
-
 
 
 
@@ -88,7 +78,6 @@ try{
 
 const res = await fetch(
 
-
 `${import.meta.env.VITE_API_URL}/convert_word?filename=${encodeURIComponent(filename)}`,
 
 {
@@ -96,7 +85,6 @@ const res = await fetch(
 method:"POST"
 
 }
-
 
 )
 
@@ -126,7 +114,7 @@ createPDFResult({
 
 filename:data.filename,
 
-size:data.size || "Unknown"
+size:data.size || ""
 
 })
 
@@ -156,19 +144,13 @@ setDownloadUrl(
 
 
 
+catch(err){
 
 
-catch(error){
-
-
-
-console.log(error)
-
+console.log(err)
 
 
 }
-
-
 
 
 
@@ -192,7 +174,6 @@ return (
 
 
 
-
 <ToolHeader
 
 
@@ -204,9 +185,7 @@ title="Convert PDF to Word"
 
 description="Turn PDF documents into editable Word files."
 
-
 />
-
 
 
 
@@ -219,17 +198,16 @@ description="Turn PDF documents into editable Word files."
 
 
 
-onUpload={(files)=>{
+onUpload={(file)=>{
 
 
-setFile(files[0])
+setFile(file)
 
 
 }}
 
 
 />
-
 
 
 
@@ -247,9 +225,14 @@ className="secondary-btn"
 onClick={uploadPDF}
 
 
+disabled={loading}
+
+
 >
 
+
 Upload PDF
+
 
 </button>
 
@@ -260,24 +243,44 @@ Upload PDF
 
 
 
-
 {
 
-message && !downloadUrl &&
+progress>0 && progress<100 &&
 
 
+<div className="upload-progress">
 
-<div className="success-message">
+
+<div className="progress-bar">
 
 
-✅ {message}
+<div
+
+className="progress-inner"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+/>
+
+
+</div>
+
+
+<p>
+
+Uploading {progress}%
+
+</p>
 
 
 </div>
 
 
 }
-
 
 
 
@@ -295,56 +298,18 @@ className="primary-btn"
 onClick={convertWord}
 
 
-disabled={loading}
+disabled={loading || !filename}
 
 
 >
 
 
-{
 
-
-loading
-
-?
-
-"Converting..."
-
-:
-
-"Convert to Word"
-
-
-}
+Convert to Word
 
 
 
 </button>
-
-
-
-
-
-
-
-
-
-{
-
-loading &&
-
-
-
-<div className="loading-box">
-
-
-Processing PDF, please wait...
-
-
-</div>
-
-
-}
 
 
 
@@ -370,7 +335,6 @@ error &&
 
 
 }
-
 
 
 

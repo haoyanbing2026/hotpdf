@@ -3,6 +3,10 @@
 ========================= */
 
 
+
+/* ---------- File Manager ---------- */
+
+
 .file-manager {
 
 
@@ -24,8 +28,36 @@
     border-radius:20px;
 
 
+    box-shadow:0 10px 30px rgba(0,0,0,.05);
+
+
 }
 
+
+
+
+
+
+.file-manager h3{
+
+
+    text-align:center;
+
+
+    margin-bottom:20px;
+
+
+    color:#1e293b;
+
+
+}
+
+
+
+
+
+
+/* ---------- Merge Item ---------- */
 
 
 .merge-item {
@@ -52,8 +84,27 @@
     border-radius:12px;
 
 
+    transition:.2s;
+
+
 }
 
+
+
+
+.merge-item:hover{
+
+
+    background:#f1f5f9;
+
+
+}
+
+
+
+
+
+/* ---------- Preview Image ---------- */
 
 
 .merge-item canvas {
@@ -78,6 +129,11 @@
 
 
 
+
+
+/* ---------- File Name ---------- */
+
+
 .file-name {
 
 
@@ -96,10 +152,18 @@
     white-space:nowrap;
 
 
+    color:#334155;
+
+
 }
 
 
 
+
+
+
+
+/* ---------- Action Buttons ---------- */
 
 
 .merge-actions {
@@ -121,6 +185,10 @@
 
 
 
+
+
+
+
 .merge-actions button {
 
 
@@ -130,7 +198,24 @@
     color:#334155;
 
 
+    border:none;
+
+
+    padding:8px 14px;
+
+
+    border-radius:8px;
+
+
+    font-size:16px;
+
+
+    cursor:pointer;
+
+
 }
+
+
 
 
 
@@ -147,6 +232,9 @@
 
 
 
+
+
+
 .merge-actions button:disabled {
 
 
@@ -160,6 +248,13 @@
 
 
 
+
+
+
+
+/* ---------- File Count ---------- */
+
+
 .merge-count {
 
 
@@ -167,6 +262,186 @@
 
 
     color:#64748b;
+
+
+    text-align:center;
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+
+/* ---------- New Order Manager ---------- */
+
+
+/*
+Used by Merge.jsx:
+
+<div className="merge-file-list">
+<div className="merge-file-item">
+*/
+
+
+
+
+.merge-file-list {
+
+
+    width:600px;
+
+
+    max-width:90%;
+
+
+    margin:30px auto;
+
+
+}
+
+
+
+
+
+
+.merge-file-list h3 {
+
+
+    text-align:center;
+
+
+    margin-bottom:20px;
+
+
+    color:#1e293b;
+
+
+}
+
+
+
+
+
+
+.merge-file-item {
+
+
+    display:flex;
+
+
+    justify-content:space-between;
+
+
+    align-items:center;
+
+
+    background:#f8fafc;
+
+
+    padding:14px 18px;
+
+
+    border-radius:12px;
+
+
+    margin-bottom:12px;
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+.merge-file-item span {
+
+
+    max-width:420px;
+
+
+    overflow:hidden;
+
+
+    text-overflow:ellipsis;
+
+
+    white-space:nowrap;
+
+
+}
+
+
+
+
+
+
+.small-btn {
+
+
+    border:none;
+
+
+    background:#e2e8f0;
+
+
+    color:#334155;
+
+
+    padding:8px 14px;
+
+
+    border-radius:8px;
+
+
+    margin-left:8px;
+
+
+    cursor:pointer;
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+
+.small-btn:hover:not(:disabled) {
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+
+.small-btn:disabled {
+
+
+    opacity:.4;
+
+
+    cursor:not-allowed;
 
 
 }

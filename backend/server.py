@@ -7,25 +7,39 @@ import uuid
 import fitz
 import subprocess
 
+from docx import Document
+
+
 
 app = FastAPI()
 
 
+
 app.add_middleware(
+
     CORSMiddleware,
+
     allow_origins=["*"],
+
     allow_credentials=False,
+
     allow_methods=["*"],
+
     allow_headers=["*"],
+
 )
+
 
 
 UPLOAD_DIR="uploads"
 
 
 os.makedirs(
+
     UPLOAD_DIR,
+
     exist_ok=True
+
 )
 
 
@@ -52,7 +66,6 @@ def home():
 
 
 @app.post("/upload")
-
 async def upload_pdf(
 
     file:UploadFile=File(...)
@@ -64,13 +77,23 @@ async def upload_pdf(
 
 
 
-    content=await file.read()
-
-
-
     with open(path,"wb") as f:
 
-        f.write(content)
+
+        while True:
+
+
+            chunk = await file.read(1024*1024)
+
+
+            if not chunk:
+
+                break
+
+
+
+            f.write(chunk)
+
 
 
 
@@ -79,7 +102,9 @@ async def upload_pdf(
 
 
 
-    size=len(content)/1024/1024
+    size=os.path.getsize(path)/1024/1024
+
+
 
 
 
@@ -125,13 +150,11 @@ async def preview(
     pdf_path=f"{UPLOAD_DIR}/{filename}"
 
 
-
     doc=fitz.open(pdf_path)
 
 
 
     pdf_page=doc[page-1]
-
 
 
     pix=pdf_page.get_pixmap(
@@ -143,7 +166,6 @@ async def preview(
 
 
     image_path=f"{UPLOAD_DIR}/{filename}_{page}.png"
-
 
 
     pix.save(image_path)
@@ -202,6 +224,8 @@ async def split_pdf(
 
 
 
+
+
     for p in page_list:
 
 
@@ -214,6 +238,8 @@ async def split_pdf(
             to_page=p-1
 
         )
+
+
 
 
 
@@ -234,16 +260,18 @@ async def split_pdf(
 
         "filename":filename_out,
 
-        "size": f"{round(os.path.getsize(output) / 1024, 2)} KB",
+
+        "pages":len(new_pdf),
+
+
+        "size":
+        f"{round(os.path.getsize(output)/1024,2)} KB",
+
 
         "message":"拆分成功"
 
+
     }
-
-
-
-
-
 
 
 # =========================
@@ -271,13 +299,22 @@ async def merge_pdf(
 
 
 
-        content=await file.read()
-
-
-
         with open(path,"wb") as f:
 
-            f.write(content)
+
+            while True:
+
+
+                chunk=await file.read(1024*1024)
+
+
+                if not chunk:
+
+                    break
+
+
+                f.write(chunk)
+
 
 
 
@@ -287,6 +324,8 @@ async def merge_pdf(
 
 
         merged_pdf.insert_pdf(doc)
+
+
 
 
 
@@ -303,15 +342,29 @@ async def merge_pdf(
 
 
 
+
+
     return {
 
 
         "filename":filename,
 
 
+        "pages":len(merged_pdf),
+
+
+        "size":
+        f"{round(os.path.getsize(output)/1024,2)} KB",
+
+
         "message":"合并成功"
 
+
     }
+
+
+
+
 
 
 
@@ -319,49 +372,66 @@ async def merge_pdf(
 # PDF 转 Word
 # =========================
 
-from docx import Document
-import uuid
-
 
 @app.post("/convert_word")
-async def convert_word(filename: str):
+
+async def convert_word(
+
+    filename:str
+
+):
 
 
-    pdf_path = f"{UPLOAD_DIR}/{filename}"
+    pdf_path=f"{UPLOAD_DIR}/{filename}"
+
 
 
     if not os.path.exists(pdf_path):
 
         return {
+
             "message":"文件不存在"
+
         }
 
 
 
-    pdf = fitz.open(pdf_path)
 
 
 
-    doc = Document()
+    pdf=fitz.open(pdf_path)
+
+
+
+    doc=Document()
 
 
 
     for page in pdf:
 
-        text = page.get_text()
+
+        text=page.get_text()
+
 
         if text.strip():
+
 
             doc.add_paragraph(text)
 
 
 
+
+
+
+
     base_name=os.path.splitext(filename)[0]
+
 
     output_name=f"{base_name}_converted.docx"
 
 
-    output_path = f"{UPLOAD_DIR}/{output_name}"
+
+    output_path=f"{UPLOAD_DIR}/{output_name}"
 
 
 
@@ -369,15 +439,29 @@ async def convert_word(filename: str):
 
 
 
+
+
+
+
     return {
 
-        "filename": output_name,
 
-        "size": f"{round(os.path.getsize(output_path)/1024,2)} KB",
+        "filename":output_name,
+
+
+        "size":
+
+        f"{round(os.path.getsize(output_path)/1024,2)} KB",
+
 
         "message":"转换成功"
 
+
     }
+
+
+
+
 
 
 
@@ -395,110 +479,170 @@ async def download(
 ):
 
 
+    path=f"{UPLOAD_DIR}/{filename}"
+
+
+
     return FileResponse(
 
-        f"{UPLOAD_DIR}/{filename}",
-
-        media_type="application/pdf",
+        path,
 
         filename=filename
 
     )
 
 
-# =========================
-# PDF压缩 Ghostscript
-# =========================
 
-import subprocess
+
+
+
+
+# =========================
+# PDF压缩
+# =========================
 
 
 @app.post("/compress")
-async def compress_pdf(filename: str):
+
+async def compress_pdf(
+
+    filename:str
+
+):
 
 
-    source = f"{UPLOAD_DIR}/{filename}"
+    source=f"{UPLOAD_DIR}/{filename}"
+
 
 
     if not os.path.exists(source):
 
+
         return {
+
+
             "message":"文件不存在"
+
+
         }
 
 
 
-    output_name = f"compressed_{uuid.uuid4().hex}.pdf"
-
-
-    output = f"{UPLOAD_DIR}/{output_name}"
 
 
 
-    command = [
+
+    output_name=f"compressed_{uuid.uuid4().hex}.pdf"
+
+
+
+    output=f"{UPLOAD_DIR}/{output_name}"
+
+
+
+
+
+
+
+    command=[
+
 
         "gs",
 
+
         "-sDEVICE=pdfwrite",
+
 
         "-dCompatibilityLevel=1.4",
 
+
         "-dPDFSETTINGS=/ebook",
+
 
         "-dNOPAUSE",
 
+
         "-dQUIET",
+
 
         "-dBATCH",
 
+
         f"-sOutputFile={output}",
 
+
         source
+
 
     ]
 
 
 
+
+
+
+
     subprocess.run(
+
         command,
+
         check=True
+
     )
 
 
 
-    original_size = os.path.getsize(source) / 1024 / 1024
-
-
-    compressed_size = os.path.getsize(output) / 1024 / 1024
 
 
 
-    saved = 0
 
 
-    if original_size > 0:
+    original_size=os.path.getsize(source)/1024/1024
 
-        saved = (
-            1 - compressed_size / original_size
-        ) * 100
+
+
+    compressed_size=os.path.getsize(output)/1024/1024
+
+
+
+
+
+    saved=0
+
+
+
+    if original_size>0:
+
+
+        saved=(
+
+            1-compressed_size/original_size
+
+        )*100
+
+
+
+
 
 
 
     return {
 
 
-        "filename": output_name,
+        "filename":output_name,
 
 
-        "original_size": round(original_size,2),
+        "original_size":round(original_size,2),
 
 
-        "compressed_size": round(compressed_size,2),
+        "compressed_size":round(compressed_size,2),
 
 
-        "saved": round(saved,1),
+        "saved":round(saved,1),
 
 
         "message":"压缩成功"
 
+
     }
+

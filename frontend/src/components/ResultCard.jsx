@@ -1,14 +1,14 @@
 function ResultCard({
 
-title,
+    title,
 
-message,
+    message,
 
-downloadUrl,
+    downloadUrl,
 
-downloadText="Download File",
+    downloadText="Download File",
 
-info={}
+    info={}
 
 }){
 
@@ -16,7 +16,6 @@ info={}
 return (
 
 <div className="result-card">
-
 
 
 <div className="result-header">
@@ -27,7 +26,6 @@ return (
 ✓
 
 </div>
-
 
 
 <h2>
@@ -43,8 +41,6 @@ return (
 
 
 
-
-
 <p className="result-message">
 
 {message}
@@ -55,66 +51,44 @@ return (
 
 
 
+<div className="result-info">
+
+
+
 
 
 {
-
 info.filename &&
-
 
 <div className="info-row">
 
 <span>
-
 📄 File name
-
 </span>
 
 
-<strong>
+<strong className="file-name-text">
 
-<span className="file-name-text">
-{
-info.filename.length > 35
-
-?
-
-info.filename.substring(0,35)+"..."
-
-:
-
-info.filename
-
-}
-
-</span>
+{info.filename}
 
 </strong>
 
 
 </div>
 
-
 }
 
 
 
 
 
-
-
-
 {
-
 info.pages &&
-
 
 <div className="info-row">
 
 <span>
-
 📑 Pages
-
 </span>
 
 
@@ -127,7 +101,6 @@ info.pages &&
 
 </div>
 
-
 }
 
 
@@ -135,19 +108,13 @@ info.pages &&
 
 
 
-
-
 {
-
 info.size &&
-
 
 <div className="info-row">
 
 <span>
-
 💾 Size
-
 </span>
 
 
@@ -160,6 +127,31 @@ info.size &&
 
 </div>
 
+}
+
+
+
+
+
+
+{
+info.originalSize &&
+
+<div className="info-row">
+
+<span>
+📦 Original size
+</span>
+
+
+<strong>
+
+{info.originalSize}
+
+</strong>
+
+
+</div>
 
 }
 
@@ -168,11 +160,64 @@ info.size &&
 
 
 
+{
+info.compressedSize &&
+
+<div className="info-row">
+
+<span>
+📉 Compressed size
+</span>
+
+
+<strong>
+
+{info.compressedSize}
+
+</strong>
+
+
+</div>
+
+}
+
+
+
 
 
 
 {
+info.saved &&
 
+<div className="info-row">
+
+<span>
+✨ Saved
+</span>
+
+
+<strong>
+
+{info.saved}
+
+</strong>
+
+
+</div>
+
+}
+
+
+
+</div>
+
+
+
+
+
+
+
+{
 downloadUrl &&
 
 
@@ -190,9 +235,7 @@ download
 
 </a>
 
-
 }
-
 
 
 
@@ -200,7 +243,9 @@ download
 
 )
 
+
 }
+
 
 
 export default ResultCard

@@ -2,9 +2,15 @@ function createPDFResult({
 
     filename,
 
-    size="Unknown",
+    size = "",
 
-    pages=""
+    pages = "",
+
+    originalSize = "",
+
+    compressedSize = "",
+
+    saved = ""
 
 }){
 
@@ -12,23 +18,31 @@ function createPDFResult({
 return {
 
 
-filename,
+    filename,
 
 
-size,
+    size,
 
 
-pages,
+    pages,
 
 
-createdAt:new Date().toISOString()
+    originalSize,
+
+
+    compressedSize,
+
+
+    saved,
+
+
+    createdAt: new Date().toISOString()
 
 
 }
 
 
 }
-
 
 
 export default createPDFResult

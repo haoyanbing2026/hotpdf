@@ -27,6 +27,7 @@
 
 
 
+
 .footer-brand {
 
 
@@ -34,6 +35,8 @@
 
 
 }
+
+
 
 
 
@@ -59,7 +62,6 @@
 
 
 }
-
 
 
 
@@ -126,6 +128,9 @@
     color:#64748b;
 
 
+    transition:.2s;
+
+
 }
 
 
@@ -139,7 +144,6 @@
 
 
 }
-
 
 
 
@@ -161,6 +165,75 @@
 
 
     text-align:center;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+   Mobile
+========================= */
+
+
+@media(max-width:700px){
+
+
+
+.footer {
+
+
+    padding:40px 20px;
+
+
+}
+
+
+
+
+
+.footer-links {
+
+
+    flex-direction:column;
+
+
+    gap:30px;
+
+
+    align-items:center;
+
+
+}
+
+
+
+
+
+.footer-links div {
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+.footer-brand h2 {
+
+
+    font-size:24px;
+
+
+}
+
 
 
 }

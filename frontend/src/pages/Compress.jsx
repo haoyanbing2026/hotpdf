@@ -1,29 +1,84 @@
-import {
-useState
-} from "react"
+import { useState } from "react"
 
+import ToolHeader from "../components/ToolHeader"
 
-const API_URL = import.meta.env.VITE_API_URL
+import UploadBox from "../components/UploadBox"
+
+import ResultCard from "../components/ResultCard"
+
+import createPDFResult from "../utils/pdfResult"
+
+import useUploadPDF from "../hooks/useUploadPDF"
 
 
 
 function Compress(){
 
 
-const [file,setFile]=useState(null)
 
-const [result,setResult]=useState(null)
+const {
 
-const [loading,setLoading]=useState(false)
+file,
+
+setFile,
+
+filename,
+
+loading,
+
+progress,
+
+error:uploadError,
+
+uploadPDF
+
+}=useUploadPDF()
 
 
 
-async function uploadAndCompress(){
 
 
-if(!file){
 
-alert("Please select a PDF")
+const [resultInfo,setResultInfo] = useState({})
+
+
+const [downloadUrl,setDownloadUrl] = useState("")
+
+
+const [compressing,setCompressing] = useState(false)
+
+
+const [error,setError] = useState("")
+
+
+
+
+
+
+
+
+
+async function compressPDF(){
+
+
+
+setError("")
+
+
+setResultInfo({})
+
+
+setDownloadUrl("")
+
+
+
+
+
+const data = await uploadPDF()
+
+
+
+if(!data?.filename){
 
 return
 
@@ -31,46 +86,24 @@ return
 
 
 
-setLoading(true)
 
 
 
-// 上传
 
-const formData=new FormData()
-
-formData.append(
-"file",
-file
-)
+setCompressing(true)
 
 
 
-const uploadRes=await fetch(
-
-`${API_URL}/upload`,
-
-{
-
-method:"POST",
-
-body:formData
-
-}
-
-)
 
 
 
-const uploadData=await uploadRes.json()
+try{
 
 
 
-// 压缩
+const res = await fetch(
 
-const compressRes=await fetch(
-
-`${API_URL}/compress?filename=${encodeURIComponent(uploadData.filename)}`,
+`${import.meta.env.VITE_API_URL}/compress?filename=${encodeURIComponent(data.filename)}`,
 
 {
 
@@ -82,186 +115,259 @@ method:"POST"
 
 
 
-const compressData=await compressRes.json()
 
 
 
-setResult(compressData)
+
+const result = await res.json()
 
 
-setLoading(false)
+
+
+
+
+
+if(result.filename){
+
+
+
+setResultInfo(
+
+createPDFResult({
+
+filename:result.filename,
+
+
+originalSize:
+
+result.original_size || result.originalSize || "",
+
+
+compressedSize:
+
+result.compressed_size || result.compressedSize || "",
+
+
+saved:
+
+result.saved || ""
+
+})
+
+)
+
+
+
+
+
+
+
+setDownloadUrl(
+
+`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(result.filename)}`
+
+)
+
 
 
 }
+
+else{
+
+
+throw new Error(
+
+"Compression failed."
+
+)
+
+
+}
+
+
+
+
+
+
+
+}
+
+catch(err){
+
+
+setError(
+
+err.message || "Compression failed."
+
+)
+
+
+}
+
+finally{
+
+
+setCompressing(false)
+
+
+}
+
+
+
+}
+
+
+
+
+
 
 
 
 
 return (
 
+
 <div className="page">
 
 
-<h1 className="tool-title">
-
-📦 Compress PDF
-
-</h1>
-
-
-<p className="tool-subtitle">
-
-Reduce PDF size while keeping good quality.
-
-</p>
-
-
-<div className="upload-box">
-
-
-<div className="upload-icon">
-
-📦
-
-</div>
 
 
 
-<label className="file-select-btn">
+
+<ToolHeader
 
 
-Select PDF File
+icon="📦"
 
-<input
 
-type="file"
+title="Compress PDF"
 
-accept="application/pdf"
 
-onChange={e=>setFile(e.target.files[0])}
+description="Reduce PDF size while keeping good quality."
 
 />
 
-</label>
 
 
 
-{file &&
 
-<p>
 
-{file.name}
 
-</p>
 
-}
+
+<UploadBox
+
+
+onUpload={(file)=>{
+
+
+setFile(file)
+
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+}}
+
+
+/>
+
+
+
+
+
+
 
 
 
 <button
 
+
 className="primary-btn"
 
-onClick={uploadAndCompress}
+
+onClick={compressPDF}
+
+
+disabled={loading || compressing}
+
 
 >
 
+
+
 {
+
+
 loading
+
 ?
-"Compressing..."
+
+"Uploading..."
+
 :
+
+compressing
+
+?
+
+"Compressing..."
+
+:
+
 "Compress PDF"
+
+
 }
+
 
 
 </button>
 
 
-</div>
+
+
+
 
 
 
 
 {
-result &&
+
+progress>0 && progress<100 &&
 
 
-<div className="result-card">
+<div className="upload-progress">
 
 
-<div className="result-header">
+<div className="progress-bar">
 
 
-<div className="success-icon">
+<div
 
-✓
+className="progress-inner"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+/>
+
 
 </div>
 
 
-<h3>
-Compression completed
-</h3>
+<p>
 
+Uploading {progress}%
 
-</div>
-
-
-
-<div className="info-row">
-
-<span>
-Original
-</span>
-
-<strong>
-{result.original_size} MB
-</strong>
-
-</div>
-
-
-
-<div className="info-row">
-
-<span>
-Compressed
-</span>
-
-<strong>
-{result.compressed_size} MB
-</strong>
-
-</div>
-
-
-
-<div className="info-row">
-
-<span>
-Saved
-</span>
-
-<strong>
-{result.saved}%
-</strong>
-
-</div>
-
-
-
-<a
-
-className="download-btn"
-
-href={`${API_URL}/download/${result.filename}`}
-
->
-
-Download PDF
-
-</a>
+</p>
 
 
 </div>
@@ -271,12 +377,84 @@ Download PDF
 
 
 
+
+
+
+
+
+
+{
+
+(uploadError || error) &&
+
+
+<div className="error-message">
+
+
+⚠️ {uploadError || error}
+
+
 </div>
+
+
+}
+
+
+
+
+
+
+
+
+
+{
+
+downloadUrl &&
+
+
+
+<ResultCard
+
+
+title="🎉 Compression completed"
+
+
+message="Your PDF has been compressed successfully."
+
+
+info={resultInfo}
+
+
+downloadUrl={downloadUrl}
+
+
+downloadText="Download Compressed PDF"
+
+
+
+/>
+
+
+
+}
+
+
+
+
+
+
+
+
+
+</div>
+
 
 )
 
 
+
 }
+
 
 
 export default Compress

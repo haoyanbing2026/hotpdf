@@ -8,9 +8,9 @@ import PDFPreview from "../components/PDFPreview"
 
 import ResultCard from "../components/ResultCard"
 
-import useUploadPDF from "../hooks/useUploadPDF"
-
 import createPDFResult from "../utils/pdfResult"
+
+import useUploadPDF from "../hooks/useUploadPDF"
 
 
 
@@ -28,9 +28,11 @@ filename,
 
 pages,
 
-message,
+loading,
 
-error,
+progress,
+
+error:uploadError,
 
 uploadPDF
 
@@ -38,6 +40,10 @@ uploadPDF
 
 
 
+
+
+
+const [uploaded,setUploaded] = useState(false)
 
 
 const [selectedPages,setSelectedPages] = useState([])
@@ -49,24 +55,67 @@ const [resultInfo,setResultInfo] = useState({})
 const [downloadUrl,setDownloadUrl] = useState("")
 
 
+const [error,setError] = useState("")
 
 
 
 
 
-// Split PDF
+
+
+
+
+async function handleUpload(){
+
+
+
+const data = await uploadPDF()
+
+
+
+if(data?.filename){
+
+
+setUploaded(true)
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
 
 async function splitPDF(){
 
 
 
-if(!filename){
+setError("")
+
+
+
+if(!uploaded){
+
+
+setError(
+
+"Please upload PDF first."
+
+)
 
 
 return
 
 
 }
+
 
 
 
@@ -75,6 +124,13 @@ return
 if(selectedPages.length===0){
 
 
+setError(
+
+"Please select pages."
+
+)
+
+
 return
 
 
@@ -82,6 +138,11 @@ return
 
 
 
+
+
+
+
+try{
 
 
 
@@ -108,6 +169,8 @@ const data = await res.json()
 
 
 
+
+
 if(data.filename){
 
 
@@ -120,7 +183,7 @@ filename:data.filename,
 
 pages:selectedPages.length,
 
-size:data.size
+size:data.size || ""
 
 })
 
@@ -132,10 +195,40 @@ size:data.size
 
 setDownloadUrl(
 
-`${import.meta.env.VITE_API_URL}/download/${data.filename}`
+`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(data.filename)}`
 
 )
 
+
+
+}
+
+else{
+
+
+throw new Error(
+
+"Split failed."
+
+)
+
+
+}
+
+
+
+
+
+}
+
+catch(err){
+
+
+setError(
+
+err.message
+
+)
 
 
 }
@@ -156,6 +249,7 @@ return (
 
 
 <div className="page">
+
 
 
 
@@ -186,11 +280,19 @@ description="Extract selected pages from your PDF quickly and easily."
 <UploadBox
 
 
-onUpload={(files)=>{
+onUpload={(file)=>{
 
 
-setFile(files[0])
+setFile(file)
 
+
+setUploaded(false)
+
+setSelectedPages([])
+
+setResultInfo({})
+
+setDownloadUrl("")
 
 }}
 
@@ -208,10 +310,13 @@ setFile(files[0])
 <button
 
 
-className="primary-btn"
+className="secondary-btn"
 
 
-onClick={uploadPDF}
+onClick={handleUpload}
+
+
+disabled={loading}
 
 
 >
@@ -227,10 +332,56 @@ Upload PDF
 
 
 
+{
+
+progress>0 && progress<100 &&
+
+
+<div className="upload-progress">
+
+
+<div className="progress-bar">
+
+
+<div
+
+className="progress-inner"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+/>
+
+
+</div>
+
+
+<p>
+
+Uploading {progress}%
+
+</p>
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
 
 {
 
-file &&
+uploaded &&
 
 
 <PDFPreview
@@ -260,7 +411,8 @@ setSelectedPages={setSelectedPages}
 
 {
 
-pages.length > 0 &&
+pages.length>0 &&
+
 
 
 <div className="select-area">
@@ -275,39 +427,21 @@ Select pages to split
 
 
 
-<p className="select-tip">
-
-Choose the pages you want to extract.
-
-</p>
-
-
-
-
 
 
 
 <div className="select-info">
 
 
-Selected pages:
-
+Selected:
 
 {
 
-selectedPages.length===0
-
-?
-
-"No pages selected"
-
-:
-
-selectedPages.join(", ")+" page(s)"
+selectedPages.length
 
 }
 
-
+page(s)
 
 </div>
 
@@ -318,24 +452,13 @@ selectedPages.join(", ")+" page(s)"
 
 
 
-
-<div className="select-buttons">
-
-
-
 <button
 
 
 className="secondary-btn"
 
 
-onClick={()=>{
-
-
-setSelectedPages(pages)
-
-
-}}
+onClick={()=>setSelectedPages(pages)}
 
 
 >
@@ -356,13 +479,7 @@ Select All
 className="secondary-btn"
 
 
-onClick={()=>{
-
-
-setSelectedPages([])
-
-
-}}
+onClick={()=>setSelectedPages([])}
 
 
 >
@@ -370,12 +487,6 @@ setSelectedPages([])
 Clear Selection
 
 </button>
-
-
-
-</div>
-
-
 
 
 
@@ -402,6 +513,8 @@ Split PDF
 
 
 
+
+
 </div>
 
 
@@ -417,35 +530,14 @@ Split PDF
 
 {
 
-message &&
+(uploadError || error) &&
 
-
-<div className="success-message">
-
-
-✅ {message}
-
-</div>
-
-
-}
-
-
-
-
-
-
-
-
-{
-
-error &&
 
 
 <div className="error-message">
 
 
-⚠️ {error}
+⚠️ {uploadError || error}
 
 
 </div>
@@ -466,10 +558,11 @@ error &&
 downloadUrl &&
 
 
+
 <ResultCard
 
 
-title="Split completed"
+title="🎉 Split completed"
 
 
 message="Your PDF has been successfully split."
@@ -488,7 +581,10 @@ downloadText="Download Split PDF"
 />
 
 
+
 }
+
+
 
 
 
@@ -500,6 +596,7 @@ downloadText="Download Split PDF"
 
 
 )
+
 
 
 }

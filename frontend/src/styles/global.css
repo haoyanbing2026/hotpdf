@@ -3,9 +3,13 @@
 ========================= */
 
 
+/* ---------- Reset ---------- */
+
+
 html,
 body,
 #root {
+
 
     width:100%;
 
@@ -13,19 +17,27 @@ body,
 
     overflow-x:hidden;
 
+
 }
+
+
 
 
 
 * {
 
+
     box-sizing:border-box;
+
 
 }
 
 
 
+
+
 body {
+
 
     margin:0;
 
@@ -41,24 +53,282 @@ body {
 
     color:#1e293b;
 
-}
-
-
-
-button {
-
-    cursor:pointer;
-
-    border:none;
-
-    font-size:16px;
 
 }
 
+
+
+
+
+
+/* ---------- Links ---------- */
 
 
 a {
 
+
     text-decoration:none;
+
+
+    color:inherit;
+
+
+}
+
+
+
+
+
+/* ---------- Buttons ---------- */
+
+
+button {
+
+
+    cursor:pointer;
+
+
+    border:none;
+
+
+    font-size:16px;
+
+
+    font-family:inherit;
+
+
+}
+
+
+
+
+
+button:disabled {
+
+
+    cursor:not-allowed;
+
+
+    opacity:.6;
+
+
+}
+
+
+
+
+
+
+/* ---------- Common Layout ---------- */
+
+
+.page {
+
+
+    min-height:100vh;
+
+
+    padding-top:80px;
+
+
+    padding-bottom:80px;
+
+
+}
+
+
+
+
+
+.container {
+
+
+    width:100%;
+
+
+    max-width:1200px;
+
+
+    margin:0 auto;
+
+
+    padding:0 24px;
+
+
+}
+
+
+
+
+
+
+
+/* ---------- Common Buttons ---------- */
+
+
+.primary-btn {
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+    padding:14px 36px;
+
+
+    border-radius:12px;
+
+
+    font-size:18px;
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+
+.primary-btn:hover {
+
+
+    background:#1d4ed8;
+
+
+}
+
+
+
+
+
+.primary-btn:disabled {
+
+
+    background:#94a3b8;
+
+
+}
+
+
+
+
+
+
+
+.secondary-btn {
+
+
+    background:#e5eaf3;
+
+
+    color:#334155;
+
+
+    padding:12px 28px;
+
+
+    border-radius:10px;
+
+
+    font-size:16px;
+
+
+}
+
+
+
+
+
+.secondary-btn:hover {
+
+
+    background:#cbd5e1;
+
+
+}
+
+
+
+
+
+
+
+/* ---------- Messages ---------- */
+
+
+.error-message {
+
+
+    margin:25px auto;
+
+
+    padding:15px 25px;
+
+
+    color:#dc2626;
+
+
+    font-size:18px;
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+
+.success-message {
+
+
+    margin:25px auto;
+
+
+    padding:15px 25px;
+
+
+    background:#dcfce7;
+
+
+    color:#166534;
+
+
+    border-radius:12px;
+
+
+    width:max-content;
+
+
+    max-width:90%;
+
+
+}
+
+
+
+
+
+
+/* ---------- File Text ---------- */
+
+
+.file-name-text {
+
+
+    overflow:hidden;
+
+
+    text-overflow:ellipsis;
+
+
+    white-space:nowrap;
+
 
 }
