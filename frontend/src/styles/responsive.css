@@ -1,0 +1,259 @@
+/* =========================
+   Responsive
+========================= */
+
+
+
+@media(max-width:900px){
+
+
+
+.tools {
+
+
+    grid-template-columns:repeat(2,1fr);
+
+
+}
+
+
+
+.hero {
+
+
+    flex-direction:column;
+
+
+    text-align:center;
+
+
+}
+
+
+
+.hero-text h1 {
+
+
+    font-size:42px;
+
+
+}
+
+
+
+.pdf-demo {
+
+
+    width:90%;
+
+
+}
+
+
+
+.steps {
+
+
+    grid-template-columns:1fr;
+
+
+}
+
+
+
+.navbar {
+
+
+    padding:0 20px;
+
+
+}
+
+
+
+.nav-links {
+
+
+    gap:15px;
+
+
+}
+
+
+}
+
+
+
+
+@media(max-width:700px){
+
+
+
+.footer-links {
+
+
+    flex-direction:column;
+
+
+    gap:30px;
+
+
+}
+
+
+
+}
+
+
+
+
+@media(max-width:600px){
+
+
+
+.tools {
+
+
+    grid-template-columns:1fr;
+
+
+}
+
+
+
+.home {
+
+
+    padding:40px 20px;
+
+
+}
+
+
+
+.hero-text h1 {
+
+
+    font-size:32px;
+
+
+}
+
+
+
+.navbar {
+
+
+    flex-direction:column;
+
+
+    height:auto;
+
+
+    padding:20px;
+
+
+    gap:15px;
+
+
+}
+
+
+
+.nav-links {
+
+
+    flex-wrap:wrap;
+
+
+    justify-content:center;
+
+
+}
+
+
+
+.tool-title {
+
+
+    font-size:32px;
+
+
+}
+
+
+
+.tool-subtitle {
+
+
+    font-size:16px;
+
+
+}
+
+
+
+.upload-box {
+
+
+    padding:25px;
+
+
+}
+
+
+
+.upload-box h3 {
+
+
+    font-size:22px;
+
+
+}
+
+
+
+.preview-card {
+
+
+    width:160px;
+
+
+}
+
+
+
+.merge-item {
+
+
+    flex-wrap:wrap;
+
+
+}
+
+
+
+.merge-actions {
+
+
+    width:100%;
+
+
+    justify-content:center;
+
+
+}
+
+
+
+.file-name {
+
+
+    overflow-wrap:anywhere;
+
+
+}
+
+
+
+}

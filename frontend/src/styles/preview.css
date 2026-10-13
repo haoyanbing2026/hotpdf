@@ -1,0 +1,202 @@
+/* =========================
+   PDF Preview
+========================= */
+
+
+
+.preview-container {
+
+
+    display:flex;
+
+
+    flex-wrap:wrap;
+
+
+    justify-content:center;
+
+
+    gap:20px;
+
+
+    margin:40px auto;
+
+
+    max-width:1000px;
+
+
+}
+
+
+
+
+
+.preview-card {
+
+
+    width:180px;
+
+
+    background:white;
+
+
+    padding:15px;
+
+
+    border-radius:15px;
+
+
+    box-shadow:
+
+    0 5px 20px rgba(0,0,0,.08);
+
+
+    cursor:pointer;
+
+
+    transition:.2s;
+
+
+}
+
+
+
+.preview-card:hover {
+
+
+    transform:translateY(-5px);
+
+}
+
+
+
+.preview-card img {
+
+
+    width:150px;
+
+
+    height:auto;
+
+
+    border:1px solid #ddd;
+
+
+}
+
+
+
+
+
+.preview-card p {
+
+
+    font-size:16px;
+
+
+    font-weight:600;
+
+
+    margin:10px 0 0;
+
+
+    color:#475569;
+
+
+}
+
+
+
+.preview-card.selected {
+
+
+    border:
+
+    3px solid #2563eb;
+
+
+    background:#eff6ff;
+
+
+}
+
+
+
+
+
+.preview-card.selected p {
+
+
+    color:#2563eb;
+
+
+}
+
+
+
+
+
+
+/* Page selection */
+
+
+.select-area {
+
+
+    margin:30px auto;
+
+
+    text-align:center;
+
+
+}
+
+
+
+.select-info {
+
+
+    background:white;
+
+
+    padding:15px;
+
+
+    border-radius:12px;
+
+
+    width:400px;
+
+
+    max-width:90%;
+
+
+    margin:20px auto;
+
+
+    color:#2563eb;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+.select-buttons {
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    gap:15px;
+
+
+    margin-bottom:25px;
+
+
+}

@@ -1,0 +1,64 @@
+/* =========================
+   Global Styles
+========================= */
+
+
+html,
+body,
+#root {
+
+    width:100%;
+
+    min-height:100%;
+
+    overflow-x:hidden;
+
+}
+
+
+
+* {
+
+    box-sizing:border-box;
+
+}
+
+
+
+body {
+
+    margin:0;
+
+
+    font-family:
+        Arial,
+        "Microsoft YaHei",
+        sans-serif;
+
+
+    background:#f8fafc;
+
+
+    color:#1e293b;
+
+}
+
+
+
+button {
+
+    cursor:pointer;
+
+    border:none;
+
+    font-size:16px;
+
+}
+
+
+
+a {
+
+    text-decoration:none;
+
+}

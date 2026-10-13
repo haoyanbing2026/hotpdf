@@ -1,0 +1,172 @@
+/* =========================
+   Merge PDF
+========================= */
+
+
+.file-manager {
+
+
+    background:white;
+
+
+    width:600px;
+
+
+    max-width:90%;
+
+
+    margin:30px auto;
+
+
+    padding:25px;
+
+
+    border-radius:20px;
+
+
+}
+
+
+
+.merge-item {
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:20px;
+
+
+    padding:15px;
+
+
+    margin:10px 0;
+
+
+    background:#f8fafc;
+
+
+    border-radius:12px;
+
+
+}
+
+
+
+.merge-item canvas {
+
+
+    width:80px;
+
+
+    height:110px;
+
+
+    border-radius:8px;
+
+
+    box-shadow:
+
+    0 3px 10px rgba(0,0,0,.15);
+
+
+}
+
+
+
+
+.file-name {
+
+
+    flex:1;
+
+
+    font-weight:bold;
+
+
+    overflow:hidden;
+
+
+    text-overflow:ellipsis;
+
+
+    white-space:nowrap;
+
+
+}
+
+
+
+
+
+.merge-actions {
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:8px;
+
+
+    flex-wrap:wrap;
+
+
+}
+
+
+
+.merge-actions button {
+
+
+    background:#e2e8f0;
+
+
+    color:#334155;
+
+
+}
+
+
+
+.merge-actions button:hover:not(:disabled) {
+
+
+    background:#dbeafe;
+
+
+    color:#2563eb;
+
+
+}
+
+
+
+.merge-actions button:disabled {
+
+
+    opacity:.4;
+
+
+    cursor:not-allowed;
+
+
+}
+
+
+
+.merge-count {
+
+
+    margin-top:20px;
+
+
+    color:#64748b;
+
+
+}

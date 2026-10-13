@@ -26,7 +26,16 @@ import Compress from "./pages/Compress"
 
 import Privacy from "./pages/Privacy"
 
-import "./App.css"
+import "./styles/global.css"
+import "./styles/navbar.css"
+import "./styles/home.css"
+import "./styles/tools.css"
+import "./styles/upload.css"
+import "./styles/preview.css"
+import "./styles/result.css"
+import "./styles/merge.css"
+import "./styles/footer.css"
+import "./styles/responsive.css"
 
 
 

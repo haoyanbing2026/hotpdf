@@ -1,0 +1,140 @@
+/* =========================
+   Tool Pages
+========================= */
+
+
+.page {
+
+    padding:40px 20px;
+
+    text-align:center;
+
+}
+
+
+
+.tool-title {
+
+    font-size:42px;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.tool-subtitle {
+
+    font-size:18px;
+
+    color:#64748b;
+
+    max-width:600px;
+
+    margin:0 auto 30px;
+
+}
+
+
+
+/* Main buttons */
+
+
+.primary-btn {
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:12px 30px;
+
+    border-radius:10px;
+
+    transition:.2s;
+
+}
+
+
+
+.primary-btn:hover {
+
+    background:#1d4ed8;
+
+}
+
+
+
+.secondary-btn {
+
+    background:#e2e8f0;
+
+    color:#334155;
+
+    padding:12px 25px;
+
+    border-radius:10px;
+
+    transition:.2s;
+
+}
+
+
+
+.secondary-btn:hover {
+
+    background:#cbd5e1;
+
+}
+
+
+
+/* Error */
+
+
+.error-message {
+
+    margin:20px auto;
+
+    color:#dc2626;
+
+    font-weight:500;
+
+}
+
+
+
+/* Loading */
+
+
+.loading-box {
+
+
+    margin:30px auto;
+
+
+    background:white;
+
+
+    width:350px;
+
+
+    padding:20px;
+
+
+    border-radius:15px;
+
+
+    text-align:center;
+
+
+    color:#2563eb;
+
+
+    font-weight:bold;
+
+
+}
