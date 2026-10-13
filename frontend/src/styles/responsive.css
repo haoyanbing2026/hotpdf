@@ -1,258 +1,677 @@
 /* =========================
-   Responsive
+   Responsive Design
 ========================= */
 
+
+
+/* =========================
+   Tablet
+========================= */
+
+
+@media(max-width:1100px){
+
+
+    .hero {
+
+        gap:40px;
+
+        padding:0 20px;
+
+    }
+
+
+
+    .hero-text h1 {
+
+        font-size:48px;
+
+    }
+
+
+
+    .pdf-demo {
+
+        width:320px;
+
+    }
+
+
+
+    .tools {
+
+        grid-template-columns:
+
+        repeat(2,1fr);
+
+    }
+
+
+
+}
+
+
+
+
+
+
+/* =========================
+   Tablet / Small Laptop
+========================= */
 
 
 @media(max-width:900px){
 
 
 
-.tools {
+    /* Navbar */
 
 
-    grid-template-columns:repeat(2,1fr);
+    .navbar {
+
+        padding:0 25px;
+
+    }
+
+
+
+    .nav-links {
+
+        gap:18px;
+
+    }
+
+
+
+
+
+
+    /* Home Hero */
+
+
+    .hero {
+
+
+        flex-direction:column;
+
+
+        text-align:center;
+
+
+    }
+
+
+
+    .hero-text {
+
+
+        text-align:center;
+
+
+    }
+
+
+
+    .hero-text h1 {
+
+
+        font-size:42px;
+
+
+    }
+
+
+
+    .hero-text p {
+
+
+        font-size:18px;
+
+
+    }
+
+
+
+    .pdf-demo {
+
+
+        width:90%;
+
+
+        max-width:350px;
+
+
+    }
+
+
+
+
+
+
+
+    /* Scenario */
+
+
+    .scenario-box {
+
+
+        grid-template-columns:
+
+        repeat(2,1fr);
+
+
+    }
+
+
+
+
+
+
+
+    /* Steps */
+
+
+    .steps {
+
+
+        grid-template-columns:
+
+        repeat(3,1fr);
+
+
+        gap:20px;
+
+
+    }
+
+
+
+
+
+
+    /* Footer */
+
+
+    .footer-links {
+
+
+        gap:50px;
+
+
+    }
+
+
 
 
 }
 
 
 
-.hero {
-
-
-    flex-direction:column;
-
-
-    text-align:center;
-
-
-}
 
 
 
-.hero-text h1 {
 
 
-    font-size:42px;
-
-
-}
-
-
-
-.pdf-demo {
-
-
-    width:90%;
-
-
-}
-
-
-
-.steps {
-
-
-    grid-template-columns:1fr;
-
-
-}
-
-
-
-.navbar {
-
-
-    padding:0 20px;
-
-
-}
-
-
-
-.nav-links {
-
-
-    gap:15px;
-
-
-}
-
-
-}
-
-
+/* =========================
+   Mobile
+========================= */
 
 
 @media(max-width:700px){
 
 
 
-.footer-links {
+    body {
 
+        overflow-x:hidden;
 
-    flex-direction:column;
+    }
 
 
-    gap:30px;
 
 
-}
 
+    /* Navbar */
 
 
-}
+    .navbar {
 
 
+        height:auto;
 
 
-@media(max-width:600px){
+        padding:20px;
 
 
+        flex-direction:column;
 
-.tools {
 
+        gap:20px;
 
-    grid-template-columns:1fr;
 
+    }
 
-}
 
 
+    .nav-links {
 
-.home {
 
+        flex-wrap:wrap;
 
-    padding:40px 20px;
 
+        justify-content:center;
 
-}
 
+        gap:15px;
 
 
-.hero-text h1 {
+    }
 
 
-    font-size:32px;
 
 
-}
 
+    .nav-upload {
 
 
-.navbar {
+        padding:10px 18px;
 
+    }
 
-    flex-direction:column;
 
 
-    height:auto;
 
 
-    padding:20px;
 
 
-    gap:15px;
 
+    /* Home */
 
-}
 
+    .home {
 
 
-.nav-links {
+        padding:40px 20px;
 
 
-    flex-wrap:wrap;
+    }
 
 
-    justify-content:center;
 
 
-}
+    .hero-text h1 {
 
 
+        font-size:36px;
 
-.tool-title {
 
+    }
 
-    font-size:32px;
 
 
-}
+    .hero-text p {
 
 
+        font-size:16px;
 
-.tool-subtitle {
 
+    }
 
-    font-size:16px;
 
 
-}
 
 
+    .home h2 {
 
-.upload-box {
 
+        font-size:28px;
 
-    padding:25px;
 
+    }
 
-}
 
 
 
-.upload-box h3 {
 
 
-    font-size:22px;
+    /* Tool cards */
 
 
-}
+    .tools {
 
 
+        grid-template-columns:
 
-.preview-card {
+        1fr;
 
 
-    width:160px;
+    }
 
 
-}
 
 
 
-.merge-item {
+    .tool-card {
 
 
-    flex-wrap:wrap;
+        text-align:center;
 
 
-}
+    }
 
 
 
-.merge-actions {
+    .tool-icon {
 
 
-    width:100%;
+        margin:auto;
 
 
-    justify-content:center;
+    }
 
 
-}
 
 
 
-.file-name {
 
 
-    overflow-wrap:anywhere;
 
+    /* Scenarios */
 
-}
+
+    .scenario-box {
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+
+
+
+
+
+    /* Steps */
+
+
+    .steps {
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+        gap:35px;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Upload */
+
+
+    .upload-box {
+
+
+        width:100%;
+
+
+        padding:25px;
+
+
+    }
+
+
+
+
+    .upload-box h3 {
+
+
+        font-size:22px;
+
+
+    }
+
+
+
+
+    .upload-box p {
+
+
+        font-size:16px;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Tool pages */
+
+
+    .page {
+
+
+        padding:30px 15px;
+
+
+    }
+
+
+
+    .tool-title {
+
+
+        font-size:32px;
+
+
+    }
+
+
+
+    .tool-subtitle {
+
+
+        font-size:16px;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Preview */
+
+
+    .preview-container {
+
+
+        gap:15px;
+
+
+    }
+
+
+
+    .preview-card {
+
+
+        width:150px;
+
+
+    }
+
+
+
+    .preview-card img {
+
+
+        width:120px;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Select area */
+
+
+    .select-info {
+
+
+        width:100%;
+
+
+    }
+
+
+
+    .select-buttons {
+
+
+        flex-direction:column;
+
+
+        align-items:center;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Result */
+
+
+    .result-card {
+
+
+        width:100%;
+
+
+        padding:25px;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Merge */
+
+
+    .file-manager {
+
+
+        width:100%;
+
+
+        padding:20px;
+
+
+    }
+
+
+
+    .merge-item {
+
+
+        flex-wrap:wrap;
+
+
+    }
+
+
+
+    .merge-actions {
+
+
+        width:100%;
+
+
+        justify-content:center;
+
+
+    }
+
+
+
+    .file-name {
+
+
+        width:100%;
+
+
+        overflow:hidden;
+
+
+        text-overflow:ellipsis;
+
+
+    }
+
+
+
+
+
+
+
+
+    /* Footer */
+
+
+    .footer {
+
+
+        padding:40px 20px;
+
+
+    }
+
+
+
+    .footer-links {
+
+
+        flex-direction:column;
+
+
+        gap:30px;
+
+
+    }
 
 
 
