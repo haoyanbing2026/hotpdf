@@ -1,24 +1,81 @@
+import { useEffect, useRef } from "react"
+
+import "../styles/result.css"
+
+
+
 function ResultCard({
 
     title,
 
     message,
 
+    info,
+
     downloadUrl,
 
-    downloadText="Download File",
-
-    info={}
+    downloadText="Download File"
 
 }){
 
 
+
+const resultRef = useRef(null)
+
+
+
+
+
+useEffect(()=>{
+
+
+    if(downloadUrl){
+
+
+        setTimeout(()=>{
+
+
+            resultRef.current?.scrollIntoView({
+
+                behavior:"smooth",
+
+                block:"center"
+
+            })
+
+
+        },300)
+
+
+    }
+
+
+
+},[downloadUrl])
+
+
+
+
+
+
+
+
+
 return (
 
-<div className="result-card">
+
+<div
+
+ref={resultRef}
+
+className="result-card"
+
+>
+
 
 
 <div className="result-header">
+
 
 
 <div className="success-icon">
@@ -28,14 +85,22 @@ return (
 </div>
 
 
-<h2>
+
+
+
+<div className="result-title">
 
 {title}
 
-</h2>
+</div>
+
 
 
 </div>
+
+
+
+
 
 
 
@@ -51,28 +116,27 @@ return (
 
 
 
+
+
+
+
 <div className="result-info">
 
 
 
-
-
 {
-info.filename &&
 
-<div className="info-row">
+info?.filename &&
 
-<span>
-📄 File name
-</span>
+<div className="result-row">
 
+<span>📄 File name</span>
 
-<strong className="file-name-text">
+<strong>
 
 {info.filename}
 
 </strong>
-
 
 </div>
 
@@ -82,15 +146,15 @@ info.filename &&
 
 
 
+
+
 {
-info.pages &&
 
-<div className="info-row">
+info?.pages &&
 
-<span>
-📑 Pages
-</span>
+<div className="result-row">
 
+<span>📑 Pages</span>
 
 <strong>
 
@@ -98,7 +162,6 @@ info.pages &&
 
 </strong>
 
-
 </div>
 
 }
@@ -108,15 +171,14 @@ info.pages &&
 
 
 
+
 {
-info.size &&
 
-<div className="info-row">
+info?.size &&
 
-<span>
-💾 Size
-</span>
+<div className="result-row">
 
+<span>💾 Size</span>
 
 <strong>
 
@@ -124,7 +186,6 @@ info.size &&
 
 </strong>
 
-
 </div>
 
 }
@@ -134,22 +195,20 @@ info.size &&
 
 
 
+
 {
-info.originalSize &&
 
-<div className="info-row">
+info?.originalSize &&
 
-<span>
-📦 Original size
-</span>
+<div className="result-row">
 
+<span>📦 Original size</span>
 
 <strong>
 
-{info.originalSize}
+{info.originalSize} MB
 
 </strong>
-
 
 </div>
 
@@ -160,22 +219,20 @@ info.originalSize &&
 
 
 
+
 {
-info.compressedSize &&
 
-<div className="info-row">
+info?.compressedSize &&
 
-<span>
-📉 Compressed size
-</span>
+<div className="result-row">
 
+<span>📉 Compressed size</span>
 
 <strong>
 
-{info.compressedSize}
+{info.compressedSize} MB
 
 </strong>
-
 
 </div>
 
@@ -186,22 +243,20 @@ info.compressedSize &&
 
 
 
+
 {
-info.saved &&
 
-<div className="info-row">
+info?.saved &&
 
-<span>
-✨ Saved
-</span>
+<div className="result-row">
 
+<span>✨ Saved</span>
 
 <strong>
 
-{info.saved}
+{info.saved}%
 
 </strong>
-
 
 </div>
 
@@ -217,8 +272,6 @@ info.saved &&
 
 
 
-{
-downloadUrl &&
 
 
 <a
@@ -235,13 +288,17 @@ download
 
 </a>
 
-}
+
+
+
 
 
 
 </div>
 
+
 )
+
 
 
 }

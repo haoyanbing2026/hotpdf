@@ -31,7 +31,7 @@
 
     animation:
 
-    showCard .3s ease;
+    showCard .5s ease;
 
 
 }
@@ -49,11 +49,10 @@ from {
     opacity:0;
 
 
-    transform:translateY(20px);
+    transform:translateY(40px);
 
 
 }
-
 
 
 to {
@@ -101,16 +100,16 @@ to {
 
 
 
-.result-header h2 {
+.result-title {
 
 
     color:#0f172a;
 
 
-    font-size:24px;
+    font-size:28px;
 
 
-    margin:0;
+    font-weight:600;
 
 
 }
@@ -123,10 +122,10 @@ to {
 .success-icon {
 
 
-    width:45px;
+    width:55px;
 
 
-    height:45px;
+    height:55px;
 
 
     border-radius:50%;
@@ -147,7 +146,7 @@ to {
     justify-content:center;
 
 
-    font-size:25px;
+    font-size:32px;
 
 
     font-weight:bold;
@@ -171,10 +170,16 @@ to {
     color:#64748b;
 
 
-    margin:20px 0;
+    margin:25px 0;
+
+
+    text-align:center;
 
 
     line-height:1.6;
+
+
+    font-size:18px;
 
 
 }
@@ -201,7 +206,7 @@ to {
 
 
 
-.info-row {
+.result-row {
 
 
     display:flex;
@@ -216,7 +221,7 @@ to {
     gap:15px;
 
 
-    padding:12px 0;
+    padding:14px 0;
 
 
     border-bottom:1px solid #e2e8f0;
@@ -228,13 +233,10 @@ to {
 
 
 
-.info-row span {
+.result-row span {
 
 
     color:#64748b;
-
-
-    flex-shrink:0;
 
 
 }
@@ -243,7 +245,7 @@ to {
 
 
 
-.info-row strong {
+.result-row strong {
 
 
     color:#0f172a;
@@ -271,31 +273,6 @@ to {
 
 
 
-.file-name-text {
-
-
-    display:block;
-
-
-    max-width:260px;
-
-
-    overflow:hidden;
-
-
-    text-overflow:ellipsis;
-
-
-    white-space:nowrap;
-
-
-}
-
-
-
-
-
-
 /* =========================
    Download Button
 ========================= */
@@ -307,7 +284,7 @@ to {
     display:block;
 
 
-    margin-top:25px;
+    margin-top:30px;
 
 
     text-align:center;
@@ -319,10 +296,13 @@ to {
     color:white;
 
 
-    padding:14px;
+    padding:16px;
 
 
-    border-radius:12px;
+    border-radius:14px;
+
+
+    font-size:18px;
 
 
     font-weight:bold;
