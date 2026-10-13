@@ -6,7 +6,7 @@
 .footer {
 
 
-    margin-top:80px;
+    margin-top:50px;
 
 
     width:100%;
@@ -19,6 +19,18 @@
 
 
     border-top:1px solid #e2e8f0;
+
+
+}
+
+
+
+
+
+.footer-brand {
+
+
+    text-align:center;
 
 
 }
@@ -38,6 +50,8 @@
 
 
 
+
+
 .footer-brand p {
 
 
@@ -49,10 +63,16 @@
 
 
 
+
+
+
 .footer-links {
 
 
     display:flex;
+
+
+    justify-content:center;
 
 
     gap:100px;
@@ -62,6 +82,8 @@
 
 
 }
+
+
 
 
 
@@ -81,13 +103,20 @@
 
 
 
+
+
 .footer-links h3 {
+
+
+    color:#0f172a;
 
 
     margin-bottom:10px;
 
 
 }
+
+
 
 
 
@@ -101,6 +130,8 @@
 
 
 
+
+
 .footer-links a:hover {
 
 
@@ -108,6 +139,7 @@
 
 
 }
+
 
 
 
@@ -126,6 +158,9 @@
 
 
     color:#94a3b8;
+
+
+    text-align:center;
 
 
 }

@@ -372,7 +372,7 @@ Choose the pages you want to extract.
 <div className="select-info">
 
 
-Selected:
+Selected pages:
 
 {
 

@@ -18,7 +18,7 @@
     margin:30px auto;
 
 
-    padding:30px;
+    padding:40px;
 
 
     border-radius:24px;
@@ -56,16 +56,18 @@
 
 
 
+
 .upload-icon {
 
 
     font-size:48px;
 
 
-    margin-bottom:15px;
+    margin-bottom:20px;
 
 
 }
+
 
 
 
@@ -103,6 +105,8 @@
 
 
 
+
+
 .upload-box input {
 
 
@@ -115,13 +119,20 @@
 
 
 
+
 .file-select-btn {
 
 
-    display:inline-block;
+    display:inline-flex;
 
 
-    padding:12px 25px;
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    padding:12px 30px;
 
 
     background:#e2e8f0;
@@ -130,13 +141,16 @@
     color:#2563eb;
 
 
-    border-radius:10px;
+    border-radius:12px;
 
 
     cursor:pointer;
 
 
     font-weight:bold;
+
+
+    transition:.2s;
 
 
 }
@@ -155,10 +169,11 @@
 
 
 
+
 .file-list {
 
 
-    margin-top:20px;
+    margin-top:25px;
 
 
     text-align:left;
@@ -168,16 +183,18 @@
 
 
 
+
+
 .file-list p {
 
 
     background:#f1f5f9;
 
 
-    padding:10px;
+    padding:12px;
 
 
-    border-radius:8px;
+    border-radius:10px;
 
 
     overflow:hidden;
