@@ -1,4 +1,30 @@
 /* =========================
+   Tool Header
+========================= */
+
+
+.tool-header {
+
+    margin-bottom:40px;
+
+}
+
+
+
+.tool-header .tool-title {
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+
+/* =========================
    Tool Pages
 ========================= */
 

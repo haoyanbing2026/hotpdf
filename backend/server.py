@@ -356,8 +356,9 @@ async def convert_word(filename: str):
 
 
 
-    output_name = f"{uuid.uuid4().hex}.docx"
+    base_name=os.path.splitext(filename)[0]
 
+    output_name=f"{base_name}_converted.docx"
 
 
     output_path = f"{UPLOAD_DIR}/{output_name}"
@@ -371,6 +372,8 @@ async def convert_word(filename: str):
     return {
 
         "filename": output_name,
+
+        "size": f"{round(os.path.getsize(output_path)/1024,2)} KB",
 
         "message":"转换成功"
 

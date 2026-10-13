@@ -1,146 +1,52 @@
 import { useState } from "react"
 
+import ToolHeader from "../components/ToolHeader"
+
 import UploadBox from "../components/UploadBox"
 
 import PDFPreview from "../components/PDFPreview"
 
 import ResultCard from "../components/ResultCard"
 
+import useUploadPDF from "../hooks/useUploadPDF"
+
+import createPDFResult from "../utils/pdfResult"
+
 
 
 function Split(){
 
 
-const [file,setFile] = useState(null)
+
+const {
+
+file,
+
+setFile,
+
+filename,
+
+pages,
+
+message,
+
+error,
+
+uploadPDF
+
+}=useUploadPDF()
 
 
-const [filename,setFilename] = useState("")
 
-
-const [pages,setPages] = useState([])
 
 
 const [selectedPages,setSelectedPages] = useState([])
-
-
-const [message,setMessage] = useState("")
 
 
 const [resultInfo,setResultInfo] = useState({})
 
 
 const [downloadUrl,setDownloadUrl] = useState("")
-
-
-
-
-
-// Upload PDF
-
-async function uploadPDF(){
-
-
-setMessage("")
-
-setDownloadUrl("")
-
-
-if(!file){
-
-
-setMessage(
-"Please select a PDF file first."
-)
-
-
-return
-
-
-}
-
-
-
-const formData = new FormData()
-
-
-formData.append(
-
-"file",
-
-file
-
-)
-
-
-
-
-const res = await fetch(
-
-`${import.meta.env.VITE_API_URL}/upload`,
-
-{
-
-method:"POST",
-
-body:formData
-
-}
-
-)
-
-
-
-
-const data = await res.json()
-
-
-
-if(data.filename){
-
-
-setFilename(data.filename)
-
-
-
-const pageList=[]
-
-
-for(
-let i=1;
-i<=data.pages;
-i++
-){
-
-pageList.push(i)
-
-}
-
-
-
-setPages(pageList)
-
-
-
-setMessage("")
-
-
-
-}
-else{
-
-
-setMessage(
-
-"Upload failed."
-
-)
-
-
-}
-
-
-}
-
 
 
 
@@ -153,37 +59,27 @@ setMessage(
 async function splitPDF(){
 
 
+
 if(!filename){
-
-
-setMessage(
-
-"Please upload a PDF first."
-
-)
 
 
 return
 
 
 }
+
+
 
 
 
 if(selectedPages.length===0){
 
 
-setMessage(
-
-"Please select pages to split."
-
-)
-
-
 return
 
 
 }
+
 
 
 
@@ -204,28 +100,33 @@ method:"POST"
 
 
 
+
+
 const data = await res.json()
+
+
 
 
 
 if(data.filename){
 
 
-setMessage(
-"PDF split completed."
-)
 
+setResultInfo(
 
-
-setResultInfo({
+createPDFResult({
 
 filename:data.filename,
 
 pages:selectedPages.length,
 
-size:data.size || "Unknown"
+size:data.size
 
 })
+
+)
+
+
 
 
 
@@ -238,20 +139,13 @@ setDownloadUrl(
 
 
 }
-else{
 
-
-setMessage(
-
-"Split failed."
-
-)
 
 
 }
 
 
-}
+
 
 
 
@@ -260,22 +154,31 @@ setMessage(
 
 return (
 
+
 <div className="page">
 
 
 
-<h1 className="tool-title">
-
-✂️ Split PDF
-
-</h1>
 
 
-<p className="tool-subtitle">
 
-Extract selected pages from your PDF quickly and easily.
+<ToolHeader
 
-</p>
+
+icon="✂️"
+
+
+title="Split PDF"
+
+
+description="Extract selected pages from your PDF quickly and easily."
+
+/>
+
+
+
+
+
 
 
 
@@ -298,17 +201,26 @@ setFile(files[0])
 
 
 
+
+
+
+
 <button
+
 
 className="primary-btn"
 
+
 onClick={uploadPDF}
+
 
 >
 
 Upload PDF
 
 </button>
+
+
 
 
 
@@ -345,14 +257,13 @@ setSelectedPages={setSelectedPages}
 
 
 
+
 {
 
-pages.length>0 &&
+pages.length > 0 &&
 
 
 <div className="select-area">
-
-
 
 
 
@@ -362,9 +273,16 @@ Select pages to split
 
 </h3>
 
+
+
 <p className="select-tip">
+
 Choose the pages you want to extract.
+
 </p>
+
+
+
 
 
 
@@ -373,6 +291,7 @@ Choose the pages you want to extract.
 
 
 Selected pages:
+
 
 {
 
@@ -399,9 +318,8 @@ selectedPages.join(", ")+" page(s)"
 
 
 
+
 <div className="select-buttons">
-
-
 
 
 
@@ -432,8 +350,6 @@ Select All
 
 
 
-
-
 <button
 
 
@@ -454,8 +370,6 @@ setSelectedPages([])
 Clear Selection
 
 </button>
-
-
 
 
 
@@ -506,6 +420,51 @@ Split PDF
 message &&
 
 
+<div className="success-message">
+
+
+✅ {message}
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+{
+
+error &&
+
+
+<div className="error-message">
+
+
+⚠️ {error}
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+
+{
+
+downloadUrl &&
+
 
 <ResultCard
 
@@ -525,10 +484,12 @@ downloadUrl={downloadUrl}
 downloadText="Download Split PDF"
 
 
+
 />
 
 
 }
+
 
 
 

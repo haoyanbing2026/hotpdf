@@ -1,158 +1,52 @@
 import { useState } from "react"
 
+import ToolHeader from "../components/ToolHeader"
+
 import UploadBox from "../components/UploadBox"
 
 import ResultCard from "../components/ResultCard"
+
+import useUploadPDF from "../hooks/useUploadPDF"
+
+import createPDFResult from "../utils/pdfResult"
+
+
 
 
 
 function Convert(){
 
 
-const [file,setFile] = useState(null)
-
-
-const [filename,setFilename] = useState("")
-
-
-const [message,setMessage] = useState("")
-
-
-const [error,setError] = useState("")
-
 
 const [downloadUrl,setDownloadUrl] = useState("")
+
 
 
 const [resultInfo,setResultInfo] = useState({})
 
 
-const [loading,setLoading] = useState(false)
 
 
 
 
 
+const {
 
-// Upload PDF
+file,
 
-async function uploadPDF(){
+setFile,
 
+filename,
 
-setError("")
+uploadPDF,
 
-setMessage("")
+message,
 
-setDownloadUrl("")
+error,
 
+loading
 
-
-if(!file){
-
-
-setError(
-"Please select a PDF file first."
-)
-
-
-return
-
-
-}
-
-
-
-const formData = new FormData()
-
-
-
-formData.append(
-
-"file",
-
-file
-
-)
-
-
-
-
-
-try{
-
-
-const res = await fetch(
-
-`${import.meta.env.VITE_API_URL}/upload`,
-
-{
-
-method:"POST",
-
-body:formData
-
-}
-
-)
-
-
-
-
-const data = await res.json()
-
-
-
-
-
-if(data.filename){
-
-
-setFilename(data.filename)
-
-
-setMessage(
-
-"Upload completed. Ready to convert."
-
-)
-
-
-}
-
-else{
-
-
-setError(
-
-"Upload failed."
-
-)
-
-
-}
-
-
-
-}
-
-catch(error){
-
-
-console.log(error)
-
-
-setError(
-
-"Server connection failed."
-
-)
-
-
-}
-
-
-
-}
+}=useUploadPDF()
 
 
 
@@ -168,20 +62,13 @@ async function convertWord(){
 
 
 
-setError("")
+setDownloadUrl("")
 
 
 
 
 
 if(!filename){
-
-
-setError(
-
-"Please upload a PDF first."
-
-)
 
 
 return
@@ -193,16 +80,10 @@ return
 
 
 
-setLoading(true)
-
-
-setMessage("")
-
-
-
 
 
 try{
+
 
 
 const res = await fetch(
@@ -223,7 +104,11 @@ method:"POST"
 
 
 
+
+
 const data = await res.json()
+
+
 
 
 
@@ -233,24 +118,21 @@ if(data.filename){
 
 
 
-setMessage(
 
-"PDF has been successfully converted to Word."
+
+setResultInfo(
+
+createPDFResult({
+
+filename:data.filename,
+
+size:data.size || "Unknown"
+
+})
 
 )
 
 
-
-setResultInfo({
-
-
-filename:data.filename,
-
-
-size:data.size || "Unknown"
-
-
-})
 
 
 
@@ -258,52 +140,35 @@ size:data.size || "Unknown"
 
 setDownloadUrl(
 
-
-`${import.meta.env.VITE_API_URL}/download/${data.filename}`
-
+`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(data.filename)}`
 
 )
 
 
 
 
-}
-
-else{
-
-
-setError(
-
-data.message || "Conversion failed."
-
-)
-
 
 }
 
 
 
 }
+
+
+
 
 
 catch(error){
 
 
+
 console.log(error)
 
-
-setError(
-
-"Conversion failed."
-
-)
 
 
 }
 
 
-
-setLoading(false)
 
 
 
@@ -324,18 +189,25 @@ return (
 
 
 
-<h1 className="tool-title">
-
-📝 Convert PDF to Word
-
-</h1>
 
 
-<p className="tool-subtitle">
 
-Turn PDF documents into editable Word files.
 
-</p>
+<ToolHeader
+
+
+icon="📝"
+
+
+title="Convert PDF to Word"
+
+
+description="Turn PDF documents into editable Word files."
+
+
+/>
+
+
 
 
 
@@ -346,15 +218,11 @@ Turn PDF documents into editable Word files.
 <UploadBox
 
 
+
 onUpload={(files)=>{
 
 
 setFile(files[0])
-
-
-setMessage("")
-
-setError("")
 
 
 }}
@@ -392,9 +260,11 @@ Upload PDF
 
 
 
+
 {
 
 message && !downloadUrl &&
+
 
 
 <div className="success-message">
@@ -433,6 +303,7 @@ disabled={loading}
 
 {
 
+
 loading
 
 ?
@@ -443,7 +314,9 @@ loading
 
 "Convert to Word"
 
+
 }
+
 
 
 </button>
@@ -459,6 +332,7 @@ loading
 {
 
 loading &&
+
 
 
 <div className="loading-box">
@@ -485,6 +359,7 @@ Processing PDF, please wait...
 error &&
 
 
+
 <div className="error-message">
 
 
@@ -509,13 +384,14 @@ error &&
 downloadUrl &&
 
 
+
 <ResultCard
 
 
 title="🎉 Conversion completed"
 
 
-message={message}
+message="Your PDF has been converted successfully."
 
 
 info={resultInfo}
@@ -527,7 +403,9 @@ downloadUrl={downloadUrl}
 downloadText="Download Word File"
 
 
+
 />
+
 
 
 }
@@ -544,6 +422,7 @@ downloadText="Download Word File"
 
 
 )
+
 
 
 }

@@ -73,7 +73,21 @@ info.filename &&
 
 <strong>
 
-{info.filename}
+<span className="file-name-text">
+{
+info.filename.length > 35
+
+?
+
+info.filename.substring(0,35)+"..."
+
+:
+
+info.filename
+
+}
+
+</span>
 
 </strong>
 
