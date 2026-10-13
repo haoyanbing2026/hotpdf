@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import ToolHeader from "../components/ToolHeader"
 
@@ -12,25 +12,31 @@ import useUploadPDF from "../hooks/useUploadPDF"
 
 
 
+
+
 function Compress(){
+
+
+
+const actionRef = useRef(null)
+
+
 
 
 
 const {
 
-file,
+filename,
 
 setFile,
 
-filename,
+uploadPDF,
 
 loading,
 
 progress,
 
-error:uploadError,
-
-uploadPDF
+error:uploadError
 
 }=useUploadPDF()
 
@@ -49,6 +55,47 @@ const [compressing,setCompressing] = useState(false)
 
 
 const [error,setError] = useState("")
+
+
+
+
+
+
+
+
+
+function handleFile(file){
+
+
+
+setFile(file)
+
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+
+setTimeout(()=>{
+
+
+actionRef.current?.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+})
+
+
+},300)
+
+
+
+}
 
 
 
@@ -137,16 +184,13 @@ createPDFResult({
 
 filename:result.filename,
 
-
 originalSize:
 
-result.original_size || result.originalSize || "",
-
+result.original_size || "",
 
 compressedSize:
 
-result.compressed_size || result.compressedSize || "",
-
+result.compressed_size || "",
 
 saved:
 
@@ -175,18 +219,9 @@ setDownloadUrl(
 else{
 
 
-throw new Error(
-
-"Compression failed."
-
-)
-
+throw new Error("Compression failed.")
 
 }
-
-
-
-
 
 
 
@@ -258,75 +293,10 @@ description="Reduce PDF size while keeping good quality."
 <UploadBox
 
 
-onUpload={(file)=>{
-
-
-setFile(file)
-
-
-setResultInfo({})
-
-setDownloadUrl("")
-
-setError("")
-
-
-}}
+onUpload={handleFile}
 
 
 />
-
-
-
-
-
-
-
-
-
-<button
-
-
-className="primary-btn"
-
-
-onClick={compressPDF}
-
-
-disabled={loading || compressing}
-
-
->
-
-
-
-{
-
-
-loading
-
-?
-
-"Uploading..."
-
-:
-
-compressing
-
-?
-
-"Compressing..."
-
-:
-
-"Compress PDF"
-
-
-}
-
-
-
-</button>
 
 
 
@@ -374,6 +344,63 @@ Uploading {progress}%
 
 
 }
+
+
+
+
+
+
+
+
+
+<div ref={actionRef}>
+
+
+<button
+
+
+className="primary-btn"
+
+
+onClick={compressPDF}
+
+
+disabled={loading || compressing}
+
+
+>
+
+
+{
+
+
+loading
+
+?
+
+"Uploading..."
+
+:
+
+compressing
+
+?
+
+"Compressing..."
+
+:
+
+"Compress PDF"
+
+
+}
+
+
+
+</button>
+
+
+</div>
 
 
 

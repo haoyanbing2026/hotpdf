@@ -1,5 +1,4 @@
 import { useRef, useState } from "react"
-import axios from "axios"
 
 
 
@@ -15,16 +14,12 @@ function UploadBox({
 const inputRef = useRef(null)
 
 
-const [dragging,setDragging] = useState(false)
 
+const [dragging,setDragging] = useState(false)
 
 const [files,setFiles] = useState([])
 
-
 const [error,setError] = useState("")
-
-
-const [progress,setProgress] = useState(0)
 
 
 
@@ -45,6 +40,7 @@ const pdfFiles = fileArray.filter(
 file => file.type === "application/pdf"
 
 )
+
 
 
 
@@ -75,10 +71,8 @@ return
 setError("")
 
 
-setProgress(0)
-
-
 setFiles(pdfFiles)
+
 
 
 
@@ -156,9 +150,6 @@ function removeFiles(){
 setFiles([])
 
 
-setProgress(0)
-
-
 setError("")
 
 
@@ -178,74 +169,6 @@ null
 )
 
 
-}
-
-
-
-
-
-
-
-
-
-async function uploadWithProgress(url,formData){
-
-
-
-try{
-
-
-
-await axios.post(
-
-url,
-
-formData,
-
-{
-
-onUploadProgress:(event)=>{
-
-
-const percent=Math.round(
-
-(event.loaded * 100) /
-
-event.total
-
-)
-
-
-setProgress(percent)
-
-
-
-}
-
-}
-
-)
-
-
-
-}
-
-catch(err){
-
-
-setError(
-
-"Upload failed."
-
-)
-
-
-}
-
-
-
-
-
 
 }
 
@@ -262,11 +185,13 @@ return (
 
 <div
 
+
 className={
 
 `upload-box ${dragging ? "dragging":""}`
 
 }
+
 
 
 onDragOver={(e)=>{
@@ -280,11 +205,18 @@ setDragging(true)
 }}
 
 
-onDragLeave={()=>setDragging(false)}
+
+onDragLeave={()=>{
+
+
+setDragging(false)
+
+
+}}
+
 
 
 onDrop={handleDrop}
-
 
 
 >
@@ -333,9 +265,15 @@ or click to select a file
 
 <button
 
+
+type="button"
+
+
 className="file-select-btn"
 
+
 onClick={()=>inputRef.current.click()}
+
 
 >
 
@@ -351,19 +289,27 @@ Choose File
 
 <input
 
+
 ref={inputRef}
+
 
 type="file"
 
+
 accept="application/pdf"
+
 
 multiple={multiple}
 
+
 hidden
+
 
 onChange={handleChange}
 
+
 />
+
 
 
 
@@ -388,15 +334,16 @@ files.map((file,index)=>(
 
 <div
 
+
 className="selected-file"
+
 
 key={index}
 
+
 >
 
-
 📄 {file.name}
-
 
 </div>
 
@@ -414,9 +361,15 @@ key={index}
 
 <button
 
+
+type="button"
+
+
 className="upload-action-btn"
 
+
 onClick={removeFiles}
+
 
 >
 
@@ -427,82 +380,6 @@ Remove
 
 
 
-
-</div>
-
-
-}
-
-
-
-
-
-
-
-
-
-{
-
-progress>0 && progress<100 &&
-
-
-
-<div className="upload-progress">
-
-
-<div className="progress-bar">
-
-
-<div
-
-className="progress-inner"
-
-style={{
-
-width:`${progress}%`
-
-}}
-
-/>
-
-
-</div>
-
-
-
-
-
-<p>
-
-Uploading {progress}%
-
-</p>
-
-
-
-
-</div>
-
-
-}
-
-
-
-
-
-
-
-
-
-{
-
-progress===100 &&
-
-
-
-<div className="success-message">
-
-Upload completed
 
 </div>
 

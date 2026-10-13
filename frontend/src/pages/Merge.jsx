@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import axios from "axios"
 
@@ -22,22 +22,79 @@ function Merge(){
 
 
 
-const [files,setFiles] = useState([])
+const actionRef = useRef(null)
 
+
+
+const [files,setFiles] = useState([])
 
 const [progress,setProgress] = useState(0)
 
-
 const [loading,setLoading] = useState(false)
-
 
 const [resultInfo,setResultInfo] = useState({})
 
-
 const [downloadUrl,setDownloadUrl] = useState("")
 
-
 const [error,setError] = useState("")
+
+
+
+
+
+
+
+
+
+function scrollToAction(){
+
+
+
+setTimeout(()=>{
+
+
+actionRef.current?.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+})
+
+
+},300)
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function handleFiles(selectedFiles){
+
+
+
+setFiles(selectedFiles)
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+
+scrollToAction()
+
+
+
+}
 
 
 
@@ -53,6 +110,7 @@ function moveUp(index){
 if(index===0)return
 
 
+
 const list=[...files]
 
 
@@ -65,7 +123,9 @@ list[index]=list[index-1]
 list[index-1]=temp
 
 
+
 setFiles(list)
+
 
 
 }
@@ -81,7 +141,9 @@ setFiles(list)
 function moveDown(index){
 
 
+
 if(index===files.length-1)return
+
 
 
 const list=[...files]
@@ -96,7 +158,9 @@ list[index]=list[index+1]
 list[index+1]=temp
 
 
+
 setFiles(list)
+
 
 
 }
@@ -201,14 +265,15 @@ onUploadProgress:(event)=>{
 if(event.total){
 
 
-const percent=Math.round(
+setProgress(
+
+Math.round(
 
 event.loaded*100/event.total
 
 )
 
-
-setProgress(percent)
+)
 
 
 }
@@ -355,20 +420,7 @@ description="Combine multiple PDF files into one document."
 multiple={true}
 
 
-onUpload={(selectedFiles)=>{
-
-
-setFiles(selectedFiles)
-
-
-setResultInfo({})
-
-setDownloadUrl("")
-
-setError("")
-
-
-}}
+onUpload={handleFiles}
 
 
 />
@@ -387,7 +439,13 @@ files.length>0 &&
 
 
 
-<div className="merge-file-list">
+<div
+
+ref={actionRef}
+
+className="merge-file-list"
+
+>
 
 
 
@@ -543,6 +601,9 @@ Uploading {progress}%
 
 
 
+<div ref={actionRef}>
+
+
 <button
 
 
@@ -578,6 +639,9 @@ loading
 
 
 </button>
+
+
+</div>
 
 
 

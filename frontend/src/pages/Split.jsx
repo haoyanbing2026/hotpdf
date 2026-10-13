@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import ToolHeader from "../components/ToolHeader"
 
@@ -14,7 +14,17 @@ import useUploadPDF from "../hooks/useUploadPDF"
 
 
 
+
+
 function Split(){
+
+
+
+const uploadButtonRef = useRef(null)
+
+const splitButtonRef = useRef(null)
+
+
 
 
 
@@ -28,13 +38,13 @@ filename,
 
 pages,
 
+uploadPDF,
+
 loading,
 
 progress,
 
-error:uploadError,
-
-uploadPDF
+error:uploadError
 
 }=useUploadPDF()
 
@@ -45,17 +55,91 @@ uploadPDF
 
 const [uploaded,setUploaded] = useState(false)
 
-
 const [selectedPages,setSelectedPages] = useState([])
-
 
 const [resultInfo,setResultInfo] = useState({})
 
-
 const [downloadUrl,setDownloadUrl] = useState("")
 
-
 const [error,setError] = useState("")
+
+
+
+
+
+
+
+
+
+function handleFile(selectedFile){
+
+
+
+setFile(selectedFile)
+
+
+setUploaded(false)
+
+setSelectedPages([])
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+
+
+
+setTimeout(()=>{
+
+
+if(uploadButtonRef.current){
+
+
+
+const buttonTop =
+
+uploadButtonRef.current.getBoundingClientRect().top
+
++
+
+window.pageYOffset
+
+
+
+window.scrollTo({
+
+
+top:
+
+buttonTop
+
+-
+
+window.innerHeight
+
++
+
+100,
+
+
+behavior:"smooth"
+
+
+})
+
+
+}
+
+
+
+},300)
+
+
+
+}
 
 
 
@@ -77,6 +161,58 @@ if(data?.filename){
 
 
 setUploaded(true)
+
+
+
+
+
+setTimeout(()=>{
+
+
+if(splitButtonRef.current){
+
+
+
+const buttonTop =
+
+splitButtonRef.current.getBoundingClientRect().top
+
++
+
+window.pageYOffset
+
+
+
+
+
+window.scrollTo({
+
+
+top:
+
+buttonTop
+
+-
+
+window.innerHeight
+
++
+
+150,
+
+
+behavior:"smooth"
+
+
+})
+
+
+}
+
+
+
+},800)
+
 
 
 }
@@ -163,6 +299,7 @@ method:"POST"
 
 
 
+
 const data = await res.json()
 
 
@@ -193,6 +330,8 @@ size:data.size || ""
 
 
 
+
+
 setDownloadUrl(
 
 `${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(data.filename)}`
@@ -217,8 +356,6 @@ throw new Error(
 
 
 
-
-
 }
 
 catch(err){
@@ -226,7 +363,7 @@ catch(err){
 
 setError(
 
-err.message
+err.message || "Split failed."
 
 )
 
@@ -249,7 +386,6 @@ return (
 
 
 <div className="page">
-
 
 
 
@@ -280,21 +416,7 @@ description="Extract selected pages from your PDF quickly and easily."
 <UploadBox
 
 
-onUpload={(file)=>{
-
-
-setFile(file)
-
-
-setUploaded(false)
-
-setSelectedPages([])
-
-setResultInfo({})
-
-setDownloadUrl("")
-
-}}
+onUpload={handleFile}
 
 
 />
@@ -310,6 +432,9 @@ setDownloadUrl("")
 <button
 
 
+ref={uploadButtonRef}
+
+
 className="secondary-btn"
 
 
@@ -321,9 +446,23 @@ disabled={loading}
 
 >
 
-Upload PDF
+{
+
+loading
+
+?
+
+"Uploading..."
+
+:
+
+"Upload PDF"
+
+}
+
 
 </button>
+
 
 
 
@@ -415,7 +554,11 @@ pages.length>0 &&
 
 
 
-<div className="select-area">
+<div
+
+className="select-area"
+
+>
 
 
 
@@ -424,6 +567,7 @@ pages.length>0 &&
 Select pages to split
 
 </h3>
+
 
 
 
@@ -444,7 +588,6 @@ selectedPages.length
 page(s)
 
 </div>
-
 
 
 
@@ -495,6 +638,9 @@ Clear Selection
 
 
 <button
+
+
+ref={splitButtonRef}
 
 
 className="primary-btn"

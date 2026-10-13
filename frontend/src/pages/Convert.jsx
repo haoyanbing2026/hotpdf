@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import ToolHeader from "../components/ToolHeader"
 
@@ -6,9 +6,9 @@ import UploadBox from "../components/UploadBox"
 
 import ResultCard from "../components/ResultCard"
 
-import useUploadPDF from "../hooks/useUploadPDF"
-
 import createPDFResult from "../utils/pdfResult"
+
+import useUploadPDF from "../hooks/useUploadPDF"
 
 
 
@@ -18,20 +18,13 @@ function Convert(){
 
 
 
-const [downloadUrl,setDownloadUrl] = useState("")
-
-
-const [resultInfo,setResultInfo] = useState({})
-
-
+const actionRef = useRef(null)
 
 
 
 
 
 const {
-
-file,
 
 setFile,
 
@@ -43,9 +36,70 @@ loading,
 
 progress,
 
-error
+error:uploadError
 
 }=useUploadPDF()
+
+
+
+
+
+
+const [resultInfo,setResultInfo] = useState({})
+
+
+const [downloadUrl,setDownloadUrl] = useState("")
+
+
+const [converting,setConverting] = useState(false)
+
+
+const [error,setError] = useState("")
+
+
+
+
+
+
+
+
+
+function handleFile(file){
+
+
+
+setFile(file)
+
+
+setResultInfo({})
+
+setDownloadUrl("")
+
+setError("")
+
+
+
+
+
+setTimeout(()=>{
+
+
+actionRef.current?.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+})
+
+
+},300)
+
+
+
+}
+
+
 
 
 
@@ -57,15 +111,36 @@ async function convertWord(){
 
 
 
+setError("")
+
+
+setResultInfo({})
+
+
 setDownloadUrl("")
 
 
 
-if(!filename){
+
+
+const data = await uploadPDF()
+
+
+
+if(!data?.filename){
 
 return
 
 }
+
+
+
+
+
+
+
+setConverting(true)
+
 
 
 
@@ -78,7 +153,7 @@ try{
 
 const res = await fetch(
 
-`${import.meta.env.VITE_API_URL}/convert_word?filename=${encodeURIComponent(filename)}`,
+`${import.meta.env.VITE_API_URL}/convert_word?filename=${encodeURIComponent(data.filename)}`,
 
 {
 
@@ -94,7 +169,7 @@ method:"POST"
 
 
 
-const data = await res.json()
+const result = await res.json()
 
 
 
@@ -102,9 +177,7 @@ const data = await res.json()
 
 
 
-if(data.filename){
-
-
+if(result.filename){
 
 
 
@@ -112,9 +185,9 @@ setResultInfo(
 
 createPDFResult({
 
-filename:data.filename,
+filename:result.filename,
 
-size:data.size || ""
+size:result.size || ""
 
 })
 
@@ -128,26 +201,48 @@ size:data.size || ""
 
 setDownloadUrl(
 
-`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(data.filename)}`
+`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(result.filename)}`
 
 )
 
 
 
+}
+
+else{
+
+
+throw new Error(
+
+"Conversion failed."
+
+)
 
 
 }
 
 
 
+
+
 }
-
-
 
 catch(err){
 
 
-console.log(err)
+setError(
+
+err.message || "Conversion failed."
+
+)
+
+
+}
+
+finally{
+
+
+setConverting(false)
 
 
 }
@@ -194,47 +289,15 @@ description="Turn PDF documents into editable Word files."
 
 
 
+
 <UploadBox
 
 
-
-onUpload={(file)=>{
-
-
-setFile(file)
-
-
-}}
+onUpload={handleFile}
 
 
 />
 
-
-
-
-
-
-
-
-<button
-
-
-className="secondary-btn"
-
-
-onClick={uploadPDF}
-
-
-disabled={loading}
-
-
->
-
-
-Upload PDF
-
-
-</button>
 
 
 
@@ -289,6 +352,10 @@ Uploading {progress}%
 
 
 
+
+<div ref={actionRef}>
+
+
 <button
 
 
@@ -298,18 +365,43 @@ className="primary-btn"
 onClick={convertWord}
 
 
-disabled={loading || !filename}
+disabled={loading || converting}
 
 
 >
 
 
 
-Convert to Word
+{
+
+
+loading
+
+?
+
+"Uploading..."
+
+:
+
+converting
+
+?
+
+"Converting..."
+
+:
+
+"Convert to Word"
+
+
+}
 
 
 
 </button>
+
+
+</div>
 
 
 
@@ -321,20 +413,20 @@ Convert to Word
 
 {
 
-error &&
-
+(uploadError || error) &&
 
 
 <div className="error-message">
 
 
-⚠️ {error}
+⚠️ {uploadError || error}
 
 
 </div>
 
 
 }
+
 
 
 
