@@ -4,6 +4,8 @@ import ToolHeader from "../components/ToolHeader"
 
 import UploadBox from "../components/UploadBox"
 
+import PDFPreview from "../components/PDFPreview"
+
 import ResultCard from "../components/ResultCard"
 
 import createPDFResult from "../utils/pdfResult"
@@ -26,8 +28,6 @@ const actionRef = useRef(null)
 
 const {
 
-filename,
-
 setFile,
 
 uploadPDF,
@@ -45,14 +45,14 @@ error:uploadError
 
 
 
-const [resultInfo,setResultInfo] = useState({})
 
+const [previewFile,setPreviewFile] = useState(null)
+
+const [resultInfo,setResultInfo] = useState({})
 
 const [downloadUrl,setDownloadUrl] = useState("")
 
-
 const [compressing,setCompressing] = useState(false)
-
 
 const [error,setError] = useState("")
 
@@ -71,12 +71,25 @@ function handleFile(file){
 setFile(file)
 
 
+setPreviewFile(file)
+
+
 setResultInfo({})
+
 
 setDownloadUrl("")
 
+
 setError("")
 
+
+
+
+
+/*
+ 等待 PDFPreview 渲染完成
+ 然后定位到 Compress 按钮
+*/
 
 
 setTimeout(()=>{
@@ -91,7 +104,7 @@ block:"center"
 })
 
 
-},300)
+},1000)
 
 
 
@@ -138,6 +151,7 @@ return
 
 
 setCompressing(true)
+
 
 
 
@@ -219,7 +233,12 @@ setDownloadUrl(
 else{
 
 
-throw new Error("Compression failed.")
+throw new Error(
+
+"Compression failed."
+
+)
+
 
 }
 
@@ -261,7 +280,6 @@ setCompressing(false)
 
 return (
 
-
 <div className="page">
 
 
@@ -271,12 +289,9 @@ return (
 
 <ToolHeader
 
-
 icon="📦"
 
-
 title="Compress PDF"
-
 
 description="Reduce PDF size while keeping good quality."
 
@@ -292,11 +307,54 @@ description="Reduce PDF size while keeping good quality."
 
 <UploadBox
 
-
 onUpload={handleFile}
 
+/>
+
+
+
+
+
+
+
+
+
+{
+
+previewFile &&
+
+
+<div
+
+className="compress-preview-area"
+
+>
+
+
+<h3>
+
+PDF Preview
+
+</h3>
+
+
+
+<PDFPreview
+
+file={previewFile}
+
+selectedPages={[]}
+
+setSelectedPages={()=>{}}
 
 />
+
+
+
+</div>
+
+
+}
 
 
 
@@ -358,21 +416,17 @@ Uploading {progress}%
 
 <button
 
-
 className="primary-btn"
-
 
 onClick={compressPDF}
 
-
 disabled={loading || compressing}
-
 
 >
 
 
-{
 
+{
 
 loading
 
@@ -391,6 +445,7 @@ compressing
 :
 
 "Compress PDF"
+
 
 
 }
@@ -442,22 +497,15 @@ downloadUrl &&
 
 <ResultCard
 
-
 title="🎉 Compression completed"
-
 
 message="Your PDF has been compressed successfully."
 
-
 info={resultInfo}
-
 
 downloadUrl={downloadUrl}
 
-
 downloadText="Download Compressed PDF"
-
-
 
 />
 
@@ -471,13 +519,9 @@ downloadText="Download Compressed PDF"
 
 
 
-
-
 </div>
 
-
 )
-
 
 
 }

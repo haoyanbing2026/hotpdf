@@ -2,235 +2,274 @@ import { useEffect, useState } from "react"
 
 import * as pdfjsLib from "pdfjs-dist"
 
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url"
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+
+
 
 
 
 function PDFPreview({
 
-file,
+    file,
 
-selectedPages,
+    selectedPages,
 
-setSelectedPages
+    setSelectedPages
 
-}){
+}) {
 
 
-const [pages,setPages]=useState([])
+    const [pages,setPages] = useState([])
 
+    const [loading,setLoading] = useState(false)
 
-const [loading,setLoading]=useState(false)
+    const [error,setError] = useState("")
 
 
 
 
 
+    useEffect(()=>{
 
-useEffect(()=>{
 
+        if(!file){
 
-if(!file){
+            setPages([])
 
-setPages([])
+            return
 
-return
+        }
 
-}
 
+        loadPDF()
 
 
-async function loadPDF(){
+    },[file])
 
 
-setLoading(true)
 
 
 
-try{
 
 
-const buffer = await file.arrayBuffer()
+    async function loadPDF(){
 
 
+        try {
 
-const pdf = await pdfjsLib.getDocument({
 
-data:buffer
+            setLoading(true)
 
-}).promise
+            setError("")
 
+            setPages([])
 
 
 
+            const buffer = await file.arrayBuffer()
 
 
-const list=[]
 
+            const pdf = await pdfjsLib.getDocument({
 
+                data:buffer
 
+            }).promise
 
 
-for(
 
-let i=1;
 
-i<=pdf.numPages;
 
-i++
+            const list = []
 
-){
 
 
+            /*
+              Avoid mobile memory problems.
+              Large PDFs only preview first 30 pages.
+            */
 
-const page = await pdf.getPage(i)
+            const maxPages = Math.min(
+                pdf.numPages,
+                30
+            )
 
 
 
-const viewport = page.getViewport({
 
-scale:0.4
+            for(
+                let i = 1;
+                i <= maxPages;
+                i++
+            ){
 
-})
 
+                const page = await pdf.getPage(i)
 
 
 
+                const scale =
+                    window.innerWidth < 600
+                    ? 0.8
+                    : 0.6
 
-const canvas=document.createElement("canvas")
 
 
-const context=canvas.getContext("2d")
 
+                const viewport =
+                    page.getViewport({
 
+                        scale
 
-canvas.width=viewport.width
+                    })
 
 
-canvas.height=viewport.height
 
 
 
+                const canvas =
+                    document.createElement(
+                        "canvas"
+                    )
 
 
-await page.render({
 
-canvasContext:context,
+                const context =
+                    canvas.getContext(
+                        "2d"
+                    )
 
-viewport
 
-}).promise
 
 
 
+                canvas.width =
+                    viewport.width
 
 
-list.push({
 
-page:i,
+                canvas.height =
+                    viewport.height
 
-image:canvas.toDataURL()
 
-})
 
 
 
-}
+                await page.render({
 
+                    canvasContext:
+                    context,
 
+                    viewport
 
+                }).promise
 
-setPages(list)
 
 
 
-}
 
-catch(err){
 
+                list.push({
 
-console.log(
+                    page:i,
 
-"PDF preview error",
+                    image:
+                    canvas.toDataURL(
+                        "image/jpeg",
+                        0.85
+                    )
 
-err
+                })
 
-)
 
 
-}
 
-finally{
 
+                canvas.width = 0
 
-setLoading(false)
+                canvas.height = 0
 
 
-}
+            }
 
 
 
-}
+            setPages(list)
 
 
 
-loadPDF()
+        }
+        catch(err){
 
 
+            console.error(
+                "PDF preview error",
+                err
+            )
 
-},[file])
 
+            setError(
+                "Unable to preview PDF."
+            )
 
 
+        }
+        finally{
 
 
+            setLoading(false)
 
 
+        }
 
 
-function togglePage(page){
+    }
 
 
 
-if(selectedPages.includes(page)){
 
 
 
-setSelectedPages(
 
-selectedPages.filter(
 
-p=>p!==page
 
-)
+    function togglePage(page){
 
-)
 
+        if(
+            selectedPages.includes(page)
+        ){
 
 
-}
+            setSelectedPages(
 
-else{
+                selectedPages.filter(
+                    p=>p!==page
+                )
 
+            )
 
-setSelectedPages([
 
-...selectedPages,
+        }
+        else{
 
-page
 
-])
+            setSelectedPages([
 
+                ...selectedPages,
 
-}
+                page
 
+            ])
 
 
-}
+        }
 
 
+    }
 
 
 
@@ -238,96 +277,113 @@ page
 
 
 
-return (
 
 
-<div className="preview-container">
+    return (
 
+        <div className="preview-container">
 
-{
 
-loading &&
+            {
+                loading &&
 
+                <div className="loading-box">
 
-<div className="loading-box">
+                    Loading PDF preview...
 
-Loading PDF preview...
+                </div>
+            }
 
-</div>
 
 
-}
 
 
+            {
+                error &&
 
+                <div className="error-message">
 
+                    ⚠️ {error}
 
+                </div>
 
-{
+            }
 
-pages.map(item=>(
 
 
 
-<div
 
-className={
 
-selectedPages.includes(item.page)
 
-?
+            {
+                pages.map(item=>(
 
-"preview-card selected"
 
-:
+                    <div
 
-"preview-card"
+                        key={item.page}
 
-}
 
+                        className={
 
-key={item.page}
+                            selectedPages.includes(
+                                item.page
+                            )
 
+                            ?
 
-onClick={()=>togglePage(item.page)}
+                            "preview-card selected"
 
+                            :
 
->
+                            "preview-card"
 
+                        }
 
-<img
 
-src={item.image}
 
-alt={`page ${item.page}`}
+                        onClick={()=>
+                            togglePage(
+                                item.page
+                            )
+                        }
 
-/>
 
+                    >
 
 
-<p>
 
-Page {item.page}
+                        <img
 
-</p>
+                            src={item.image}
 
+                            alt={
+                                `page ${item.page}`
+                            }
 
-</div>
+                        />
 
 
 
-))
+                        <p>
 
+                            Page {item.page}
 
-}
+                        </p>
 
 
+                    </div>
 
-</div>
 
+                ))
 
-)
+            }
 
+
+
+        </div>
+
+    )
 
 }
 

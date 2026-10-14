@@ -6,6 +6,8 @@ import ToolHeader from "../components/ToolHeader"
 
 import UploadBox from "../components/UploadBox"
 
+import MultiPDFPreview from "../components/MultiPDFPreview"
+
 import ResultCard from "../components/ResultCard"
 
 import createPDFResult from "../utils/pdfResult"
@@ -18,11 +20,14 @@ const API_URL = import.meta.env.VITE_API_URL
 
 
 
+
 function Merge(){
 
 
 
 const actionRef = useRef(null)
+
+
 
 
 
@@ -49,7 +54,6 @@ const [error,setError] = useState("")
 function scrollToAction(){
 
 
-
 setTimeout(()=>{
 
 
@@ -63,7 +67,6 @@ block:"center"
 
 
 },300)
-
 
 
 }
@@ -81,6 +84,7 @@ function handleFiles(selectedFiles){
 
 
 setFiles(selectedFiles)
+
 
 setResultInfo({})
 
@@ -179,9 +183,7 @@ async function mergePDF(){
 
 setError("")
 
-
 setResultInfo({})
-
 
 setDownloadUrl("")
 
@@ -209,12 +211,9 @@ return
 
 
 
-
 setLoading(true)
 
-
 setProgress(0)
-
 
 
 
@@ -227,6 +226,8 @@ try{
 
 
 const formData=new FormData()
+
+
 
 
 
@@ -243,7 +244,6 @@ file
 
 
 })
-
 
 
 
@@ -293,9 +293,7 @@ event.loaded*100/event.total
 
 
 
-
 const data=res.data
-
 
 
 
@@ -319,9 +317,6 @@ size:data.size || ""
 })
 
 )
-
-
-
 
 
 
@@ -385,7 +380,6 @@ setLoading(false)
 
 return (
 
-
 <div className="page">
 
 
@@ -395,12 +389,9 @@ return (
 
 <ToolHeader
 
-
 icon="📎"
 
-
 title="Merge PDF"
-
 
 description="Combine multiple PDF files into one document."
 
@@ -416,12 +407,9 @@ description="Combine multiple PDF files into one document."
 
 <UploadBox
 
-
 multiple={true}
 
-
 onUpload={handleFiles}
-
 
 />
 
@@ -436,6 +424,11 @@ onUpload={handleFiles}
 {
 
 files.length>0 &&
+
+
+<>
+
+
 
 
 
@@ -511,6 +504,8 @@ disabled={index===0}
 
 
 
+
+
 <button
 
 className="small-btn"
@@ -541,8 +536,47 @@ disabled={index===files.length-1}
 
 
 
+
+
+
 </div>
 
+
+
+
+
+
+
+
+
+<div className="merge-preview-area">
+
+
+<h3>
+
+PDF Preview
+
+</h3>
+
+
+
+<MultiPDFPreview
+
+files={files}
+
+/>
+
+
+
+</div>
+
+
+
+
+
+
+
+</>
 
 }
 
@@ -601,27 +635,17 @@ Uploading {progress}%
 
 
 
-<div ref={actionRef}>
-
-
 <button
-
 
 className="primary-btn"
 
-
 onClick={mergePDF}
-
 
 disabled={loading}
 
-
 >
 
-
-
 {
-
 
 loading
 
@@ -633,15 +657,11 @@ loading
 
 "Merge PDF"
 
-
 }
 
 
 
 </button>
-
-
-</div>
 
 
 
@@ -658,9 +678,7 @@ error &&
 
 <div className="error-message">
 
-
 ⚠️ {error}
-
 
 </div>
 
@@ -680,28 +698,19 @@ error &&
 downloadUrl &&
 
 
-
 <ResultCard
-
 
 title="🎉 Merge completed"
 
-
 message="Your PDF files have been merged successfully."
-
 
 info={resultInfo}
 
-
 downloadUrl={downloadUrl}
-
 
 downloadText="Download Merged PDF"
 
-
-
 />
-
 
 
 }
@@ -712,13 +721,9 @@ downloadText="Download Merged PDF"
 
 
 
-
-
 </div>
 
-
 )
-
 
 
 }

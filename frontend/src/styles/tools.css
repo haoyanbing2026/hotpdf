@@ -445,3 +445,549 @@
 
 
 }
+
+/* =========================================
+   Multi PDF Preview
+   Merge PDF
+========================================= */
+
+
+.multi-preview-container {
+
+    width:100%;
+
+    margin:30px 0;
+
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+
+    gap:28px;
+
+
+}
+
+
+
+
+
+/* Preview Card */
+
+.multi-preview-card {
+
+
+    width:100%;
+
+
+    padding:20px;
+
+
+    box-sizing:border-box;
+
+
+    background:#ffffff;
+
+
+    border-radius:18px;
+
+
+
+    box-shadow:
+
+    0 10px 30px rgba(15,23,42,0.08);
+
+
+
+    transition:
+
+    transform .2s ease,
+
+    box-shadow .2s ease;
+
+
+}
+
+
+
+
+
+.multi-preview-card:hover {
+
+
+    transform:translateY(-3px);
+
+
+    box-shadow:
+
+    0 15px 35px rgba(15,23,42,0.12);
+
+
+}
+
+
+
+
+
+
+
+
+/* Image Area */
+
+.multi-preview-image {
+
+
+    width:100%;
+
+
+    height:260px;
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    overflow:hidden;
+
+
+
+    background:#f8fafc;
+
+
+    border-radius:12px;
+
+
+}
+
+
+
+
+
+.multi-preview-image img {
+
+
+    max-width:100%;
+
+
+    max-height:240px;
+
+
+    object-fit:contain;
+
+
+
+    border-radius:6px;
+
+
+}
+
+
+
+
+
+
+
+
+/* File Information */
+
+.multi-preview-info {
+
+
+    margin-top:16px;
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+.preview-name {
+
+
+    margin:0;
+
+
+    font-size:14px;
+
+
+    font-weight:600;
+
+
+    line-height:1.5;
+
+
+    color:#334155;
+
+
+
+    word-break:break-word;
+
+
+}
+
+
+
+
+
+
+
+.preview-pages {
+
+
+    margin:8px 0 0;
+
+
+    font-size:13px;
+
+
+    color:#64748b;
+
+
+}
+
+
+
+
+
+
+
+
+/* Loading */
+
+.loading-box {
+
+
+    width:100%;
+
+
+    padding:20px;
+
+
+    box-sizing:border-box;
+
+
+    text-align:center;
+
+
+
+    color:#64748b;
+
+
+    background:#f8fafc;
+
+
+    border-radius:12px;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================================
+   Merge File Order
+========================================= */
+
+
+.merge-file-list {
+
+
+    width:100%;
+
+
+    max-width:700px;
+
+
+    margin:35px auto;
+
+
+}
+
+
+
+.merge-file-list h3 {
+
+
+    margin-bottom:20px;
+
+
+    text-align:center;
+
+
+    font-size:20px;
+
+
+    color:#0f172a;
+
+
+}
+
+
+
+
+
+.merge-file-item {
+
+
+    width:100%;
+
+
+    padding:14px 18px;
+
+
+    margin-bottom:12px;
+
+
+    box-sizing:border-box;
+
+
+
+    display:flex;
+
+
+    justify-content:space-between;
+
+
+    align-items:center;
+
+
+
+    background:#f8fafc;
+
+
+    border-radius:12px;
+
+
+}
+
+
+
+.merge-file-item span {
+
+
+    max-width:75%;
+
+
+    overflow:hidden;
+
+
+    text-overflow:ellipsis;
+
+
+    white-space:nowrap;
+
+
+
+    font-size:14px;
+
+
+    color:#475569;
+
+
+}
+
+
+
+
+
+
+
+.small-btn {
+
+
+    width:34px;
+
+
+    height:34px;
+
+
+
+    margin-left:8px;
+
+
+    border:none;
+
+
+    border-radius:10px;
+
+
+
+    background:#e2e8f0;
+
+
+    color:#334155;
+
+
+
+    cursor:pointer;
+
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+
+.small-btn:hover:not(:disabled) {
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+}
+
+
+
+.small-btn:disabled {
+
+
+    opacity:.4;
+
+
+    cursor:not-allowed;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================================
+   Mobile
+========================================= */
+
+
+@media(max-width:600px){
+
+
+
+.multi-preview-container {
+
+
+    grid-template-columns:1fr;
+
+
+    gap:20px;
+
+
+}
+
+
+
+
+
+.multi-preview-card {
+
+
+    padding:15px;
+
+
+}
+
+
+
+
+
+.multi-preview-image {
+
+
+    height:220px;
+
+
+}
+
+
+
+
+
+.multi-preview-image img {
+
+
+    max-height:200px;
+
+
+}
+
+
+
+
+
+.preview-name {
+
+
+    font-size:13px;
+
+
+}
+
+
+
+
+
+.merge-file-item {
+
+
+    padding:12px;
+
+
+}
+
+
+
+
+
+.merge-file-item span {
+
+
+    max-width:65%;
+
+
+    font-size:13px;
+
+
+}
+
+
+
+
+
+.small-btn {
+
+
+    width:30px;
+
+
+    height:30px;
+
+
+}
+
+
+}

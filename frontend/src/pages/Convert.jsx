@@ -4,6 +4,8 @@ import ToolHeader from "../components/ToolHeader"
 
 import UploadBox from "../components/UploadBox"
 
+import PDFPreview from "../components/PDFPreview"
+
 import ResultCard from "../components/ResultCard"
 
 import createPDFResult from "../utils/pdfResult"
@@ -28,8 +30,6 @@ const {
 
 setFile,
 
-filename,
-
 uploadPDF,
 
 loading,
@@ -45,14 +45,14 @@ error:uploadError
 
 
 
-const [resultInfo,setResultInfo] = useState({})
 
+const [previewFile,setPreviewFile] = useState(null)
+
+const [resultInfo,setResultInfo] = useState({})
 
 const [downloadUrl,setDownloadUrl] = useState("")
 
-
 const [converting,setConverting] = useState(false)
-
 
 const [error,setError] = useState("")
 
@@ -71,14 +71,25 @@ function handleFile(file){
 setFile(file)
 
 
+setPreviewFile(file)
+
+
 setResultInfo({})
 
+
 setDownloadUrl("")
+
 
 setError("")
 
 
 
+
+
+/*
+ 等待 PDFPreview 渲染完成
+ 然后滚动到 Convert 按钮
+*/
 
 
 setTimeout(()=>{
@@ -93,7 +104,7 @@ block:"center"
 })
 
 
-},300)
+},1000)
 
 
 
@@ -261,7 +272,6 @@ setConverting(false)
 
 return (
 
-
 <div className="page">
 
 
@@ -271,12 +281,9 @@ return (
 
 <ToolHeader
 
-
 icon="📝"
 
-
 title="Convert PDF to Word"
-
 
 description="Turn PDF documents into editable Word files."
 
@@ -292,11 +299,54 @@ description="Turn PDF documents into editable Word files."
 
 <UploadBox
 
-
 onUpload={handleFile}
 
+/>
+
+
+
+
+
+
+
+
+
+{
+
+previewFile &&
+
+
+<div
+
+className="convert-preview-area"
+
+>
+
+
+<h3>
+
+PDF Preview
+
+</h3>
+
+
+
+<PDFPreview
+
+file={previewFile}
+
+selectedPages={[]}
+
+setSelectedPages={()=>{}}
 
 />
+
+
+
+</div>
+
+
+}
 
 
 
@@ -358,22 +408,17 @@ Uploading {progress}%
 
 <button
 
-
 className="primary-btn"
-
 
 onClick={convertWord}
 
-
 disabled={loading || converting}
-
 
 >
 
 
 
 {
-
 
 loading
 
@@ -392,6 +437,7 @@ converting
 :
 
 "Convert to Word"
+
 
 
 }
@@ -443,22 +489,15 @@ downloadUrl &&
 
 <ResultCard
 
-
 title="🎉 Conversion completed"
-
 
 message="Your PDF has been converted successfully."
 
-
 info={resultInfo}
-
 
 downloadUrl={downloadUrl}
 
-
 downloadText="Download Word File"
-
-
 
 />
 
@@ -472,13 +511,9 @@ downloadText="Download Word File"
 
 
 
-
-
 </div>
 
-
 )
-
 
 
 }
