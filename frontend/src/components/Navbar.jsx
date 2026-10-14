@@ -98,19 +98,19 @@ PDF Tools ▾
 
 
 
-<Link to="/convert">
 
-📝 Convert PDF
+<Link to="/compress">
+
+📦 Compress PDF
 
 </Link>
 
 
 
 
+<Link to="/convert">
 
-<Link to="/compress">
-
-📦 Compress PDF
+📝 Convert PDF
 
 </Link>
 

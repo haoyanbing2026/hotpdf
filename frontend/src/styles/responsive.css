@@ -1,211 +1,101 @@
-/* =========================
-   Responsive Design
-========================= */
+/* =========================================
+   HotPDF Responsive Design
+========================================= */
 
 
 /* =========================
    Tablet
 ========================= */
 
-
-@media(max-width:1100px){
-
-
-    .hero {
+@media (max-width: 900px) {
 
 
-        gap:40px;
+  .hero {
 
-        padding:0 20px;
+    flex-direction: column;
 
+    padding: 45px 25px 55px;
 
-    }
+    gap: 40px;
 
+    text-align: center;
 
-
-
-    .hero-text h1 {
-
-
-        font-size:48px;
-
-
-    }
+  }
 
 
 
+  .hero-text {
 
+    max-width: 100%;
 
-    .pdf-demo {
-
-
-        width:320px;
-
-
-    }
+  }
 
 
 
+  .hero-text h1 {
+
+    font-size: 42px;
+
+  }
 
 
-    .tools {
+
+  .hero-text .hero-main {
+
+    font-size: 21px;
+
+  }
 
 
-        grid-template-columns:repeat(2,1fr);
+
+  .hero-illustration {
+
+    width:100%;
+
+  }
 
 
-    }
+
+  .pdf-illustration {
+
+    width:320px;
+
+    min-height:320px;
+
+    margin:auto;
+
+  }
+
+
+
+  .tools {
+
+    grid-template-columns:
+
+    repeat(2, minmax(0,1fr));
+
+  }
+
+
+
+  .workflow-section .steps,
+
+  .workflow-section .how-it-works > div,
+
+  .workflow-section .how-section > div {
+
+    grid-template-columns:
+
+    repeat(3,minmax(0,1fr));
+
+    gap:20px;
+
+  }
+
 
 
 }
 
-
-
-
-
-
-/* =========================
-   Tablet / Small Laptop
-========================= */
-
-
-@media(max-width:900px){
-
-
-
-    .navbar {
-
-
-        padding:0 25px;
-
-
-    }
-
-
-
-
-
-    .nav-links {
-
-
-        gap:18px;
-
-
-    }
-
-
-
-
-
-
-    .hero {
-
-
-        flex-direction:column;
-
-
-        text-align:center;
-
-
-    }
-
-
-
-
-
-    .hero-text {
-
-
-        text-align:center;
-
-
-    }
-
-
-
-
-
-    .hero-text h1 {
-
-
-        font-size:42px;
-
-
-    }
-
-
-
-
-
-    .hero-text p {
-
-
-        font-size:18px;
-
-
-    }
-
-
-
-
-
-    .pdf-demo {
-
-
-        width:90%;
-
-
-        max-width:350px;
-
-
-    }
-
-
-
-
-
-
-
-    .scenario-box {
-
-
-        grid-template-columns:repeat(2,1fr);
-
-
-    }
-
-
-
-
-
-    .steps {
-
-
-        grid-template-columns:repeat(3,1fr);
-
-
-        gap:20px;
-
-
-    }
-
-
-
-
-
-    .footer-links {
-
-
-        gap:50px;
-
-
-    }
-
-
-
-
-
-}
 
 
 
@@ -218,74 +108,85 @@
    Mobile
 ========================= */
 
+@media (max-width:600px) {
 
-@media(max-width:700px){
 
 
+  body {
 
-    body {
+    overflow-x:hidden;
 
+  }
 
-        overflow-x:hidden;
 
 
-    }
 
 
 
 
+  /* Hero */
 
 
+  .hero {
 
-    /* Navbar */
+    padding:35px 20px 45px;
 
+    gap:30px;
 
-    .navbar {
+  }
 
 
-        height:auto;
 
+  .hero-text h1 {
 
-        padding:20px;
+    font-size:32px;
 
+    line-height:1.25;
 
-        flex-direction:column;
+  }
 
 
-        gap:20px;
 
+  .hero-text .hero-main {
 
-    }
+    font-size:18px;
 
+  }
 
 
 
+  .hero-text p {
 
-    .nav-links {
+    font-size:15px;
 
+    line-height:1.6;
 
-        flex-wrap:wrap;
+  }
 
 
-        justify-content:center;
 
+  .primary-btn {
 
-        gap:15px;
+    padding:12px 28px;
 
+    font-size:15px;
 
-    }
+  }
 
 
 
+  .trust {
 
+    margin-top:22px;
 
-    .nav-upload {
+    margin-left:10px;
 
+    font-size:13px;
 
-        padding:10px 18px;
+    text-align:left;
 
+  }
 
-    }
 
 
 
@@ -293,488 +194,335 @@
 
 
 
-    /* Home */
 
+  /* PDF Illustration */
 
-    .home {
 
+  .pdf-illustration {
 
-        padding:40px 20px;
+    width:245px;
 
+    min-height:280px;
 
-    }
+    padding:20px;
 
+    border-radius:24px;
 
+  }
 
 
 
-    .hero-text h1 {
+  .pdf-page {
 
+    width:70px;
 
-        font-size:36px;
+    min-height:95px;
 
+    padding:10px;
 
-    }
+  }
 
 
 
+  .pdf-icon {
 
+    font-size:28px;
 
-    .hero-text p {
+  }
 
 
-        font-size:16px;
 
+  .pdf-title {
 
-    }
+    font-size:20px;
 
+    margin-top:15px;
 
+  }
 
 
 
-    .home h2 {
+  .pdf-subtitle {
 
+    font-size:12px;
 
-        font-size:28px;
+  }
 
 
-    }
 
+  .pdf-tools {
 
+    gap:6px;
 
+    margin-top:15px;
 
+  }
 
 
 
-    /* Tool Cards */
+  .pdf-tools span {
 
+    padding:5px 9px;
 
-    .tools {
+    font-size:10px;
 
+  }
 
-        grid-template-columns:1fr;
 
 
-    }
+  .pdf-status {
 
+    font-size:12px;
 
+    margin-top:15px;
 
+  }
 
 
-    .tool-card {
 
 
-        text-align:center;
 
 
-    }
 
 
 
+  /* Tools */
 
 
-    .tool-icon {
+  .tools-section {
 
+    padding:45px 20px;
 
-        margin:auto;
+  }
 
 
-    }
 
+  .tools-section h2 {
 
+    font-size:28px;
 
+  }
 
 
 
+  .tools {
 
+    grid-template-columns:1fr;
 
-    /* Scenario */
+    gap:18px;
 
+  }
 
-    .scenario-box {
 
 
-        grid-template-columns:1fr;
 
 
-    }
 
 
 
 
+  /* Audience */
 
 
+  .audience-section {
 
-    /* Steps */
+    padding:45px 20px;
 
+  }
 
-    .steps {
 
 
-        grid-template-columns:1fr;
+  .audience-section h2 {
 
+    font-size:28px;
 
-        gap:35px;
+  }
 
 
-    }
 
+  .audience-cards {
 
+    gap:20px;
 
+  }
 
 
 
+  .audience-card {
 
+    width:100%;
 
-    /* Upload */
+    padding:25px;
 
+  }
 
-    .upload-box {
 
 
-        width:100%;
+  .student-icon,
 
+  .work-icon {
 
-        padding:25px;
+    font-size:38px;
 
+  }
 
-    }
 
 
+  .student-files,
 
+  .work-files {
 
+    font-size:18px;
 
-    .upload-box h3 {
+  }
 
 
-        font-size:22px;
 
+  .audience-card p {
 
-    }
+    font-size:14px;
 
+  }
 
 
 
 
-    .upload-box p {
 
 
-        font-size:16px;
 
 
-    }
 
+  /* Workflow */
 
 
+  .workflow-section {
 
+    padding:45px 20px;
 
+  }
 
 
 
-    /* Tool Pages */
+  .workflow-section h2 {
 
+    font-size:28px;
 
-    .page {
+  }
 
 
-        padding:30px 15px;
 
+  /* mobile vertical flow */
 
-    }
+  .workflow-section .steps,
 
+  .workflow-section .how-it-works > div,
 
+  .workflow-section .how-section > div {
 
+    display:flex;
 
+    flex-direction:column;
 
-    .tool-title {
+    align-items:center;
 
+    gap:25px;
 
-        font-size:32px;
+  }
 
 
-    }
 
+  .workflow-section .step {
 
+    width:100%;
 
+    max-width:320px;
 
+  }
 
-    .tool-subtitle {
 
 
-        font-size:16px;
+  .workflow-section .step-number {
 
+    width:42px;
 
-    }
+    height:42px;
 
+    font-size:16px;
 
+  }
 
 
 
 
 
 
-    /* Preview */
 
 
-    .preview-container {
 
+  /* Security */
 
-        gap:15px;
 
+  .security {
 
-    }
+    padding:40px 20px;
 
+  }
 
 
 
+  .security-illustration {
 
-    .preview-card {
+    width:140px;
 
+    min-height:120px;
 
-        width:150px;
+    margin-bottom:15px;
 
+  }
 
-    }
 
 
+  .security-lock {
 
+    font-size:40px;
 
+  }
 
-    .preview-card img {
 
 
-        width:120px;
+  .security-file {
 
+    margin-left:40px;
 
-    }
+    font-size:30px;
 
+  }
 
 
 
+  .security h2 {
 
+    font-size:26px;
 
+  }
 
 
-    /* Select */
 
+  .security-items {
 
-    .select-info {
+    flex-direction:column;
 
+    gap:12px;
 
-        width:100%;
+  }
 
 
-    }
 
+  .security-items span {
 
+    font-size:13px;
 
-
-
-    .select-buttons {
-
-
-        flex-direction:column;
-
-
-        align-items:center;
-
-
-    }
-
-
-
-
-
-
-
-
-    /* Result */
-
-
-    .result-card {
-
-
-        width:100%;
-
-
-        padding:25px;
-
-
-    }
-
-
-
-
-
-    .result-header {
-
-
-        flex-direction:column;
-
-
-    }
-
-
-
-
-
-    .info-row {
-
-
-        flex-direction:column;
-
-
-        align-items:flex-start;
-
-
-    }
-
-
-
-
-
-    .info-row strong {
-
-
-        max-width:100%;
-
-
-        text-align:left;
-
-
-    }
-
-
-
-
-
-
-
-
-    /* Merge */
-
-
-    .file-manager {
-
-
-        width:100%;
-
-
-        padding:20px;
-
-
-    }
-
-
-
-
-
-    .merge-item {
-
-
-        flex-wrap:wrap;
-
-
-    }
-
-
-
-
-
-    .merge-actions {
-
-
-        width:100%;
-
-
-        justify-content:center;
-
-
-    }
-
-
-
-
-
-    .file-name {
-
-
-        width:100%;
-
-
-        overflow:hidden;
-
-
-        text-overflow:ellipsis;
-
-
-        white-space:nowrap;
-
-
-    }
-
-
-
-
-
-    .merge-file-list {
-
-
-        width:100%;
-
-
-    }
-
-
-
-
-
-    .merge-file-item {
-
-
-        flex-direction:column;
-
-
-        align-items:flex-start;
-
-
-        gap:10px;
-
-
-    }
-
-
-
-
-
-
-
-
-    /* Footer */
-
-
-    .footer {
-
-
-        padding:40px 20px;
-
-
-    }
-
-
-
-
-
-    .footer-links {
-
-
-        flex-direction:column;
-
-
-        gap:30px;
-
-
-    }
+  }
 
 
 

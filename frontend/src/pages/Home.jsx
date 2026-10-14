@@ -4,6 +4,14 @@ import ToolCard from "../components/ToolCard"
 
 import HowItWorks from "../components/HowItWorks"
 
+import PdfIllustration from "../components/PdfIllustration"
+
+import StudentIllustration from "../components/StudentIllustration"
+
+import WorkIllustration from "../components/WorkIllustration"
+
+import SecurityIllustration from "../components/SecurityIllustration"
+
 import "../styles/home.css"
 
 
@@ -23,12 +31,16 @@ return (
 
 
 
+{/* =========================
+    Hero
+========================= */}
+
+
 <section className="hero">
 
 
 
 <div className="hero-text">
-
 
 
 <h1>
@@ -40,17 +52,19 @@ All-in-one PDF Tools
 
 
 
-
-<p>
+<p className="hero-main">
 
 Your smart PDF assistant for study and work.
 
-<br/>
+</p>
+
+
+
+<p>
 
 Merge, split, compress and convert PDF files easily.
 
 </p>
-
 
 
 
@@ -74,98 +88,18 @@ Choose File
 
 
 
-
 <div className="trust">
 
-✓ Fast processing
 
-<br/>
+<div>✓ Fast processing</div>
 
-✓ Secure file handling
+<div>✓ Secure file handling</div>
 
-<br/>
-
-✓ No complicated software
-
-</div>
-
+<div>✓ No complicated software</div>
 
 
 </div>
 
-
-
-
-
-
-
-
-
-<div className="pdf-demo">
-
-
-
-<div className="demo-icon">
-
-📄
-
-</div>
-
-
-
-
-
-<div className="pdf-title">
-
-PDF Assistant
-
-</div>
-
-
-
-
-
-<div className="pdf-info">
-
-Smart tools for your documents
-
-</div>
-
-
-
-
-
-
-
-<div className="demo-tags">
-
-
-<span>
-
-Split
-
-</span>
-
-
-<span>
-
-Merge
-
-</span>
-
-
-<span>
-
-Compress
-
-</span>
-
-
-<span>
-
-Convert
-
-</span>
 
 
 </div>
@@ -176,14 +110,10 @@ Convert
 
 
 
-<div className="convert-demo">
-
-Fast • Simple • Secure
-
-</div>
+<div className="hero-illustration">
 
 
-
+<PdfIllustration />
 
 
 </div>
@@ -202,6 +132,12 @@ Fast • Simple • Secure
 
 
 
+{/* =========================
+    Tools
+========================= */}
+
+
+
 <section className="tools-section">
 
 
@@ -213,10 +149,7 @@ Everything you need
 
 
 
-
-
 <div className="tools">
-
 
 
 <ToolCard
@@ -230,9 +163,6 @@ desc="Extract specific pages from large documents."
 onClick={()=>navigate("/split")}
 
 />
-
-
-
 
 
 
@@ -250,10 +180,6 @@ onClick={()=>navigate("/merge")}
 
 
 
-
-
-
-
 <ToolCard
 
 icon="📦"
@@ -265,10 +191,6 @@ desc="Reduce file size for easier sharing."
 onClick={()=>navigate("/compress")}
 
 />
-
-
-
-
 
 
 
@@ -285,7 +207,6 @@ onClick={()=>navigate("/convert")}
 />
 
 
-
 </div>
 
 
@@ -296,6 +217,12 @@ onClick={()=>navigate("/convert")}
 
 
 
+
+
+
+{/* =========================
+    Audience
+========================= */}
 
 
 
@@ -313,12 +240,15 @@ Built for Students and Professionals
 
 
 
-
 <div className="audience-cards">
 
 
 
 <div className="audience-card">
+
+
+<StudentIllustration />
+
 
 
 <h3>
@@ -331,8 +261,15 @@ Built for Students and Professionals
 
 <p>
 
-HotPDF helps students organize learning materials,
-prepare assignments, and manage research documents.
+✓ Organize learning materials
+
+<br/>
+
+✓ Prepare assignments
+
+<br/>
+
+✓ Manage research documents
 
 </p>
 
@@ -350,6 +287,11 @@ prepare assignments, and manage research documents.
 <div className="audience-card">
 
 
+
+<WorkIllustration />
+
+
+
 <h3>
 
 💼 For Professionals
@@ -360,9 +302,15 @@ prepare assignments, and manage research documents.
 
 <p>
 
-HotPDF makes daily document work faster with
-simple tools for merging, splitting, compressing,
-and converting PDF files.
+✓ Handle daily documents
+
+<br/>
+
+✓ Merge, split and compress files
+
+<br/>
+
+✓ Improve work efficiency
 
 </p>
 
@@ -372,10 +320,7 @@ and converting PDF files.
 
 
 
-
-
 </div>
-
 
 
 
@@ -400,7 +345,13 @@ HotPDF helps you handle files faster and smarter.
 
 
 
-<section>
+{/* =========================
+    Workflow
+========================= */}
+
+
+
+<section className="workflow-section">
 
 
 <HowItWorks />
@@ -416,7 +367,18 @@ HotPDF helps you handle files faster and smarter.
 
 
 
+{/* =========================
+    Security
+========================= */}
+
+
+
 <section className="security">
+
+
+
+<SecurityIllustration />
+
 
 
 <h2>
@@ -427,19 +389,36 @@ Your files are safe
 
 
 
-<p>
+
+
+<div className="security-items">
+
+
+<span>
 
 🔒 Secure processing
 
-&nbsp;&nbsp;
+</span>
+
+
+
+<span>
 
 ⚡ Fast conversion
 
-&nbsp;&nbsp;
+</span>
+
+
+
+<span>
 
 🗑 Temporary file removal
 
-</p>
+</span>
+
+
+
+</div>
 
 
 
@@ -452,7 +431,6 @@ Your files are safe
 
 
 </div>
-
 
 )
 
