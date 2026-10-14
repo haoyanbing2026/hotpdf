@@ -7,8 +7,9 @@ function Footer(){
 
 return (
 
-
 <footer className="footer">
+
+
 
 
 
@@ -26,7 +27,9 @@ return (
 <p>
 
 Your smart PDF assistant
+
 <br />
+
 for students and professionals.
 
 </p>
@@ -40,7 +43,12 @@ for students and professionals.
 
 
 
+
+
 <div className="footer-links">
+
+
+
 
 
 
@@ -55,11 +63,15 @@ Tools
 
 
 
+
+
 <Link to="/split">
 
 Split PDF
 
 </Link>
+
+
 
 
 
@@ -71,11 +83,15 @@ Merge PDF
 
 
 
+
+
 <Link to="/compress">
 
 Compress PDF
 
 </Link>
+
+
 
 
 
@@ -87,7 +103,10 @@ Convert PDF
 
 
 
+
 </div>
+
+
 
 
 
@@ -106,6 +125,18 @@ Company
 
 
 
+
+
+<Link to="/about">
+
+About
+
+</Link>
+
+
+
+
+
 <Link to="/privacy">
 
 Privacy
@@ -114,13 +145,30 @@ Privacy
 
 
 
-</div>
+
+
+<Link to="/terms">
+
+Terms
+
+</Link>
 
 
 
 
 
 </div>
+
+
+
+
+
+
+
+
+</div>
+
+
 
 
 
@@ -132,6 +180,7 @@ Privacy
 
 
 © 2026 HotPDF.
+
 All rights reserved.
 
 

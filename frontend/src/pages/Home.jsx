@@ -4,6 +4,8 @@ import ToolCard from "../components/ToolCard"
 
 import HowItWorks from "../components/HowItWorks"
 
+import FeatureSection from "../components/FeatureSection"
+
 import PdfIllustration from "../components/PdfIllustration"
 
 import StudentIllustration from "../components/StudentIllustration"
@@ -13,6 +15,8 @@ import WorkIllustration from "../components/WorkIllustration"
 import SecurityIllustration from "../components/SecurityIllustration"
 
 import "../styles/home.css"
+
+
 
 
 
@@ -91,11 +95,25 @@ Choose File
 <div className="trust">
 
 
-<div>✓ Fast processing</div>
+<div>
 
-<div>✓ Secure file handling</div>
+✓ Fast processing
 
-<div>✓ No complicated software</div>
+</div>
+
+
+<div>
+
+✓ Secure file handling
+
+</div>
+
+
+<div>
+
+✓ No complicated software
+
+</div>
 
 
 </div>
@@ -211,6 +229,22 @@ onClick={()=>navigate("/convert")}
 
 
 </section>
+
+
+
+
+
+
+
+
+
+{/* =========================
+    PDF Features SEO Section
+========================= */}
+
+
+
+<FeatureSection />
 
 
 

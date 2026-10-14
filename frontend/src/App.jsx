@@ -30,6 +30,12 @@ import Compress from "./pages/Compress"
 
 import Privacy from "./pages/Privacy"
 
+import About from "./pages/About"
+
+import Terms from "./pages/Terms"
+
+
+
 
 
 import "./styles/global.css"
@@ -52,7 +58,7 @@ import "./styles/footer.css"
 
 import "./styles/responsive.css"
 
-
+import "./styles/company.css"
 
 
 
@@ -106,8 +112,8 @@ function App(){
 
 return (
 
-
 <>
+
 
 
 <ScrollToTop />
@@ -119,6 +125,7 @@ return (
 
 
 <Routes>
+
 
 
 <Route
@@ -180,11 +187,33 @@ element={<Privacy />}
 />
 
 
+
+<Route
+
+path="/about"
+
+element={<About />}
+
+/>
+
+
+
+<Route
+
+path="/terms"
+
+element={<Terms />}
+
+/>
+
+
+
 </Routes>
 
 
 
 <Footer />
+
 
 
 </>

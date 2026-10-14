@@ -1,0 +1,178 @@
+/* =========================
+   Company Pages
+   About / Privacy / Terms
+========================= */
+
+
+.about-container {
+
+    width:100%;
+
+    max-width:900px;
+
+    margin:40px auto 0;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:25px;
+
+}
+
+
+
+
+
+.about-card {
+
+
+    background:white;
+
+
+    padding:35px;
+
+
+    border-radius:20px;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(15,23,42,0.06);
+
+
+    text-align:left;
+
+
+}
+
+
+
+
+
+.about-card h2 {
+
+
+    margin-top:0;
+
+
+    margin-bottom:18px;
+
+
+    color:#0f172a;
+
+
+    font-size:26px;
+
+
+}
+
+
+
+
+
+.about-card h3 {
+
+
+    margin-bottom:10px;
+
+
+    color:#2563eb;
+
+
+    font-size:20px;
+
+
+}
+
+
+
+
+
+.about-card p {
+
+
+    color:#475569;
+
+
+    font-size:16px;
+
+
+    line-height:1.8;
+
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+.about-feature {
+
+
+    padding:18px 0;
+
+
+    border-bottom:1px solid #e2e8f0;
+
+
+}
+
+
+
+
+
+.about-feature:last-child {
+
+
+    border-bottom:none;
+
+
+}
+
+
+
+
+
+@media(max-width:768px){
+
+
+    .about-container {
+
+
+        margin-top:25px;
+
+
+        padding:0 5px;
+
+
+    }
+
+
+
+    .about-card {
+
+
+        padding:25px;
+
+
+        border-radius:16px;
+
+
+    }
+
+
+
+    .about-card h2 {
+
+
+        font-size:22px;
+
+
+    }
+
+
+}

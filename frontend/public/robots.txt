@@ -1,0 +1,6 @@
+User-agent: *
+
+Allow: /
+
+
+Sitemap: https://hotpdf.haoyanbing.workers.dev/sitemap.xml
