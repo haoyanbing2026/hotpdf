@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import * as pdfjsLib from "pdfjs-dist"
 
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url"
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url"
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
@@ -22,6 +22,10 @@ function MultiPDFPreview({
 
     const [loading,setLoading] = useState(false)
 
+    const [error,setError] = useState("")
+
+
+
 
 
 
@@ -33,11 +37,14 @@ function MultiPDFPreview({
 
         if(!files || files.length===0){
 
+
             setPreviews([])
 
             return
 
+
         }
+
 
 
         loadPreviews()
@@ -62,7 +69,11 @@ function MultiPDFPreview({
 
             setLoading(true)
 
+            setError("")
+
             setPreviews([])
+
+
 
 
 
@@ -74,43 +85,113 @@ function MultiPDFPreview({
 
 
 
+
+
             for(const file of files){
 
 
 
-                const buffer =
-                    await file.arrayBuffer()
+
+
+                const buffer = await new Promise(
+
+                    (resolve,reject)=>{
+
+
+                        const reader =
+                        new FileReader()
 
 
 
-                const pdf =
-                    await pdfjsLib.getDocument({
-
-                        data:buffer
-
-                    }).promise
+                        reader.onload=(e)=>{
 
 
+                            resolve(
+
+                                new Uint8Array(
+
+                                    e.target.result
+
+                                )
+
+                            )
+
+
+                        }
 
 
 
-                const page =
-                    await pdf.getPage(1)
+
+
+                        reader.onerror=reject
+
+
+
+                        reader.readAsArrayBuffer(file)
+
+
+
+                    }
+
+                )
+
+
+
+
+
+
+
+
+
+                const pdf = await pdfjsLib.getDocument({
+
+                    data:buffer,
+
+                    disableFontFace:true,
+
+                    useWorkerFetch:false,
+
+                    isEvalSupported:false
+
+
+                }).promise
+
+
+
+
+
+
+
+
+
+                const page = await pdf.getPage(1)
+
+
 
 
 
 
 
                 const scale =
+
                     window.innerWidth < 600
-                    ? 0.45
-                    : 0.4
+
+                    ?
+
+                    0.45
+
+                    :
+
+                    0.4
+
+
 
 
 
 
 
                 const viewport =
+
                     page.getViewport({
 
                         scale
@@ -121,31 +202,43 @@ function MultiPDFPreview({
 
 
 
+
+
+
                 const canvas =
+
                     document.createElement(
+
                         "canvas"
+
                     )
+
+
 
 
 
 
 
                 const context =
+
                     canvas.getContext(
+
                         "2d"
+
                     )
 
 
 
 
 
-                canvas.width =
-                    viewport.width
 
 
+                canvas.width = viewport.width
 
-                canvas.height =
-                    viewport.height
+
+                canvas.height = viewport.height
+
+
 
 
 
@@ -153,8 +246,7 @@ function MultiPDFPreview({
 
                 await page.render({
 
-                    canvasContext:
-                    context,
+                    canvasContext:context,
 
                     viewport
 
@@ -173,12 +265,18 @@ function MultiPDFPreview({
                     pages:pdf.numPages,
 
                     image:
+
                     canvas.toDataURL(
+
                         "image/jpeg",
-                        0.85
+
+                        0.8
+
                     )
 
+
                 })
+
 
 
 
@@ -197,6 +295,8 @@ function MultiPDFPreview({
 
 
 
+
+
             setPreviews(list)
 
 
@@ -206,10 +306,25 @@ function MultiPDFPreview({
         catch(err){
 
 
+
             console.error(
-                "Multi PDF preview error",
+
+                "Multi PDF preview error:",
+
                 err
+
             )
+
+
+
+            setError(
+
+                err.message ||
+
+                "Unable to preview PDF."
+
+            )
+
 
 
         }
@@ -243,91 +358,128 @@ function MultiPDFPreview({
 
 
 
-        {
 
-            loading &&
+            {
 
-
-            <div className="loading-box">
-
-                Loading previews...
-
-            </div>
-
-        }
+                loading &&
 
 
+                <div className="loading-box">
 
-
-
-
-
-
-
-        {
-
-            previews.map((item,index)=>(
-
-
-
-                <div
-
-                    className="multi-preview-card"
-
-                    key={index}
-
-                >
-
-
-
-                    <div className="multi-preview-image">
-
-
-                        <img
-
-                            src={item.image}
-
-                            alt={item.name}
-
-                        />
-
-
-                    </div>
-
-
-
-
-
-                    <div className="multi-preview-info">
-
-
-                        <p className="preview-name">
-
-                            📄 {item.name}
-
-                        </p>
-
-
-
-                        <p className="preview-pages">
-
-                            {item.pages} pages
-
-                        </p>
-
-
-
-                    </div>
-
-
+                    Loading previews...
 
                 </div>
 
 
+            }
 
-            ))
 
-        }
+
+
+
+
+
+
+
+            {
+
+                error &&
+
+
+                <div className="error-message">
+
+                    ⚠️ {error}
+
+                </div>
+
+
+            }
+
+
+
+
+
+
+
+
+
+            {
+
+                previews.map((item,index)=>(
+
+
+
+                    <div
+
+                        className="multi-preview-card"
+
+                        key={index}
+
+                    >
+
+
+
+
+
+                        <div className="multi-preview-image">
+
+
+
+                            <img
+
+                                src={item.image}
+
+                                alt={item.name}
+
+                            />
+
+
+
+                        </div>
+
+
+
+
+
+
+
+                        <div className="multi-preview-info">
+
+
+
+                            <p className="preview-name">
+
+                                📄 {item.name}
+
+                            </p>
+
+
+
+
+
+                            <p className="preview-pages">
+
+                                {item.pages} pages
+
+                            </p>
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+
+
+                ))
+
+            }
+
+
 
 
 

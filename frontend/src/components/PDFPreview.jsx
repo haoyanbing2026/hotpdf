@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import * as pdfjsLib from "pdfjs-dist"
 
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url"
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url"
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
@@ -32,6 +32,8 @@ function PDFPreview({
 
 
 
+
+
     useEffect(()=>{
 
 
@@ -47,7 +49,10 @@ function PDFPreview({
         loadPDF()
 
 
+
     },[file])
+
+
 
 
 
@@ -58,7 +63,7 @@ function PDFPreview({
     async function loadPDF(){
 
 
-        try {
+        try{
 
 
             setLoading(true)
@@ -69,13 +74,67 @@ function PDFPreview({
 
 
 
-            const buffer = await file.arrayBuffer()
+
+
+
+
+            const buffer = await new Promise(
+
+                (resolve,reject)=>{
+
+
+                    const reader = new FileReader()
+
+
+
+                    reader.onload = (e)=>{
+
+
+                        resolve(
+
+                            new Uint8Array(
+
+                                e.target.result
+
+                            )
+
+                        )
+
+
+                    }
+
+
+
+                    reader.onerror = reject
+
+
+
+                    reader.readAsArrayBuffer(file)
+
+
+
+                }
+
+            )
+
+
+
+
+
+
 
 
 
             const pdf = await pdfjsLib.getDocument({
 
-                data:buffer
+                data:buffer,
+
+                disableFontFace:true,
+
+                useWorkerFetch:false,
+
+                isEvalSupported:false
+
 
             }).promise
 
@@ -83,43 +142,70 @@ function PDFPreview({
 
 
 
-            const list = []
+
+
+            const list=[]
 
 
 
-            /*
-              Avoid mobile memory problems.
-              Large PDFs only preview first 30 pages.
-            */
+
+
 
             const maxPages = Math.min(
+
                 pdf.numPages,
-                30
+
+                20
+
             )
 
 
 
 
+
+
+
+
             for(
-                let i = 1;
-                i <= maxPages;
+
+                let i=1;
+
+                i<=maxPages;
+
                 i++
+
             ){
+
 
 
                 const page = await pdf.getPage(i)
 
 
 
+
+
+
+
                 const scale =
+
                     window.innerWidth < 600
-                    ? 0.8
-                    : 0.6
+
+                    ?
+
+                    0.6
+
+                    :
+
+                    0.5
+
+
+
 
 
 
 
                 const viewport =
+
                     page.getViewport({
 
                         scale
@@ -130,29 +216,42 @@ function PDFPreview({
 
 
 
+
+
+
                 const canvas =
+
                     document.createElement(
+
                         "canvas"
+
                     )
+
+
+
+
 
 
 
                 const context =
+
                     canvas.getContext(
+
                         "2d"
+
                     )
 
 
 
 
 
-                canvas.width =
-                    viewport.width
 
 
+                canvas.width = viewport.width
 
-                canvas.height =
-                    viewport.height
+                canvas.height = viewport.height
+
+
 
 
 
@@ -160,12 +259,12 @@ function PDFPreview({
 
                 await page.render({
 
-                    canvasContext:
-                    context,
+                    canvasContext:context,
 
                     viewport
 
                 }).promise
+
 
 
 
@@ -177,12 +276,18 @@ function PDFPreview({
                     page:i,
 
                     image:
+
                     canvas.toDataURL(
+
                         "image/jpeg",
-                        0.85
+
+                        0.8
+
                     )
 
                 })
+
+
 
 
 
@@ -193,7 +298,12 @@ function PDFPreview({
                 canvas.height = 0
 
 
+
             }
+
+
+
+
 
 
 
@@ -202,21 +312,33 @@ function PDFPreview({
 
 
         }
+
         catch(err){
 
 
+
             console.error(
-                "PDF preview error",
+
+                "PDF preview error:",
+
                 err
+
             )
+
 
 
             setError(
+
+                err.message ||
+
                 "Unable to preview PDF."
+
             )
 
 
+
         }
+
         finally{
 
 
@@ -224,6 +346,7 @@ function PDFPreview({
 
 
         }
+
 
 
     }
@@ -239,21 +362,28 @@ function PDFPreview({
     function togglePage(page){
 
 
+
         if(
+
             selectedPages.includes(page)
+
         ){
+
 
 
             setSelectedPages(
 
                 selectedPages.filter(
+
                     p=>p!==page
+
                 )
 
             )
 
 
         }
+
         else{
 
 
@@ -284,22 +414,37 @@ function PDFPreview({
         <div className="preview-container">
 
 
+
+
+
+
+
             {
+
                 loading &&
+
 
                 <div className="loading-box">
 
                     Loading PDF preview...
 
                 </div>
+
+
             }
 
 
 
 
 
+
+
+
+
             {
+
                 error &&
+
 
                 <div className="error-message">
 
@@ -307,6 +452,7 @@ function PDFPreview({
 
                 </div>
 
+
             }
 
 
@@ -315,7 +461,10 @@ function PDFPreview({
 
 
 
+
+
             {
+
                 pages.map(item=>(
 
 
@@ -327,7 +476,9 @@ function PDFPreview({
                         className={
 
                             selectedPages.includes(
+
                                 item.page
+
                             )
 
                             ?
@@ -342,11 +493,7 @@ function PDFPreview({
 
 
 
-                        onClick={()=>
-                            togglePage(
-                                item.page
-                            )
-                        }
+                        onClick={()=>togglePage(item.page)}
 
 
                     >
@@ -357,9 +504,7 @@ function PDFPreview({
 
                             src={item.image}
 
-                            alt={
-                                `page ${item.page}`
-                            }
+                            alt={`Page ${item.page}`}
 
                         />
 
@@ -372,6 +517,7 @@ function PDFPreview({
                         </p>
 
 
+
                     </div>
 
 
@@ -381,9 +527,12 @@ function PDFPreview({
 
 
 
+
+
         </div>
 
     )
+
 
 }
 
