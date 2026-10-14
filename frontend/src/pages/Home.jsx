@@ -17,7 +17,6 @@ const navigate = useNavigate()
 
 return (
 
-
 <div className="home">
 
 
@@ -43,6 +42,10 @@ All-in-one PDF Tools
 
 
 <p>
+
+Your smart PDF assistant for study and work.
+
+<br/>
 
 Merge, split, compress and convert PDF files easily.
 
@@ -101,21 +104,40 @@ Choose File
 <div className="pdf-demo">
 
 
-<div className="pdf-title">
 
-PDF Document
+<div className="demo-icon">
+
+📄
 
 </div>
+
+
+
+
+
+<div className="pdf-title">
+
+PDF Assistant
+
+</div>
+
+
+
 
 
 <div className="pdf-info">
 
-Ready to process
+Smart tools for your documents
 
 </div>
 
 
-<div className="demo-buttons">
+
+
+
+
+
+<div className="demo-tags">
 
 
 <span>
@@ -139,14 +161,29 @@ Compress
 </span>
 
 
+<span>
+
+Convert
+
+</span>
+
+
 </div>
+
+
+
+
+
 
 
 <div className="convert-demo">
 
-PDF → Word
+Fast • Simple • Secure
 
 </div>
+
+
+
 
 
 </div>
@@ -165,7 +202,7 @@ PDF → Word
 
 
 
-<section>
+<section className="tools-section">
 
 
 <h2>
@@ -188,7 +225,7 @@ icon="✂️"
 
 title="Split PDF"
 
-desc="Extract only the pages you need."
+desc="Extract specific pages from large documents."
 
 onClick={()=>navigate("/split")}
 
@@ -205,7 +242,7 @@ icon="📎"
 
 title="Merge PDF"
 
-desc="Combine multiple PDF files."
+desc="Combine reports, notes and documents."
 
 onClick={()=>navigate("/merge")}
 
@@ -223,7 +260,7 @@ icon="📦"
 
 title="Compress PDF"
 
-desc="Reduce PDF size."
+desc="Reduce file size for easier sharing."
 
 onClick={()=>navigate("/compress")}
 
@@ -241,7 +278,7 @@ icon="📝"
 
 title="Convert PDF"
 
-desc="Convert PDF to Word."
+desc="Turn PDF files into editable documents."
 
 onClick={()=>navigate("/convert")}
 
@@ -250,6 +287,107 @@ onClick={()=>navigate("/convert")}
 
 
 </div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section className="audience-section">
+
+
+
+<h2>
+
+Built for Students and Professionals
+
+</h2>
+
+
+
+
+
+
+<div className="audience-cards">
+
+
+
+<div className="audience-card">
+
+
+<h3>
+
+🎓 For Students
+
+</h3>
+
+
+
+<p>
+
+HotPDF helps students organize learning materials,
+prepare assignments, and manage research documents.
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="audience-card">
+
+
+<h3>
+
+💼 For Professionals
+
+</h3>
+
+
+
+<p>
+
+HotPDF makes daily document work faster with
+simple tools for merging, splitting, compressing,
+and converting PDF files.
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<p className="audience-summary">
+
+From classroom assignments to professional documents,
+HotPDF helps you handle files faster and smarter.
+
+</p>
+
 
 
 </section>
@@ -291,7 +429,15 @@ Your files are safe
 
 <p>
 
-Files are processed securely and can be removed after processing.
+🔒 Secure processing
+
+&nbsp;&nbsp;
+
+⚡ Fast conversion
+
+&nbsp;&nbsp;
+
+🗑 Temporary file removal
 
 </p>
 
@@ -309,7 +455,6 @@ Files are processed securely and can be removed after processing.
 
 
 )
-
 
 }
 
