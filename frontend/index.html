@@ -12,14 +12,9 @@
   />
 
 
-
-  <!-- Website Title -->
-
   <title>
     HotPDF - PDF Assistant
   </title>
-
-
 
 
 
@@ -66,6 +61,12 @@
   />
 
 
+  <meta
+    property="og:url"
+    content="https://hotpdf.haoyanbing.workers.dev/"
+  />
+
+
 
 
 
@@ -92,8 +93,6 @@
 
 
 
-  <!-- Mobile Browser Theme -->
-
   <meta
     name="theme-color"
     content="#ffffff"
@@ -103,26 +102,20 @@
 
 
 
-  <!-- Google Structured Data -->
+  <!-- WebSite Schema -->
 
   <script type="application/ld+json">
 
   {
+    "@context":"https://schema.org",
 
-    "@context": "https://schema.org",
+    "@type":"WebSite",
 
+    "name":"HotPDF",
 
-    "@type": "WebSite",
+    "url":"https://hotpdf.haoyanbing.workers.dev/",
 
-
-    "name": "HotPDF",
-
-
-    "url": "https://hotpdf.haoyanbing.workers.dev/",
-
-
-    "description":
-    "HotPDF is an online PDF assistant for splitting, merging, compressing and converting PDF files."
+    "description":"HotPDF is an online PDF assistant for splitting, merging, compressing and converting PDF files."
 
   }
 
@@ -132,24 +125,20 @@
 
 
 
+  <!-- Organization Schema -->
+
   <script type="application/ld+json">
 
   {
+    "@context":"https://schema.org",
 
-    "@context": "https://schema.org",
+    "@type":"Organization",
 
+    "name":"HotPDF",
 
-    "@type": "Organization",
+    "url":"https://hotpdf.haoyanbing.workers.dev/",
 
-
-    "name": "HotPDF",
-
-
-    "url": "https://hotpdf.haoyanbing.workers.dev/",
-
-
-    "logo":
-    "https://hotpdf.haoyanbing.workers.dev/favicon.svg"
+    "logo":"https://hotpdf.haoyanbing.workers.dev/favicon.svg"
 
   }
 
@@ -159,36 +148,26 @@
 
 
 
+  <!-- Software Application Schema -->
+
   <script type="application/ld+json">
 
   {
+    "@context":"https://schema.org",
 
-    "@context": "https://schema.org",
+    "@type":"SoftwareApplication",
 
+    "name":"HotPDF",
 
-    "@type": "SoftwareApplication",
+    "applicationCategory":"UtilitiesApplication",
 
+    "operatingSystem":"Web",
 
-    "name": "HotPDF",
+    "url":"https://hotpdf.haoyanbing.workers.dev/",
 
+    "description":"Online PDF tools to split, merge, compress and convert PDF files.",
 
-    "applicationCategory":
-    "UtilitiesApplication",
-
-
-    "operatingSystem":
-    "Web",
-
-
-    "url":
-    "https://hotpdf.haoyanbing.workers.dev/",
-
-
-    "description":
-    "Online PDF tools to split, merge, compress and convert PDF files.",
-
-
-    "featureList": [
+    "featureList":[
 
       "Merge PDF",
 
@@ -200,19 +179,30 @@
 
     ],
 
+    "offers":{
 
-    "offers": {
+      "@type":"Offer",
 
-      "@type": "Offer",
+      "price":"0",
 
-      "price": "0",
-
-      "priceCurrency": "USD"
+      "priceCurrency":"USD"
 
     }
 
   }
 
+  </script>
+
+
+
+
+
+  <!-- Cloudflare Web Analytics -->
+
+  <script
+    type="module"
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon='{"token":"d8169c9d17df49ba9d5e05a4ddcc2ed0"}'>
   </script>
 
 
@@ -228,14 +218,10 @@
   />
 
 
-
-
-
   <link
     rel="apple-touch-icon"
     href="/favicon.svg?v=2"
   />
-
 
 
 </head>
@@ -248,12 +234,10 @@
   <div id="root"></div>
 
 
-
   <script
     type="module"
-    src="/src/main.jsx"
-  ></script>
-
+    src="/src/main.jsx">
+  </script>
 
 
 </body>
