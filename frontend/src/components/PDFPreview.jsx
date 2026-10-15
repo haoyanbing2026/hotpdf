@@ -1,541 +1,247 @@
+
 import { useEffect, useState } from "react"
-
 import * as pdfjsLib from "pdfjs-dist"
-
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url"
 
-
+// Keep the existing PDF.js worker configuration.
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 
 
-
-
-
 function PDFPreview({
-
-    file,
-
-    selectedPages,
-
-    setSelectedPages
-
+  file,
+  selectedPages,
+  setSelectedPages
 }) {
 
-
-    const [pages,setPages] = useState([])
-
-    const [loading,setLoading] = useState(false)
-
-    const [error,setError] = useState("")
+  const [pages, setPages] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
 
+  useEffect(() => {
 
+    let cancelled = false
 
+    if (!file) {
+      setPages([])
+      setLoading(false)
+      setError("")
+      return
+    }
 
+    async function loadPDF() {
 
+      setLoading(true)
+      setError("")
+      setPages([])
 
-    useEffect(()=>{
+      try {
 
+        const buffer = await file.arrayBuffer()
 
-        if(!file){
+        if (cancelled) {
+          return
+        }
 
-            setPages([])
+        const pdf = await pdfjsLib.getDocument({
+          data: new Uint8Array(buffer),
+          disableFontFace: true,
+          useWorkerFetch: false,
+          isEvalSupported: false
+        }).promise
 
+        if (cancelled) {
+          return
+        }
+
+        const list = []
+
+        const maxPages = Math.min(
+          pdf.numPages,
+          20
+        )
+
+        for (
+          let i = 1;
+          i <= maxPages;
+          i++
+        ) {
+
+          if (cancelled) {
             return
+          }
 
+          const page = await pdf.getPage(i)
+
+          const scale =
+            window.innerWidth < 600
+              ? 0.6
+              : 0.5
+
+          const viewport = page.getViewport({
+            scale
+          })
+
+          const canvas = document.createElement(
+            "canvas"
+          )
+
+          const context = canvas.getContext("2d")
+
+          if (!context) {
+            throw new Error(
+              "Unable to create PDF preview."
+            )
+          }
+
+          canvas.width = Math.ceil(viewport.width)
+          canvas.height = Math.ceil(viewport.height)
+
+          await page.render({
+            canvasContext: context,
+            viewport
+          }).promise
+
+          if (cancelled) {
+            canvas.width = 0
+            canvas.height = 0
+            return
+          }
+
+          list.push({
+            page: i,
+            image: canvas.toDataURL(
+              "image/jpeg",
+              0.8
+            ),
+            width: canvas.width,
+            height: canvas.height
+          })
+
+          canvas.width = 0
+          canvas.height = 0
         }
 
-
-        loadPDF()
-
-
-
-    },[file])
-
-
-
-
-
-
-
-
-
-    async function loadPDF(){
-
-
-        try{
-
-
-            setLoading(true)
-
-            setError("")
-
-            setPages([])
-
-
-
-
-
-
-
-            const buffer = await new Promise(
-
-                (resolve,reject)=>{
-
-
-                    const reader = new FileReader()
-
-
-
-                    reader.onload = (e)=>{
-
-
-                        resolve(
-
-                            new Uint8Array(
-
-                                e.target.result
-
-                            )
-
-                        )
-
-
-                    }
-
-
-
-                    reader.onerror = reject
-
-
-
-                    reader.readAsArrayBuffer(file)
-
-
-
-                }
-
-            )
-
-
-
-
-
-
-
-
-
-            const pdf = await pdfjsLib.getDocument({
-
-                data:buffer,
-
-                disableFontFace:true,
-
-                useWorkerFetch:false,
-
-                isEvalSupported:false
-
-
-            }).promise
-
-
-
-
-
-
-
-            const list=[]
-
-
-
-
-
-
-            const maxPages = Math.min(
-
-                pdf.numPages,
-
-                20
-
-            )
-
-
-
-
-
-
-
-
-            for(
-
-                let i=1;
-
-                i<=maxPages;
-
-                i++
-
-            ){
-
-
-
-                const page = await pdf.getPage(i)
-
-
-
-
-
-
-
-                const scale =
-
-                    window.innerWidth < 600
-
-                    ?
-
-                    0.6
-
-                    :
-
-                    0.5
-
-
-
-
-
-
-
-                const viewport =
-
-                    page.getViewport({
-
-                        scale
-
-                    })
-
-
-
-
-
-
-
-
-                const canvas =
-
-                    document.createElement(
-
-                        "canvas"
-
-                    )
-
-
-
-
-
-
-
-                const context =
-
-                    canvas.getContext(
-
-                        "2d"
-
-                    )
-
-
-
-
-
-
-
-                canvas.width = viewport.width
-
-                canvas.height = viewport.height
-
-
-
-
-
-
-
-                await page.render({
-
-                    canvasContext:context,
-
-                    viewport
-
-                }).promise
-
-
-
-
-
-
-
-                list.push({
-
-                    page:i,
-
-                    image:
-
-                    canvas.toDataURL(
-
-                        "image/jpeg",
-
-                        0.8
-
-                    )
-
-                })
-
-
-
-
-
-
-
-                canvas.width = 0
-
-                canvas.height = 0
-
-
-
-            }
-
-
-
-
-
-
-
-            setPages(list)
-
-
-
+        if (!cancelled) {
+          setPages(list)
         }
 
-        catch(err){
+      } catch (err) {
 
+        if (!cancelled) {
 
+          console.error(
+            "PDF preview error:",
+            err
+          )
 
-            console.error(
-
-                "PDF preview error:",
-
-                err
-
-            )
-
-
-
-            setError(
-
-                err.message ||
-
-                "Unable to preview PDF."
-
-            )
-
-
-
+          setError(
+            err.message ||
+            "Unable to preview PDF."
+          )
         }
 
-        finally{
+      } finally {
 
-
-            setLoading(false)
-
-
+        if (!cancelled) {
+          setLoading(false)
         }
 
-
-
+      }
     }
 
+    loadPDF()
 
-
-
-
-
-
-
-
-    function togglePage(page){
-
-
-
-        if(
-
-            selectedPages.includes(page)
-
-        ){
-
-
-
-            setSelectedPages(
-
-                selectedPages.filter(
-
-                    p=>p!==page
-
-                )
-
-            )
-
-
-        }
-
-        else{
-
-
-            setSelectedPages([
-
-                ...selectedPages,
-
-                page
-
-            ])
-
-
-        }
-
-
+    return () => {
+      cancelled = true
     }
 
+  }, [file])
 
 
+  function togglePage(page) {
 
+    if (selectedPages.includes(page)) {
 
+      setSelectedPages(
+        selectedPages.filter(
+          p => p !== page
+        )
+      )
 
+    } else {
 
+      setSelectedPages([
+        ...selectedPages,
+        page
+      ])
 
+    }
+  }
 
-    return (
 
-        <div className="preview-container">
+  return (
 
+    <div
+      className="preview-container"
+      style={{
+        height: "min(65vh, 540px)",
+        overflowY: "auto",
+        overflowX: "hidden",
+        alignContent: "flex-start",
+        boxSizing: "border-box",
+        padding: "12px 6px"
+      }}
+    >
 
+      {loading && (
 
+        <div className="loading-box">
+          Loading PDF preview...
+        </div>
 
+      )}
 
 
+      {error && (
 
-            {
+        <div className="error-message">
+          ⚠️ {error}
+        </div>
 
-                loading &&
+      )}
 
 
-                <div className="loading-box">
+      {!loading && !error && pages.map(item => (
 
-                    Loading PDF preview...
+        <div
+          key={item.page}
+          className={
+            selectedPages.includes(item.page)
+              ? "preview-card selected"
+              : "preview-card"
+          }
+          onClick={() => togglePage(item.page)}
+        >
 
-                </div>
+          <img
+            src={item.image}
+            alt={`Page ${item.page}`}
+            width={item.width}
+            height={item.height}
+          />
 
-
-            }
-
-
-
-
-
-
-
-
-
-            {
-
-                error &&
-
-
-                <div className="error-message">
-
-                    ⚠️ {error}
-
-                </div>
-
-
-            }
-
-
-
-
-
-
-
-
-
-            {
-
-                pages.map(item=>(
-
-
-                    <div
-
-                        key={item.page}
-
-
-                        className={
-
-                            selectedPages.includes(
-
-                                item.page
-
-                            )
-
-                            ?
-
-                            "preview-card selected"
-
-                            :
-
-                            "preview-card"
-
-                        }
-
-
-
-                        onClick={()=>togglePage(item.page)}
-
-
-                    >
-
-
-
-                        <img
-
-                            src={item.image}
-
-                            alt={`Page ${item.page}`}
-
-                        />
-
-
-
-                        <p>
-
-                            Page {item.page}
-
-                        </p>
-
-
-
-                    </div>
-
-
-                ))
-
-            }
-
-
-
-
+          <p>
+            Page {item.page}
+          </p>
 
         </div>
 
-    )
+      ))}
 
+    </div>
 
+  )
 }
-
-
 
 export default PDFPreview
