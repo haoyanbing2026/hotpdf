@@ -1,475 +1,251 @@
-import { useNavigate } from "react-router-dom"
+
+import { Link, useNavigate } from "react-router-dom"
 
 import ToolCard from "../components/ToolCard"
-
 import HowItWorks from "../components/HowItWorks"
-
 import FeatureSection from "../components/FeatureSection"
 
 import PdfIllustration from "../components/PdfIllustration"
-
 import StudentIllustration from "../components/StudentIllustration"
-
 import WorkIllustration from "../components/WorkIllustration"
-
 import SecurityIllustration from "../components/SecurityIllustration"
 
 import "../styles/home.css"
 
 
+function Home() {
 
+  const navigate = useNavigate()
 
+  return (
 
-function Home(){
+    <div className="home">
 
+      {/* =========================
+          Hero
+      ========================= */}
 
-const navigate = useNavigate()
+      <section className="hero">
 
+        <div className="hero-text">
 
+          <h1>
+            All-in-one PDF Tools
+          </h1>
 
-return (
+          <p className="hero-main">
+            Your smart PDF assistant for study and work.
+          </p>
 
-<div className="home">
+          <p>
+            Merge, split, compress and convert PDF files easily.
+          </p>
 
+          <button
+            className="primary-btn"
+            onClick={() => navigate("/split")}
+          >
+            Choose File
+          </button>
 
+          <div className="trust">
 
+            <div>
+              ✓ Easy PDF processing
+            </div>
 
+            <div>
+              ✓ Temporary file storage
+            </div>
 
-{/* =========================
-    Hero
-========================= */}
+            <div>
+              ✓ No complicated software
+            </div>
 
+          </div>
 
-<section className="hero">
+        </div>
 
+        <div className="hero-illustration">
+          <PdfIllustration />
+        </div>
 
+      </section>
 
-<div className="hero-text">
 
+      {/* =========================
+          Tools
+      ========================= */}
 
-<h1>
+      <section className="tools-section">
 
-All-in-one PDF Tools
+        <h2>
+          Everything you need
+        </h2>
 
-</h1>
+        <div className="tools">
 
+          <ToolCard
+            icon="✂️"
+            title="Split PDF"
+            desc="Extract specific pages from large documents."
+            onClick={() => navigate("/split")}
+          />
 
+          <ToolCard
+            icon="📎"
+            title="Merge PDF"
+            desc="Combine reports, notes and documents."
+            onClick={() => navigate("/merge")}
+          />
 
+          <ToolCard
+            icon="📦"
+            title="Compress PDF"
+            desc="Reduce file size for easier sharing."
+            onClick={() => navigate("/compress")}
+          />
 
-<p className="hero-main">
+          <ToolCard
+            icon="📝"
+            title="Convert PDF"
+            desc="Turn text-based PDFs into editable Word documents."
+            onClick={() => navigate("/convert")}
+          />
 
-Your smart PDF assistant for study and work.
+        </div>
 
-</p>
+      </section>
 
 
+      {/* =========================
+          PDF Features SEO Section
+      ========================= */}
 
-<p>
+      <FeatureSection />
 
-Merge, split, compress and convert PDF files easily.
 
-</p>
+      {/* =========================
+          Audience
+      ========================= */}
 
+      <section className="audience-section">
 
+        <h2>
+          Built for Students and Professionals
+        </h2>
 
+        <div className="audience-cards">
 
+          <div className="audience-card">
 
+            <StudentIllustration />
 
-<button
+            <h3>
+              🎓 For Students
+            </h3>
 
-className="primary-btn"
+            <p>
+              ✓ Organize learning materials
+              <br />
+              ✓ Prepare assignments
+              <br />
+              ✓ Manage research documents
+            </p>
 
-onClick={()=>navigate("/split")}
+          </div>
 
->
+          <div className="audience-card">
 
-Choose File
+            <WorkIllustration />
 
-</button>
+            <h3>
+              💼 For Professionals
+            </h3>
 
+            <p>
+              ✓ Handle daily documents
+              <br />
+              ✓ Merge, split and compress files
+              <br />
+              ✓ Improve work efficiency
+            </p>
 
+          </div>
 
+        </div>
 
+        <p className="audience-summary">
+          From classroom assignments to professional documents,
+          HotPDF helps you handle files faster and smarter.
+        </p>
 
+      </section>
 
-<div className="trust">
 
+      {/* =========================
+          Workflow
+      ========================= */}
 
-<div>
+      <section className="workflow-section">
+        <HowItWorks />
+      </section>
 
-✓ Fast processing
 
-</div>
+      {/* =========================
+          File Handling
+      ========================= */}
 
+      <section className="security">
 
-<div>
+        <SecurityIllustration />
 
-✓ Secure file handling
+        <h2>
+          How your files are handled
+        </h2>
 
-</div>
+        <div className="security-items">
 
+          <span>
+            📄 PDF format checks
+          </span>
 
-<div>
+          <span>
+            ⏳ Temporary file storage
+          </span>
 
-✓ No complicated software
+          <span>
+            🗑 Periodic file cleanup
+          </span>
 
-</div>
+        </div>
 
+        <p>
+          Uploaded files and processed results are stored
+          temporarily. Files are generally eligible for
+          automatic deletion about 60 minutes after their
+          last access. Cleanup runs periodically, so actual
+          deletion times may vary.
+        </p>
 
-</div>
+        <p>
+          Download your files promptly and avoid uploading
+          highly sensitive documents.
+        </p>
 
+        <p>
+          Learn more in our{" "}
+          <Link to="/privacy">
+            Privacy Policy
+          </Link>.
+        </p>
 
+      </section>
 
-</div>
+    </div>
 
-
-
-
-
-
-
-<div className="hero-illustration">
-
-
-<PdfIllustration />
-
-
-</div>
-
-
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-{/* =========================
-    Tools
-========================= */}
-
-
-
-<section className="tools-section">
-
-
-<h2>
-
-Everything you need
-
-</h2>
-
-
-
-<div className="tools">
-
-
-<ToolCard
-
-icon="✂️"
-
-title="Split PDF"
-
-desc="Extract specific pages from large documents."
-
-onClick={()=>navigate("/split")}
-
-/>
-
-
-
-<ToolCard
-
-icon="📎"
-
-title="Merge PDF"
-
-desc="Combine reports, notes and documents."
-
-onClick={()=>navigate("/merge")}
-
-/>
-
-
-
-<ToolCard
-
-icon="📦"
-
-title="Compress PDF"
-
-desc="Reduce file size for easier sharing."
-
-onClick={()=>navigate("/compress")}
-
-/>
-
-
-
-<ToolCard
-
-icon="📝"
-
-title="Convert PDF"
-
-desc="Turn PDF files into editable documents."
-
-onClick={()=>navigate("/convert")}
-
-/>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-{/* =========================
-    PDF Features SEO Section
-========================= */}
-
-
-
-<FeatureSection />
-
-
-
-
-
-
-
-
-
-{/* =========================
-    Audience
-========================= */}
-
-
-
-<section className="audience-section">
-
-
-
-<h2>
-
-Built for Students and Professionals
-
-</h2>
-
-
-
-
-
-<div className="audience-cards">
-
-
-
-<div className="audience-card">
-
-
-<StudentIllustration />
-
-
-
-<h3>
-
-🎓 For Students
-
-</h3>
-
-
-
-<p>
-
-✓ Organize learning materials
-
-<br/>
-
-✓ Prepare assignments
-
-<br/>
-
-✓ Manage research documents
-
-</p>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div className="audience-card">
-
-
-
-<WorkIllustration />
-
-
-
-<h3>
-
-💼 For Professionals
-
-</h3>
-
-
-
-<p>
-
-✓ Handle daily documents
-
-<br/>
-
-✓ Merge, split and compress files
-
-<br/>
-
-✓ Improve work efficiency
-
-</p>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<p className="audience-summary">
-
-From classroom assignments to professional documents,
-HotPDF helps you handle files faster and smarter.
-
-</p>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-{/* =========================
-    Workflow
-========================= */}
-
-
-
-<section className="workflow-section">
-
-
-<HowItWorks />
-
-
-</section>
-
-
-
-
-
-
-
-
-
-{/* =========================
-    Security
-========================= */}
-
-
-
-<section className="security">
-
-
-
-<SecurityIllustration />
-
-
-
-<h2>
-
-Your files are safe
-
-</h2>
-
-
-
-
-
-<div className="security-items">
-
-
-<span>
-
-🔒 Secure processing
-
-</span>
-
-
-
-<span>
-
-⚡ Fast conversion
-
-</span>
-
-
-
-<span>
-
-🗑 Temporary file removal
-
-</span>
-
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-</div>
-
-)
+  )
 
 }
-
-
 
 export default Home
