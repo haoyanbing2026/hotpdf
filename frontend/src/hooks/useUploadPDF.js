@@ -1,299 +1,164 @@
-import { useState } from "react"
 
+import { useRef, useState } from "react"
 import axios from "axios"
 
+function useUploadPDF() {
 
+  const [file, setCurrentFile] = useState(null)
 
-function useUploadPDF(){
+  const [filename, setFilename] = useState("")
+  const [pages, setPages] = useState([])
+  const [size, setSize] = useState(0)
 
+  const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState("")
 
+  // Identifies the current file/upload operation.
+  const requestVersion = useRef(0)
 
-const [file,setFile] = useState(null)
+  // Called when the user selects a different PDF.
+  function setFile(selectedFile) {
 
+    requestVersion.current += 1
 
-const [filename,setFilename] = useState("")
+    setCurrentFile(selectedFile)
 
+    // Clear information from the previous PDF.
+    setFilename("")
+    setPages([])
+    setSize(0)
 
-const [pages,setPages] = useState([])
+    setProgress(0)
+    setError("")
+    setLoading(false)
+  }
 
+  async function uploadPDF() {
 
-const [size,setSize] = useState(0)
+    if (!file) {
 
+      setError("Please select a PDF file first.")
+      return null
+    }
 
-const [loading,setLoading] = useState(false)
+    if (loading) {
+      return null
+    }
 
+    // Each upload has its own identifier.
+    const currentVersion = ++requestVersion.current
 
-const [progress,setProgress] = useState(0)
+    setLoading(true)
+    setError("")
+    setProgress(0)
 
+    try {
 
-const [error,setError] = useState("")
+      const formData = new FormData()
+      formData.append("file", file)
 
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/upload`,
+        formData,
+        {
+          onUploadProgress: (event) => {
 
+            // Ignore progress from an outdated upload.
+            if (
+              currentVersion !== requestVersion.current
+            ) {
+              return
+            }
 
+            if (event.total) {
 
+              const percent = Math.round(
+                (event.loaded * 100) / event.total
+              )
 
+              setProgress(percent)
+            }
+          }
+        }
+      )
 
+      // Ignore responses belonging to an old file.
+      if (
+        currentVersion !== requestVersion.current
+      ) {
+        return null
+      }
 
-async function uploadPDF(){
+      const data = res.data
 
+      if (!data.filename) {
+        throw new Error("Upload failed.")
+      }
 
+      setFilename(data.filename)
+      setSize(data.size || 0)
 
-if(!file){
+      const pageCount = Number(data.pages) || 0
 
+      const pageList = Array.from(
+        { length: pageCount },
+        (_, index) => index + 1
+      )
 
-setError(
+      setPages(pageList)
+      setProgress(100)
 
-"Please select a PDF file first."
+      return data
 
-)
+    } catch (err) {
 
+      if (
+        currentVersion !== requestVersion.current
+      ) {
+        return null
+      }
 
-return null
+      let message = "Upload failed."
 
+      if (err.response?.data?.detail) {
 
+        const detail = err.response.data.detail
+
+        message = typeof detail === "string"
+          ? detail
+          : "Unable to upload this PDF."
+
+      } else if (err.message) {
+
+        message = err.message
+      }
+
+      setError(message)
+
+      return null
+
+    } finally {
+
+      if (
+        currentVersion === requestVersion.current
+      ) {
+        setLoading(false)
+      }
+    }
+  }
+
+  return {
+    file,
+    setFile,
+    filename,
+    pages,
+    size,
+    loading,
+    progress,
+    error,
+    uploadPDF
+  }
 }
-
-
-
-
-
-
-
-setLoading(true)
-
-
-setError("")
-
-
-setProgress(0)
-
-
-
-
-
-
-
-
-try{
-
-
-
-const formData = new FormData()
-
-
-formData.append(
-
-"file",
-
-file
-
-)
-
-
-
-
-
-
-
-
-const res = await axios.post(
-
-`${import.meta.env.VITE_API_URL}/upload`,
-
-formData,
-
-{
-
-
-onUploadProgress:(event)=>{
-
-
-if(event.total){
-
-
-
-const percent=Math.round(
-
-(event.loaded * 100) /
-
-event.total
-
-)
-
-
-
-setProgress(percent)
-
-
-
-}
-
-
-
-}
-
-
-
-}
-
-)
-
-
-
-
-
-
-
-
-const data=res.data
-
-
-
-
-
-
-
-if(data.filename){
-
-
-
-setFilename(data.filename)
-
-
-setSize(data.size || 0)
-
-
-
-
-
-
-const pageList=[]
-
-
-
-for(
-
-let i=1;
-
-i<=data.pages;
-
-i++
-
-){
-
-
-pageList.push(i)
-
-
-}
-
-
-
-setPages(pageList)
-
-
-
-
-
-
-
-return data
-
-
-
-}
-
-else{
-
-
-throw new Error(
-
-"Upload failed."
-
-)
-
-
-}
-
-
-
-}
-
-catch(err){
-
-
-
-setError(
-
-err.message || "Upload failed."
-
-)
-
-
-return null
-
-
-
-}
-
-
-
-finally{
-
-
-setLoading(false)
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-return {
-
-
-file,
-
-
-setFile,
-
-
-filename,
-
-
-pages,
-
-
-size,
-
-
-loading,
-
-
-progress,
-
-
-error,
-
-
-uploadPDF
-
-
-
-}
-
-
-
-}
-
-
 
 export default useUploadPDF
