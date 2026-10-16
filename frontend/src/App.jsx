@@ -12,6 +12,8 @@ useLocation
 
 
 
+import SEO from "./components/SEO"
+
 import Navbar from "./components/Navbar"
 
 import Footer from "./components/Footer"
@@ -117,6 +119,8 @@ return (
 
 
 <ScrollToTop />
+
+<SEO />
 
 
 
