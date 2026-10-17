@@ -738,6 +738,47 @@ downloadText="Download Split PDF"
 
 
 
+{/* Helpful, indexable content below the existing PDF tool. */}
+<section
+  aria-labelledby="split-guide-title"
+  style={{ maxWidth: "900px", margin: "56px auto 0", padding: "0 16px 48px", lineHeight: 1.7 }}
+>
+  <h2 id="split-guide-title">How to Split a PDF Online</h2>
+  <p>
+    Use HotPDF to extract the pages you need from a PDF and save them as a separate document.
+    You can preview pages before choosing which ones to keep.
+  </p>
+  <ol>
+    <li><strong>Choose a PDF.</strong> Select the document you want to split.</li>
+    <li><strong>Upload your file.</strong> Click “Upload PDF” to load its pages.</li>
+    <li><strong>Select pages.</strong> Use the page preview to choose one or more pages. You can also select all pages or clear your selection.</li>
+    <li><strong>Split and download.</strong> Click “Split PDF”, then download the resulting PDF file.</li>
+  </ol>
+
+  <h2>Extract PDF Pages with HotPDF</h2>
+  <p>
+    Splitting a PDF is useful when you only need certain pages from a larger document,
+    such as a chapter, a handout, or selected pages of a report. HotPDF lets you see
+    page thumbnails and select the pages you want before creating a new PDF.
+  </p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div>
+    <h3>Can I extract a single page from a PDF?</h3>
+    <p>Yes. Upload your PDF, select one page in the preview, and click “Split PDF”.</p>
+
+    <h3>Can I select multiple pages?</h3>
+    <p>Yes. Select the pages you need in the preview. HotPDF creates a PDF containing your selection.</p>
+
+    <h3>Can I change my selection before splitting?</h3>
+    <p>Yes. You can select or deselect individual pages, use “Select All”, or click “Clear Selection”.</p>
+
+    <h3>How do I get the split PDF?</h3>
+    <p>After the split is complete, click “Download Split PDF” to save the resulting file.</p>
+  </div>
+</section>
+
+
 </div>
 
 
