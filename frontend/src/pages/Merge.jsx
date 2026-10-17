@@ -718,6 +718,59 @@ downloadText="Download Merged PDF"
 
 
 
+<section
+  aria-labelledby="merge-guide-title"
+  style={{ maxWidth: "760px", margin: "72px auto 48px", padding: "0 20px", textAlign: "left", lineHeight: 1.7 }}
+>
+  <h2 id="merge-guide-title" style={{ textAlign: "center", marginBottom: "16px" }}>
+    How to Merge PDF Files Online
+  </h2>
+  <p>
+    Combine two or more PDF files into one document with HotPDF. Arrange the files
+    in the order you want, review their previews, and download the merged PDF.
+  </p>
+  <ol style={{ paddingLeft: "24px", margin: "20px 0 36px" }}>
+    <li><strong>Choose PDF files.</strong> Select at least two PDF documents to combine.</li>
+    <li><strong>Set the file order.</strong> Use the up and down arrows to arrange the PDFs.</li>
+    <li><strong>Review the previews.</strong> Check the selected documents before merging.</li>
+    <li><strong>Merge and download.</strong> Click “Merge PDF”, then download the combined file.</li>
+  </ol>
+
+  <h2 style={{ textAlign: "center", marginBottom: "16px" }}>
+    Combine PDFs in Your Preferred Order
+  </h2>
+  <p style={{ marginBottom: "36px" }}>
+    Merging PDFs can help you keep related documents together, such as class notes,
+    project materials, or multiple sections of a report. HotPDF lets you change
+    the file order before creating a single PDF, so you can organize the final
+    document to match your needs.
+  </p>
+
+  <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+    Frequently Asked Questions
+  </h2>
+  <div style={{ display: "grid", gap: "22px" }}>
+    <div>
+      <h3 style={{ marginBottom: "6px" }}>How many PDF files do I need to merge?</h3>
+      <p>Select at least two PDF files to use the merge tool.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: "6px" }}>Can I change the order of the PDFs?</h3>
+      <p>Yes. Use the up and down arrows in the file list to arrange your PDFs before merging.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: "6px" }}>Can I preview the files before merging?</h3>
+      <p>Yes. The PDF preview area lets you review the files you selected.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: "6px" }}>How do I download the merged PDF?</h3>
+      <p>After the merge is complete, click “Download Merged PDF” to save the result.</p>
+    </div>
+  </div>
+</section>
+
+
+
 
 
 
