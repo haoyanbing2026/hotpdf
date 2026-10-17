@@ -514,10 +514,39 @@ downloadText="Download Compressed PDF"
 }
 
 
+<section aria-label="Compress PDF guide" style={{ width: "min(100% - 32px, 720px)", margin: "64px auto 80px", textAlign: "left", lineHeight: 1.75 }}>
+  <h2 style={{ textAlign: "center", marginBottom: 16 }}>How to Compress a PDF Online</h2>
+  <p>Use HotPDF to upload a PDF, preview its pages, and create a compressed version that you can download. The amount of size reduction depends on the content of your original file.</p>
+  <ol style={{ paddingLeft: 24 }}>
+    <li><strong>Choose a PDF.</strong> Select the PDF file you want to compress.</li>
+    <li><strong>Review the preview.</strong> Check the document pages before processing.</li>
+    <li><strong>Compress the file.</strong> Click “Compress PDF” and wait for processing to finish.</li>
+    <li><strong>Download the result.</strong> Click “Download Compressed PDF” to save the output.</li>
+  </ol>
 
+  <h2 style={{ textAlign: "center", marginTop: 36, marginBottom: 16 }}>Reduce PDF File Size with HotPDF</h2>
+  <p>A smaller PDF may be easier to share or store. Compression can be useful for reports, class materials, and other documents. Results vary: PDFs that already contain optimized images or text may not become much smaller. Check the downloaded file to make sure it meets your needs.</p>
 
-
-
+  <h2 style={{ textAlign: "center", marginTop: 36, marginBottom: 20 }}>Frequently Asked Questions</h2>
+  <div style={{ display: "grid", gap: 20 }}>
+    <div>
+      <h3 style={{ marginBottom: 6 }}>How much smaller will my PDF become?</h3>
+      <p style={{ marginTop: 0 }}>There is no fixed reduction percentage. The result depends on the images, text, and other content in the PDF.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: 6 }}>Will compression affect PDF quality?</h3>
+      <p style={{ marginTop: 0 }}>Compression may change the file's size or quality depending on its contents and the processing method. Review the downloaded PDF before sharing it.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: 6 }}>Can I preview my PDF before compressing it?</h3>
+      <p style={{ marginTop: 0 }}>Yes. After selecting a file, you can view its pages in the PDF preview area.</p>
+    </div>
+    <div>
+      <h3 style={{ marginBottom: 6 }}>How do I download the compressed PDF?</h3>
+      <p style={{ marginTop: 0 }}>When processing finishes, click “Download Compressed PDF” in the result card.</p>
+    </div>
+  </div>
+</section>
 
 </div>
 
