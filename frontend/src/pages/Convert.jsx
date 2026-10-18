@@ -306,23 +306,78 @@ function Convert() {
           }}
         >
           <h3 style={{ marginTop: 0 }}>Choose JPG or PNG images</h3>
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            multiple
-            onChange={event => {
-              const selected = Array.from(event.target.files || [])
-              const combined = [...imageFiles, ...selected]
-              const unique = combined.filter((file, index, all) =>
-                all.findIndex(item => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified) === index
-              ).slice(0, 20)
-              imagePreviews.forEach(url => URL.revokeObjectURL(url))
-              setImageFiles(unique)
-              setImagePreviews(unique.map(file => URL.createObjectURL(file)))
-              clearResult()
-              event.target.value = ""
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: 12,
+              margin: "12px 0 18px"
             }}
-          />
+          >
+            <input
+              id="hotpdf-image-files"
+              type="file"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              multiple
+              style={{
+                position: "absolute",
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: "hidden",
+                clip: "rect(0, 0, 0, 0)",
+                whiteSpace: "nowrap",
+                border: 0
+              }}
+              onChange={event => {
+                const selected = Array.from(event.target.files || [])
+                const combined = [...imageFiles, ...selected]
+                const unique = combined.filter((file, index, all) =>
+                  all.findIndex(item =>
+                    item.name === file.name &&
+                    item.size === file.size &&
+                    item.lastModified === file.lastModified
+                  ) === index
+                ).slice(0, 20)
+
+                imagePreviews.forEach(url => URL.revokeObjectURL(url))
+                setImageFiles(unique)
+                setImagePreviews(unique.map(file => URL.createObjectURL(file)))
+                clearResult()
+                event.target.value = ""
+              }}
+            />
+            <label
+              htmlFor="hotpdf-image-files"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                minHeight: 40,
+                boxSizing: "border-box",
+                padding: "10px 20px",
+                border: "1px solid #2563eb",
+                borderRadius: 8,
+                background: "#2563eb",
+                color: "#fff",
+                fontSize: 14,
+                fontWeight: 600,
+                lineHeight: 1.2,
+                cursor: "pointer",
+                boxShadow: "0 2px 5px rgba(37, 99, 235, 0.16)"
+              }}
+            >
+              <span aria-hidden="true">＋</span>
+              Choose Images
+            </label>
+            <span style={{ color: "#64748b", fontSize: 13 }}>
+              {imageFiles.length} / 20 images selected
+            </span>
+          </div>
           <p style={{ color: "#64748b", marginBottom: 12 }}>
             Select up to 20 images. Preview them below and use the arrows to set the PDF page order.
           </p>
