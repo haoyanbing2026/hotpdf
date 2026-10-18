@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+import zipfile
 
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
@@ -79,11 +80,11 @@ TEMP_TTL_SECONDS = TEMP_TTL_MINUTES * 60
 
 FILE_NAME_RE = re.compile(
     r"(?:upload|split|merged|compressed|converted)_"
-    r"[0-9a-f]{32}\.(?:pdf|docx)"
+    r"[0-9a-f]{32}\.(?:pdf|docx|zip)"
 )
 
 PDF_NAME_RE = re.compile(
-    r"(?:upload|split|merged|compressed)_"
+    r"(?:upload|split|merged|compressed|converted)_"
     r"[0-9a-f]{32}\.pdf"
 )
 
@@ -697,6 +698,71 @@ def make_compressed_to_target(
             safe_unlink(best_path)
 
 
+def make_pdf_images(
+    source: Path,
+    output: Path,
+    image_format: str,
+):
+    """Render every PDF page into an image and package the pages as a ZIP."""
+    image_format = image_format.lower()
+    if image_format not in {"jpg", "png"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Image format must be JPG or PNG.",
+        )
+
+    image_type = "jpeg" if image_format == "jpg" else "png"
+
+    with fitz.open(str(source)) as pdf:
+        if pdf.page_count > MAX_PDF_PAGES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"A PDF may contain at most {MAX_PDF_PAGES} pages.",
+            )
+
+        with zipfile.ZipFile(
+            output, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as archive:
+            for index, page in enumerate(pdf, start=1):
+                rect = page.rect
+                scale = min(2.0, 2000 / max(rect.width, rect.height, 1))
+                pixmap = page.get_pixmap(
+                    matrix=fitz.Matrix(scale, scale),
+                    alpha=False,
+                )
+                archive.writestr(
+                    f"page-{index:03d}.{image_format}",
+                    pixmap.tobytes(image_type),
+                )
+
+
+def make_images_pdf(
+    image_contents: list[tuple[str, bytes]],
+    output: Path,
+):
+    """Create a PDF with one page per validated JPG or PNG image."""
+    with fitz.open() as result:
+        for image_name, content in image_contents:
+            extension = Path(image_name).suffix.lower()
+            image_type = "jpeg" if extension in {".jpg", ".jpeg"} else "png"
+
+            try:
+                with fitz.open(stream=content, filetype=image_type) as image:
+                    pixmap = image[0].get_pixmap()
+                    width = float(pixmap.width)
+                    height = float(pixmap.height)
+            except Exception:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not read image: {image_name}",
+                ) from None
+
+            page = result.new_page(width=width, height=height)
+            page.insert_image(page.rect, stream=content)
+
+        result.save(str(output))
+
+
 def png_preview(
     path: Path,
     page_number: int
@@ -1011,6 +1077,112 @@ async def merge_pdf(
 
 
 # ========================================
+# Convert PDF to JPG / PNG
+# ========================================
+
+@app.post("/pdf_to_images")
+async def pdf_to_images(
+    filename: str,
+    image_format: str = "jpg",
+):
+    source = stored_path(filename, pdf_only=True)
+    image_format = image_format.lower()
+
+    if image_format not in {"jpg", "png"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Image format must be JPG or PNG.",
+        )
+
+    output_name = new_filename("converted", "zip")
+    output = UPLOAD_DIR / output_name
+
+    async with processing_slots:
+        try:
+            await run_in_threadpool(
+                make_pdf_images, source, output, image_format
+            )
+            return {
+                "filename": output_name,
+                "size": f"{output.stat().st_size / 1024:.2f} KB",
+                "message": f"PDF pages converted to {image_format.upper()} images.",
+            }
+        except Exception:
+            safe_unlink(output)
+            raise
+
+
+# ========================================
+# Convert JPG / PNG images to PDF
+# ========================================
+
+@app.post("/images_to_pdf")
+async def images_to_pdf(
+    files: list[UploadFile] = File(...),
+):
+    if not 1 <= len(files) <= 20:
+        raise HTTPException(
+            status_code=400,
+            detail="Please choose between 1 and 20 images.",
+        )
+
+    allowed_extensions = {".jpg", ".jpeg", ".png"}
+    image_contents = []
+    total_bytes = 0
+
+    try:
+        for file in files:
+            original_name = Path(file.filename or "").name
+            extension = Path(original_name).suffix.lower()
+
+            if extension not in allowed_extensions:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Only JPG, JPEG, and PNG images are supported.",
+                )
+
+            content = await file.read(MAX_FILE_BYTES + 1)
+            if not content:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The image is empty: {original_name}",
+                )
+            if len(content) > MAX_FILE_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Each image must be no larger than {MAX_FILE_MB} MB.",
+                )
+
+            total_bytes += len(content)
+            if total_bytes > MAX_MERGE_TOTAL_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Total image size must not exceed {MAX_MERGE_TOTAL_MB} MB.",
+                )
+
+            image_contents.append((original_name, content))
+
+        output_name = new_filename("converted", "pdf")
+        output = UPLOAD_DIR / output_name
+
+        async with processing_slots:
+            try:
+                await run_in_threadpool(make_images_pdf, image_contents, output)
+                return {
+                    "filename": output_name,
+                    "size": f"{output.stat().st_size / 1024:.2f} KB",
+                    "pages": len(image_contents),
+                    "message": "Images converted to PDF successfully.",
+                }
+            except Exception:
+                safe_unlink(output)
+                raise
+    finally:
+        for file in files:
+            await file.close()
+
+
+# ========================================
 # Convert PDF to Word
 # ========================================
 
@@ -1067,11 +1239,10 @@ async def download(
     path = stored_path(filename)
 
     if path.suffix == ".pdf":
-
         media_type = "application/pdf"
-
+    elif path.suffix == ".zip":
+        media_type = "application/zip"
     else:
-
         media_type = (
             "application/vnd.openxmlformats-officedocument"
             ".wordprocessingml.document"
