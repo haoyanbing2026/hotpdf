@@ -575,6 +575,128 @@ def make_compressed(
         )
 
 
+def make_compressed_to_target(
+    source: Path,
+    output: Path,
+    target_bytes: int
+):
+    """Try several compression profiles to meet a maximum size.
+
+    Returns True only when the actual output file is within the requested
+    byte limit. If no profile reaches the limit, returns the smallest valid
+    result found (or the original file if no smaller result is available).
+    """
+
+    original_size = source.stat().st_size
+
+    if original_size <= target_bytes:
+        shutil.copyfile(source, output)
+        return True
+
+    profiles = [
+        (150, 75),
+        (120, 65),
+        (96, 55),
+        (72, 40),
+    ]
+
+    deadline = time.monotonic() + 100
+    best_path = None
+    best_size = original_size
+
+    try:
+        for index, (resolution, quality) in enumerate(profiles):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+
+            candidate = output.with_name(
+                f"{output.stem}_attempt{index}.pdf"
+            )
+
+            command = [
+                "gs",
+                "-dSAFER",
+                "-sDEVICE=pdfwrite",
+                "-dCompatibilityLevel=1.4",
+                "-dNOPAUSE",
+                "-dQUIET",
+                "-dBATCH",
+                "-dDetectDuplicateImages=true",
+                "-dDownsampleColorImages=true",
+                "-dDownsampleGrayImages=true",
+                "-dDownsampleMonoImages=true",
+                "-dColorImageDownsampleType=/Bicubic",
+                "-dGrayImageDownsampleType=/Bicubic",
+                "-dMonoImageDownsampleType=/Subsample",
+                f"-dColorImageResolution={resolution}",
+                f"-dGrayImageResolution={resolution}",
+                f"-dMonoImageResolution={resolution}",
+                "-dAutoFilterColorImages=false",
+                "-dAutoFilterGrayImages=false",
+                "-dColorImageFilter=/DCTEncode",
+                "-dGrayImageFilter=/DCTEncode",
+                f"-dJPEGQ={quality}",
+                f"-sOutputFile={candidate}",
+                str(source),
+            ]
+
+            try:
+                subprocess.run(
+                    command,
+                    check=True,
+                    capture_output=True,
+                    timeout=min(30, remaining),
+                )
+
+                if not candidate.is_file() or candidate.stat().st_size == 0:
+                    continue
+
+                try:
+                    with fitz.open(str(candidate)) as pdf:
+                        if pdf.page_count < 1:
+                            continue
+                except Exception:
+                    logger.warning("Invalid PDF from target compression attempt")
+                    continue
+
+                candidate_size = candidate.stat().st_size
+                if candidate_size < best_size:
+                    if best_path is not None:
+                        safe_unlink(best_path)
+                    best_path = candidate
+                    best_size = candidate_size
+                    candidate = None
+
+                if best_size <= target_bytes:
+                    break
+
+            except subprocess.TimeoutExpired:
+                logger.warning("Target compression attempt timed out")
+            except subprocess.CalledProcessError:
+                logger.warning("Target compression attempt failed")
+            finally:
+                if candidate is not None:
+                    safe_unlink(candidate)
+
+        if best_path is None:
+            shutil.copyfile(source, output)
+            return False
+
+        shutil.copyfile(best_path, output)
+        return output.stat().st_size <= target_bytes
+
+    except FileNotFoundError:
+        logger.error("Ghostscript executable missing")
+        raise HTTPException(
+            status_code=503,
+            detail="PDF compression is temporarily unavailable.",
+        ) from None
+    finally:
+        if best_path is not None:
+            safe_unlink(best_path)
+
+
 def png_preview(
     path: Path,
     page_number: int
@@ -972,63 +1094,81 @@ async def download(
 
 @app.post("/compress")
 async def compress_pdf(
-    filename: str
+    filename: str,
+    target_bytes: int | None = None,
 ):
-
     source = stored_path(
         filename,
         pdf_only=True
     )
 
+    if target_bytes is not None and target_bytes < 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="Target size must be at least 1 KB.",
+        )
+
+    if target_bytes is not None and target_bytes > 100 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="Target size must not exceed 100 MB.",
+        )
+
     output_name = new_filename(
         "compressed",
         "pdf"
     )
-
     output = UPLOAD_DIR / output_name
 
     async with processing_slots:
-
         try:
+            if target_bytes is None:
+                # Preserve the existing standard-compression behavior.
+                await run_in_threadpool(
+                    make_compressed,
+                    source,
+                    output,
+                )
+                target_met = None
+                message = "Compression successful"
+            else:
+                target_met = await run_in_threadpool(
+                    make_compressed_to_target,
+                    source,
+                    output,
+                    target_bytes,
+                )
+                message = (
+                    "Target size reached"
+                    if target_met
+                    else (
+                        "Could not reach the requested size. "
+                        "The best available result is provided."
+                    )
+                )
 
-            await run_in_threadpool(
-                make_compressed,
-                source,
-                output
-            )
-
-            original_mb = (
-                source.stat().st_size / 1024 / 1024
-            )
-
-            compressed_mb = (
-                output.stat().st_size / 1024 / 1024
-            )
-
+            original_bytes = source.stat().st_size
+            compressed_bytes = output.stat().st_size
+            original_mb = original_bytes / (1024 * 1024)
+            compressed_mb = compressed_bytes / (1024 * 1024)
             reduction = (
-                (1 - compressed_mb / original_mb) * 100
-                if original_mb
+                (1 - compressed_bytes / original_bytes) * 100
+                if original_bytes
                 else 0
             )
 
             return {
                 "filename": output_name,
-                "original_size": round(
-                    original_mb,
-                    2
-                ),
-                "compressed_size": round(
-                    compressed_mb,
-                    2
-                ),
-                "saved": round(
-                    max(0, reduction),
-                    1
-                ),
-                "message": "Compression successful"
+                "original_size": round(original_mb, 2),
+                "compressed_size": round(compressed_mb, 2),
+                "original_bytes": original_bytes,
+                "compressed_bytes": compressed_bytes,
+                "saved": round(max(0, reduction), 1),
+                "target_bytes": target_bytes,
+                "target_met": target_met,
+                "message": message,
             }
 
         except Exception:
-
             safe_unlink(output)
             raise

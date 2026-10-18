@@ -55,6 +55,11 @@ const [downloadUrl,setDownloadUrl] = useState("")
 const [compressing,setCompressing] = useState(false)
 
 const [error,setError] = useState("")
+const [compressionMode,setCompressionMode] = useState("standard")
+const [targetSize,setTargetSize] = useState("2")
+const [targetUnit,setTargetUnit] = useState("MB")
+const [targetMet,setTargetMet] = useState(null)
+const [compressionMessage,setCompressionMessage] = useState("")
 
 
 
@@ -78,7 +83,8 @@ setResultInfo({})
 
 
 setDownloadUrl("")
-
+setTargetMet(null)
+setCompressionMessage("")
 
 setError("")
 
@@ -119,161 +125,82 @@ block:"center"
 
 
 async function compressPDF(){
+  setError("")
+  setResultInfo({})
+  setDownloadUrl("")
+  setTargetMet(null)
+  setCompressionMessage("")
 
+  let targetBytes = null
+  if (compressionMode === "target") {
+    const numericSize = Number(targetSize)
+    if (!Number.isFinite(numericSize) || numericSize <= 0) {
+      setError("Enter a valid maximum file size.")
+      return
+    }
 
+    targetBytes = Math.floor(
+      numericSize * (targetUnit === "MB" ? 1024 * 1024 : 1024)
+    )
+    if (targetBytes < 1024) {
+      setError("The maximum file size must be at least 1 KB.")
+      return
+    }
+    if (targetBytes > 100 * 1024 * 1024) {
+      setError("The maximum file size cannot exceed 100 MB.")
+      return
+    }
+  }
 
-setError("")
+  setCompressing(true)
+  try {
+    const data = await uploadPDF()
+    if (!data?.filename) return
 
+    const params = new URLSearchParams({ filename: data.filename })
+    if (targetBytes !== null) params.set("target_bytes", String(targetBytes))
 
-setResultInfo({})
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/compress?${params.toString()}`,
+      { method: "POST" }
+    )
 
+    let result
+    try {
+      result = await res.json()
+    } catch {
+      throw new Error("The compression service returned an invalid response.")
+    }
+    if (!res.ok || !result?.filename) {
+      throw new Error(result?.detail || result?.message || "Compression failed.")
+    }
 
-setDownloadUrl("")
+    setResultInfo(createPDFResult({
+      filename: result.filename,
+      originalSize: result.original_size ?? "",
+      compressedSize: result.compressed_size ?? "",
+      saved: result.saved ?? ""
+    }))
 
+    if (compressionMode === "target") {
+      const met = result.target_met === true
+      setTargetMet(met)
+      setCompressionMessage(
+        met
+          ? `Target reached. The compressed PDF is within your ${targetSize} ${targetUnit} limit.`
+          : `The requested limit could not be reached. The best available compressed PDF is provided. Actual output: ${result.compressed_size} MB.`
+      )
+    } else {
+      setCompressionMessage("Your PDF has been compressed. Check the downloaded file before submitting or sharing it.")
+    }
 
-
-
-
-const data = await uploadPDF()
-
-
-
-if(!data?.filename){
-
-return
-
+    setDownloadUrl(`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(result.filename)}`)
+  } catch (err) {
+    setError(err.message || "Compression failed.")
+  } finally {
+    setCompressing(false)
+  }
 }
-
-
-
-
-
-
-
-setCompressing(true)
-
-
-
-
-
-
-
-try{
-
-
-
-const res = await fetch(
-
-`${import.meta.env.VITE_API_URL}/compress?filename=${encodeURIComponent(data.filename)}`,
-
-{
-
-method:"POST"
-
-}
-
-)
-
-
-
-
-
-
-
-const result = await res.json()
-
-
-
-
-
-
-
-if(result.filename){
-
-
-
-setResultInfo(
-
-createPDFResult({
-
-filename:result.filename,
-
-originalSize:
-
-result.original_size || "",
-
-compressedSize:
-
-result.compressed_size || "",
-
-saved:
-
-result.saved || ""
-
-})
-
-)
-
-
-
-
-
-
-
-setDownloadUrl(
-
-`${import.meta.env.VITE_API_URL}/download/${encodeURIComponent(result.filename)}`
-
-)
-
-
-
-}
-
-else{
-
-
-throw new Error(
-
-"Compression failed."
-
-)
-
-
-}
-
-
-
-}
-
-catch(err){
-
-
-setError(
-
-err.message || "Compression failed."
-
-)
-
-
-}
-
-finally{
-
-
-setCompressing(false)
-
-
-}
-
-
-
-}
-
-
-
-
-
 
 
 
@@ -310,6 +237,46 @@ description="Reduce PDF size while keeping good quality."
 onUpload={handleFile}
 
 />
+
+<div
+  className="compression-options"
+  style={{ width: "min(100% - 32px, 720px)", margin: "24px auto", padding: 20, border: "1px solid var(--border-color, #ddd)", borderRadius: 12, textAlign: "left", boxSizing: "border-box" }}
+>
+  <h3 style={{ marginTop: 0, marginBottom: 14 }}>Compression options</h3>
+  <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
+    <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+      <input type="radio" name="compressionMode" value="standard" checked={compressionMode === "standard"}
+        onChange={() => { setCompressionMode("standard"); setTargetMet(null); setCompressionMessage("") }} />
+      Standard compression
+    </label>
+    <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+      <input type="radio" name="compressionMode" value="target" checked={compressionMode === "target"}
+        onChange={() => { setCompressionMode("target"); setTargetMet(null); setCompressionMessage("") }} />
+      Maximum file size
+    </label>
+  </div>
+  {compressionMode === "target" && (
+    <div>
+      <label htmlFor="compress-target-size" style={{ display: "block", fontWeight: 600, marginBottom: 8 }}>
+        Compress to no more than
+      </label>
+      <div style={{ display: "flex", gap: 10, maxWidth: 360 }}>
+        <input id="compress-target-size" type="number" min="0.01" step="any" inputMode="decimal"
+          value={targetSize} onChange={(event) => setTargetSize(event.target.value)}
+          aria-describedby="compress-target-help"
+          style={{ flex: 1, minWidth: 0, padding: "10px 12px", border: "1px solid #bbb", borderRadius: 8, font: "inherit" }} />
+        <select aria-label="Maximum file size unit" value={targetUnit} onChange={(event) => setTargetUnit(event.target.value)}
+          style={{ width: 90, padding: "10px 12px", border: "1px solid #bbb", borderRadius: 8, font: "inherit", background: "transparent" }}>
+          <option value="KB">KB</option>
+          <option value="MB">MB</option>
+        </select>
+      </div>
+      <p id="compress-target-help" style={{ marginBottom: 0, color: "var(--text-secondary, #666)", fontSize: 14 }}>
+        HotPDF will try to make the output no larger than this limit. Some PDFs cannot be reduced enough; if that happens, we will tell you.
+      </p>
+    </div>
+  )}
+</div>
 
 
 
@@ -490,27 +457,29 @@ compressing
 
 
 {
-
-downloadUrl &&
-
-
-
-<ResultCard
-
-title="🎉 Compression completed"
-
-message="Your PDF has been compressed successfully."
-
-info={resultInfo}
-
-downloadUrl={downloadUrl}
-
-downloadText="Download Compressed PDF"
-
-/>
-
-
-
+  downloadUrl && (
+    <>
+      {compressionMessage && (
+        <div role="status" style={{
+          width: "min(100% - 32px, 720px)", margin: "20px auto", padding: 14,
+          borderRadius: 10,
+          border: `1px solid ${targetMet === false ? "#d97706" : "#16a34a"}`,
+          background: targetMet === false ? "#fff7ed" : "#f0fdf4",
+          color: "#222", lineHeight: 1.5
+        }}>
+          <strong>{targetMet === false ? "Target size not reached" : targetMet === true ? "Target size reached" : "Compression complete"}</strong>
+          <div>{compressionMessage}</div>
+        </div>
+      )}
+      <ResultCard
+        title={targetMet === false ? "Compressed PDF is ready" : "🎉 Compression completed"}
+        message={compressionMessage}
+        info={resultInfo}
+        downloadUrl={downloadUrl}
+        downloadText="Download Compressed PDF"
+      />
+    </>
+  )
 }
 
 
