@@ -22,6 +22,7 @@ function Convert() {
   const [mode, setMode] = useState("pdf-to-word")
   const [previewFile, setPreviewFile] = useState(null)
   const [imageFiles, setImageFiles] = useState([])
+  const [imagePreviews, setImagePreviews] = useState([])
   const [imageFormat, setImageFormat] = useState("jpg")
   const [resultInfo, setResultInfo] = useState({})
   const [downloadUrl, setDownloadUrl] = useState("")
@@ -56,6 +57,8 @@ function Convert() {
     setMode(nextMode)
     setPreviewFile(null)
     setImageFiles([])
+    imagePreviews.forEach(url => URL.revokeObjectURL(url))
+    setImagePreviews([])
     setFile(null)
     clearResult()
   }
@@ -125,6 +128,30 @@ function Convert() {
     } finally {
       setConverting(false)
     }
+  }
+
+  function moveImage(index, direction) {
+    const nextIndex = index + direction
+    if (nextIndex < 0 || nextIndex >= imageFiles.length) return
+    setImageFiles(current => {
+      const next = [...current]
+      ;[next[index], next[nextIndex]] = [next[nextIndex], next[index]]
+      return next
+    })
+    setImagePreviews(current => {
+      const next = [...current]
+      ;[next[index], next[nextIndex]] = [next[nextIndex], next[index]]
+      return next
+    })
+    clearResult()
+  }
+
+  function removeImage(index) {
+    const url = imagePreviews[index]
+    if (url) URL.revokeObjectURL(url)
+    setImageFiles(current => current.filter((_, i) => i !== index))
+    setImagePreviews(current => current.filter((_, i) => i !== index))
+    clearResult()
   }
 
   async function convertImagesToPdf() {
@@ -284,21 +311,39 @@ function Convert() {
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             multiple
             onChange={event => {
-              setImageFiles(Array.from(event.target.files || []))
+              const selected = Array.from(event.target.files || [])
+              const combined = [...imageFiles, ...selected]
+              const unique = combined.filter((file, index, all) =>
+                all.findIndex(item => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified) === index
+              ).slice(0, 20)
+              imagePreviews.forEach(url => URL.revokeObjectURL(url))
+              setImageFiles(unique)
+              setImagePreviews(unique.map(file => URL.createObjectURL(file)))
               clearResult()
+              event.target.value = ""
             }}
           />
-          <p style={{ color: "#64748b", marginBottom: 0 }}>
-            Select up to 20 images. They will become PDF pages in the order shown below.
+          <p style={{ color: "#64748b", marginBottom: 12 }}>
+            Select up to 20 images. Preview them below and use the arrows to set the PDF page order.
           </p>
           {imageFiles.length > 0 && (
-            <ol style={{ paddingLeft: 24, overflowWrap: "anywhere" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))", gap: 12 }}>
               {imageFiles.map((file, index) => (
-                <li key={`${file.name}-${file.size}-${index}`}>
-                  {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                </li>
+                <div key={`${file.name}-${file.size}-${file.lastModified}`} style={{ minWidth: 0, border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#fff" }}>
+                  <div style={{ color: "#475569", fontSize: 13, fontWeight: 700, marginBottom: 8 }}>Page {index + 1}</div>
+                  <div style={{ height: 115, display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc", borderRadius: 6, overflow: "hidden" }}>
+                    <img src={imagePreviews[index]} alt={`Preview of ${file.name}`} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                  </div>
+                  <div title={file.name} style={{ fontSize: 12, margin: "8px 0", overflowWrap: "anywhere", minHeight: 32 }}>{file.name}</div>
+                  <div style={{ color: "#64748b", fontSize: 11, marginBottom: 8 }}>{(file.size / 1024).toFixed(1)} KB</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    <button type="button" style={{ border: "1px solid #cbd5e1", borderRadius: 6, padding: "4px 9px", background: index === 0 ? "#f1f5f9" : "#fff", cursor: index === 0 ? "not-allowed" : "pointer" }} disabled={index === 0} onClick={() => moveImage(index, -1)} aria-label={`Move ${file.name} up`}>↑</button>
+                    <button type="button" style={{ border: "1px solid #cbd5e1", borderRadius: 6, padding: "4px 9px", background: index === imageFiles.length - 1 ? "#f1f5f9" : "#fff", cursor: index === imageFiles.length - 1 ? "not-allowed" : "pointer" }} disabled={index === imageFiles.length - 1} onClick={() => moveImage(index, 1)} aria-label={`Move ${file.name} down`}>↓</button>
+                    <button type="button" style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 6, padding: "4px 7px", background: "#fff", cursor: "pointer" }} onClick={() => removeImage(index)}>Remove</button>
+                  </div>
+                </div>
               ))}
-            </ol>
+            </div>
           )}
         </section>
       )}

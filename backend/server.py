@@ -740,7 +740,15 @@ def make_images_pdf(
     image_contents: list[tuple[str, bytes]],
     output: Path,
 ):
-    """Create a PDF with one page per validated JPG or PNG image."""
+    """Create a reasonably sized PDF with one page per image.
+
+    Images are downsampled only when their longest side exceeds 2200 pixels,
+    then encoded as JPEG to avoid embedding very large original PNG streams.
+    Pages use a 150-DPI physical size rather than treating pixels as PDF points.
+    """
+    max_dimension = 2200
+    target_dpi = 150
+
     with fitz.open() as result:
         for image_name, content in image_contents:
             extension = Path(image_name).suffix.lower()
@@ -748,9 +756,19 @@ def make_images_pdf(
 
             try:
                 with fitz.open(stream=content, filetype=image_type) as image:
-                    pixmap = image[0].get_pixmap()
-                    width = float(pixmap.width)
-                    height = float(pixmap.height)
+                    if image.page_count < 1:
+                        raise ValueError("empty image")
+                    rect = image[0].rect
+                    longest_side = max(rect.width, rect.height)
+                    scale = min(1.0, max_dimension / max(longest_side, 1))
+                    pixmap = image[0].get_pixmap(
+                        matrix=fitz.Matrix(scale, scale),
+                        alpha=False,
+                    )
+                    # JPEG is much smaller than many camera/phone PNG images.
+                    optimized_image = pixmap.tobytes("jpeg")
+                    width = pixmap.width * 72 / target_dpi
+                    height = pixmap.height * 72 / target_dpi
             except Exception:
                 raise HTTPException(
                     status_code=400,
@@ -758,9 +776,9 @@ def make_images_pdf(
                 ) from None
 
             page = result.new_page(width=width, height=height)
-            page.insert_image(page.rect, stream=content)
+            page.insert_image(page.rect, stream=optimized_image)
 
-        result.save(str(output))
+        result.save(str(output), garbage=4, deflate=True, clean=True)
 
 
 def png_preview(
