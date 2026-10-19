@@ -211,8 +211,19 @@ function EditPDF() {
       </section>}
       {(uploadError || error) && <div className="error-message" role="alert">⚠️ {uploadError || error}</div>}
       {result && <ResultCard title="PDF editing completed" message="Your edited PDF is ready. The original file has not been changed." info={result.info} downloadUrl={result.url} downloadText="Download Edited PDF" />}
-      <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 16px 48px", lineHeight: 1.7 }}>
-        <h2>Edit PDF Pages Online</h2><p>Preview, reorder, rotate, or remove PDF pages. You can also insert selected pages from another PDF. Download your changes as a new PDF while keeping your original file unchanged.</p>
+      <section aria-label="Edit PDF guide" style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 16px 64px", lineHeight: 1.7, color: "#334155" }}>
+        <h2>Edit PDF Pages Online with HotPDF</h2>
+        <p>HotPDF is an online PDF editor that helps you organize PDF documents without changing the original file. Preview your pages, change their order, rotate pages, remove unwanted pages, or insert selected pages from another PDF. When you finish editing, create and download a new PDF.</p>
+        <h3>How to Edit a PDF Online</h3>
+        <ol><li><strong>Upload your PDF.</strong> Select a PDF file and wait for HotPDF to load its pages.</li><li><strong>Preview and organize pages.</strong> Review the page thumbnails and drag pages into your preferred order.</li><li><strong>Rotate or remove pages.</strong> Rotate pages clockwise or mark unwanted pages for removal.</li><li><strong>Insert pages from another PDF.</strong> Upload a second document, select the pages you need, and choose where to insert them.</li><li><strong>Create your edited PDF.</strong> Apply your changes and download the resulting document.</li></ol>
+        <h3>PDF Editing Features</h3>
+        <ul><li><strong>Reorder PDF pages:</strong> Drag page thumbnails to arrange your document in the desired sequence.</li><li><strong>Rotate PDF pages:</strong> Correct the orientation of individual pages.</li><li><strong>Delete PDF pages:</strong> Remove unwanted pages while keeping the pages you need.</li><li><strong>Insert PDF pages:</strong> Select pages from a second PDF and insert them at a chosen position.</li><li><strong>Download a new PDF:</strong> Save your changes as a separate file without modifying the original document.</li></ul>
+        <h3>Frequently Asked Questions</h3>
+        <h4>Can I rearrange PDF pages online?</h4><p>Yes. Upload your PDF and drag the page thumbnails into your preferred order before creating the edited document.</p>
+        <h4>Can I rotate or delete individual PDF pages?</h4><p>Yes. You can rotate individual pages and mark pages for removal. Apply your changes to create a new PDF.</p>
+        <h4>Can I insert pages from another PDF?</h4><p>Yes. Upload a second PDF, select the pages you want to insert, and choose their insertion position.</p>
+        <h4>Will editing change my original PDF?</h4><p>No. HotPDF creates a separate edited PDF for download. Your original document is not modified by the editing process.</p>
+        <h4>Can I use HotPDF without installing software?</h4><p>Yes. HotPDF runs in your web browser, so you can use the PDF editing tools without installing a separate desktop application.</p>
       </section>
     </div>
   )

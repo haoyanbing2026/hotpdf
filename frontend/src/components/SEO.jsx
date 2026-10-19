@@ -9,6 +9,7 @@ const pages = {
   "/merge": ["Merge PDF Online | HotPDF", "Combine multiple PDF documents into one file with HotPDF's online PDF merger."],
   "/convert": ["Convert PDF Online | HotPDF", "Explore HotPDF's online PDF conversion tools and supported formats."],
   "/compress": ["Compress PDF Online | HotPDF", "Use HotPDF's online PDF compression tool to reduce PDF file size."],
+  "/edit": ["Edit PDF Online - Reorder, Rotate & Delete Pages | HotPDF", "Edit PDF files online with HotPDF. Reorder pages, rotate PDF pages, delete unwanted pages, and insert selected pages from another PDF. Preview your document and download your edited PDF."],
   "/about": ["About HotPDF | Online PDF Tools", "Learn about HotPDF and its online PDF tools."],
   "/privacy": ["Privacy Policy | HotPDF", "Read HotPDF's privacy policy and learn how information is handled."],
   "/terms": ["Terms of Service | HotPDF", "Read the terms of service for using HotPDF."]
