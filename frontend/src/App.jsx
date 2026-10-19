@@ -23,6 +23,7 @@ import Footer from "./components/Footer"
 import Home from "./pages/Home"
 
 import Split from "./pages/Split"
+import EditPDF from "./pages/Edit"
 
 import Merge from "./pages/Merge"
 

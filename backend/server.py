@@ -1,5 +1,6 @@
 
 import asyncio
+import json
 import logging
 import os
 import re
@@ -79,12 +80,12 @@ TEMP_TTL_SECONDS = TEMP_TTL_MINUTES * 60
 # Only server-generated filenames are accepted.
 
 FILE_NAME_RE = re.compile(
-    r"(?:upload|split|merged|compressed|converted)_"
+    r"(?:upload|split|merged|compressed|converted|edited)_"
     r"[0-9a-f]{32}\.(?:pdf|docx|zip)"
 )
 
 PDF_NAME_RE = re.compile(
-    r"(?:upload|split|merged|compressed|converted)_"
+    r"(?:upload|split|merged|compressed|converted|edited)_"
     r"[0-9a-f]{32}\.pdf"
 )
 
@@ -1241,6 +1242,71 @@ async def convert_word(
 
         except Exception:
 
+            safe_unlink(output)
+            raise
+
+
+# ========================================
+# Edit PDF pages (rotate / delete)
+# ========================================
+
+@app.post("/edit_pdf")
+async def edit_pdf(
+    filename: str,
+    rotations: str = "{}",
+    delete_pages: str = "",
+):
+    """Rotate selected pages and/or delete pages, using 1-based page numbers."""
+    source = stored_path(filename, pdf_only=True)
+
+    try:
+        rotation_map = json.loads(rotations)
+        if not isinstance(rotation_map, dict):
+            raise ValueError("rotations must be an object")
+        normalized_rotations = {}
+        for raw_page, raw_degrees in rotation_map.items():
+            page_number = int(raw_page)
+            degrees = int(raw_degrees)
+            if degrees not in (0, 90, 180, 270):
+                raise ValueError("rotation must be 0, 90, 180, or 270")
+            normalized_rotations[page_number] = degrees
+        deleted = [int(item.strip()) for item in delete_pages.split(",") if item.strip()] if delete_pages.strip() else []
+        if len(deleted) != len(set(deleted)):
+            raise ValueError("duplicate page numbers")
+    except (ValueError, TypeError, json.JSONDecodeError):
+        raise HTTPException(status_code=400, detail="Invalid page edits. Please refresh and try again.") from None
+
+    output_name = new_filename("edited", "pdf")
+    output = UPLOAD_DIR / output_name
+
+    async with processing_slots:
+        try:
+            def apply_edits():
+                with fitz.open(str(source)) as pdf:
+                    page_count = pdf.page_count
+                    valid_pages = set(range(1, page_count + 1))
+                    if not set(normalized_rotations).issubset(valid_pages):
+                        raise HTTPException(status_code=400, detail="A rotation page number is invalid.")
+                    if not set(deleted).issubset(valid_pages):
+                        raise HTTPException(status_code=400, detail="A deletion page number is invalid.")
+                    if len(deleted) >= page_count:
+                        raise HTTPException(status_code=400, detail="A PDF must contain at least one page.")
+                    for page_number, degrees in normalized_rotations.items():
+                        page = pdf[page_number - 1]
+                        page.set_rotation((page.rotation + degrees) % 360)
+                    for page_number in sorted(deleted, reverse=True):
+                        pdf.delete_page(page_number - 1)
+                    pdf.save(str(output), garbage=4, deflate=True, clean=True)
+                    return pdf.page_count
+
+            page_count = await run_in_threadpool(apply_edits)
+            return {
+                "filename": output_name,
+                "pages": page_count,
+                "size": f"{output.stat().st_size / 1024:.2f} KB",
+                "message": "PDF edited successfully.",
+            }
+        except Exception:
             safe_unlink(output)
             raise
 
