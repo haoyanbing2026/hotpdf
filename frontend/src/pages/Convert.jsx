@@ -245,31 +245,49 @@ function Convert() {
         style={{
           width: "min(100% - 32px, 720px)",
           margin: "24px auto",
-          padding: 16,
+          padding: 20,
           border: "1px solid #dfe3ea",
           borderRadius: 12,
           background: "#fff"
         }}
       >
-        <h3 style={{ marginTop: 0 }}>Choose conversion</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+        <h3 style={{ margin: "0 0 20px", textAlign: "center" }}>Choose conversion</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
           {[
             ["pdf-to-word", "PDF to Word"],
-            ["pdf-to-images", "PDF to JPG / PNG"],
-            ["images-to-pdf", "JPG / PNG to PDF"],
             ["word-to-pdf", "Word to PDF"],
+            ["pdf-to-powerpoint", "PDF to PowerPoint"],
             ["powerpoint-to-pdf", "PowerPoint to PDF"],
-            ["pdf-to-powerpoint", "PDF to PowerPoint"]
+            ["pdf-to-images", "PDF to JPG / PNG"],
+            ["images-to-pdf", "JPG / PNG to PDF"]
           ].map(([value, label]) => (
-            <label key={value} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+            <label
+              key={value}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                minWidth: 0,
+                padding: "14px 12px",
+                border: `1px solid ${mode === value ? "#2563eb" : "#dfe3ea"}`,
+                borderRadius: 10,
+                background: mode === value ? "#eff6ff" : "#fff",
+                color: "#0f2748",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: mode === value ? 600 : 400,
+                lineHeight: 1.4
+              }}
+            >
               <input
                 type="radio"
                 name="conversion-mode"
                 value={value}
                 checked={mode === value}
                 onChange={() => handleModeChange(value)}
+                style={{ flexShrink: 0, accentColor: "#2563eb" }}
               />
-              {label}
+              <span style={{ overflowWrap: "anywhere" }}>{label}</span>
             </label>
           ))}
         </div>
