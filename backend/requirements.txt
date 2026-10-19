@@ -5,3 +5,5 @@ pymupdf
 pypdf
 pdf2docx
 python-docx
+python-pptx
+psycopg[binary]>=3.2,<4

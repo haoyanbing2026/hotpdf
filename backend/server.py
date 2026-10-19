@@ -2,6 +2,10 @@
 import asyncio
 import json
 import logging
+import sqlite3
+import secrets
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 import os
 import re
 import shutil
@@ -11,13 +15,14 @@ import time
 import uuid
 import zipfile
 
-from contextlib import asynccontextmanager, suppress
+from contextlib import asynccontextmanager, suppress, contextmanager
 from pathlib import Path
 
 import fitz
 
 from docx import Document
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Header, Request
+from pydantic import BaseModel, Field, EmailStr, ValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from starlette.concurrency import run_in_threadpool
@@ -81,13 +86,96 @@ TEMP_TTL_SECONDS = TEMP_TTL_MINUTES * 60
 
 FILE_NAME_RE = re.compile(
     r"(?:upload|split|merged|compressed|converted|edited)_"
-    r"[0-9a-f]{32}\.(?:pdf|docx|zip)"
+    r"[0-9a-f]{32}\.(?:pdf|docx|pptx|zip)"
 )
 
 PDF_NAME_RE = re.compile(
     r"(?:upload|split|merged|compressed|converted|edited)_"
     r"[0-9a-f]{32}\.pdf"
 )
+
+
+# ========================================
+# Author feedback storage
+# ========================================
+
+# Use PostgreSQL on Render when DATABASE_URL is set. Keep SQLite locally.
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+ADMIN_TOKEN = os.getenv("FEEDBACK_ADMIN_TOKEN", "").strip()
+
+if not USE_POSTGRES:
+    FEEDBACK_DB = Path(os.getenv("FEEDBACK_DB_PATH", "/data/hotpdf_feedback.sqlite3"))
+    FEEDBACK_DB.parent.mkdir(parents=True, exist_ok=True)
+
+
+@contextmanager
+def feedback_connection():
+    if USE_POSTGRES:
+        # Import lazily so local SQLite installations still work.
+        import psycopg
+        from psycopg.rows import dict_row
+
+        with psycopg.connect(DATABASE_URL, connect_timeout=10, row_factory=dict_row) as connection:
+            yield connection
+    else:
+        connection = sqlite3.connect(str(FEEDBACK_DB), timeout=15)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA busy_timeout=15000")
+        try:
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+
+def feedback_execute(connection, sql: str, params=()):
+    # SQL statements in this module use SQLite-style '?' placeholders.
+    # psycopg expects '%s' placeholders instead.
+    if USE_POSTGRES:
+        sql = sql.replace("?", "%s")
+    return connection.execute(sql, params)
+
+
+def initialize_feedback_db():
+    with feedback_connection() as connection:
+        id_column = "BIGSERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
+        connection.execute(f"""
+            CREATE TABLE IF NOT EXISTS feedback (
+                id {id_column},
+                name TEXT NOT NULL,
+                email TEXT,
+                message TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'new'
+            )
+        """)
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC)")
+
+
+initialize_feedback_db()
+
+
+class FeedbackSubmission(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    email: str | None = Field(default=None, max_length=254)
+    message: str = Field(min_length=5, max_length=5000)
+    website: str | None = Field(default=None, max_length=200)  # honeypot
+
+
+class FeedbackStatusUpdate(BaseModel):
+    status: str = Field(pattern="^(new|read|replied|archived)$")
+
+
+def require_feedback_admin(authorization: str | None):
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=503, detail="Author dashboard is not configured yet.")
+    scheme, _, supplied = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or not secrets.compare_digest(supplied, ADMIN_TOKEN):
+        raise HTTPException(status_code=401, detail="Invalid admin access token.")
 
 
 # ========================================
@@ -205,7 +293,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"]
 )
 
@@ -828,6 +916,61 @@ def png_preview(
 
 
 # ========================================
+# Office document conversion helpers
+# ========================================
+
+def run_libreoffice(input_path: Path, output_dir: Path, target: str):
+    """Convert DOCX/PPTX using LibreOffice in headless mode."""
+    try:
+        subprocess.run(
+            ["libreoffice", "-env:UserInstallation=file:///tmp/lo-" + uuid.uuid4().hex,
+             "--headless", "--convert-to", target, "--outdir", str(output_dir), str(input_path)],
+            check=True, capture_output=True, timeout=120,
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=503, detail="Office conversion is unavailable: LibreOffice is not installed.") from None
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="Office conversion timed out.") from None
+    except subprocess.CalledProcessError:
+        raise HTTPException(status_code=422, detail="Could not convert this Office document.") from None
+    output = output_dir / f"{input_path.stem}.{target}"
+    if not output.is_file() or output.stat().st_size == 0:
+        raise HTTPException(status_code=422, detail="Conversion did not produce an output file.")
+    return output
+
+
+def pdf_to_powerpoint(source: Path, output: Path):
+    """Render each PDF page to a slide image. This preserves appearance, not editable text."""
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    prs.slide_width = Inches(10)
+    prs.slide_height = Inches(7.5)
+    blank = prs.slide_layouts[6]
+    with fitz.open(str(source)) as pdf:
+        if pdf.page_count > MAX_PDF_PAGES:
+            raise HTTPException(status_code=413, detail=f"A PDF may contain at most {MAX_PDF_PAGES} pages.")
+        for page in pdf:
+            pix = page.get_pixmap(matrix=fitz.Matrix(1.35, 1.35), alpha=False)
+            image_bytes = pix.tobytes("png")
+            from io import BytesIO
+            stream = BytesIO(image_bytes)
+            slide = prs.slides.add_slide(blank)
+            page_ratio = page.rect.width / max(page.rect.height, 1)
+            slide_ratio = prs.slide_width / prs.slide_height
+            if page_ratio >= slide_ratio:
+                width = prs.slide_width
+                height = int(width / page_ratio)
+                left, top = 0, int((prs.slide_height - height) / 2)
+            else:
+                height = prs.slide_height
+                width = int(height * page_ratio)
+                left, top = int((prs.slide_width - width) / 2), 0
+            slide.shapes.add_picture(stream, left, top, width=width, height=height)
+    prs.save(str(output))
+
+
+# ========================================
 # Health checks
 # ========================================
 
@@ -1359,6 +1502,135 @@ async def edit_pdf(
 
 
 # ========================================
+# Author feedback endpoints
+# ========================================
+
+@app.post("/feedback")
+async def submit_feedback(payload: FeedbackSubmission, request: Request):
+    # Quietly accept bot submissions into the honeypot without storing them.
+    if payload.website and payload.website.strip():
+        return {"message": "Thank you for your feedback."}
+    name = " ".join(payload.name.split()).strip()
+    email = (payload.email or "").strip() or None
+    message = payload.message.strip()
+    if not name or len(message) < 5:
+        raise HTTPException(status_code=422, detail="Please provide your name and a message of at least 5 characters.")
+    if email and ("@" not in email or len(email) > 254):
+        raise HTTPException(status_code=422, detail="Please enter a valid email address or leave it blank.")
+    # Per-process basic abuse guard; use a gateway/WAF for stronger distributed rate limits.
+    now = time.time()
+    recent = getattr(submit_feedback, "recent", {})
+    client_ip = request.client.host if request.client else "unknown"
+    recent = {key: value for key, value in recent.items() if now - value < 60}
+    if client_ip in recent:
+        raise HTTPException(status_code=429, detail="Please wait a minute before sending another message.")
+    recent[client_ip] = now
+    submit_feedback.recent = recent
+    created_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with feedback_connection() as connection:
+        feedback_execute(connection,
+            "INSERT INTO feedback(name,email,message,created_at,status) VALUES(?,?,?,?, 'new')",
+            (name, email, message, created_at),
+        )
+    return {"message": "Thank you. Your message has been sent to the HotPDF author."}
+
+
+@app.get("/author/feedback")
+def list_feedback(authorization: str | None = Header(default=None), limit: int = 100, offset: int = 0):
+    require_feedback_admin(authorization)
+    limit = max(1, min(limit, 200))
+    offset = max(0, offset)
+    with feedback_connection() as connection:
+        total = connection.execute("SELECT COUNT(*) AS total FROM feedback").fetchone()["total"]
+        rows = feedback_execute(connection,
+            "SELECT id,name,email,message,created_at,status FROM feedback ORDER BY id DESC LIMIT ? OFFSET ?",
+            (limit, offset),
+        ).fetchall()
+    return {"total": total, "items": [dict(row) for row in rows]}
+
+
+@app.patch("/author/feedback/{feedback_id}")
+def update_feedback_status(feedback_id: int, payload: FeedbackStatusUpdate, authorization: str | None = Header(default=None)):
+    require_feedback_admin(authorization)
+    with feedback_connection() as connection:
+        cursor = feedback_execute(connection, "UPDATE feedback SET status=? WHERE id=?", (payload.status, feedback_id))
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Feedback message not found.")
+    return {"message": "Status updated."}
+
+
+@app.delete("/author/feedback/{feedback_id}")
+def delete_feedback(feedback_id: int, authorization: str | None = Header(default=None)):
+    require_feedback_admin(authorization)
+    with feedback_connection() as connection:
+        cursor = feedback_execute(connection, "DELETE FROM feedback WHERE id=?", (feedback_id,))
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Feedback message not found.")
+    return {"message": "Feedback deleted."}
+
+
+# ========================================
+# Added Office conversion endpoints
+# ========================================
+
+@app.post("/convert_word_to_pdf")
+async def convert_word_to_pdf(file: UploadFile = File(...)):
+    if not (file.filename or "").lower().endswith(".docx"):
+        raise HTTPException(status_code=400, detail="Please upload a DOCX file.")
+    temp_name = new_filename("converted", "docx")
+    source = UPLOAD_DIR / temp_name
+    output_name = new_filename("converted", "pdf")
+    output = UPLOAD_DIR / output_name
+    try:
+        content = await file.read(MAX_FILE_BYTES + 1)
+        if not content or len(content) > MAX_FILE_BYTES:
+            raise HTTPException(status_code=413, detail=f"File must be no larger than {MAX_FILE_MB} MB.")
+        source.write_bytes(content)
+        await run_in_threadpool(run_libreoffice, source, UPLOAD_DIR, "pdf")
+        generated = UPLOAD_DIR / f"{source.stem}.pdf"
+        if generated != output:
+            generated.replace(output)
+        return {"filename": output_name, "size": f"{output.stat().st_size / 1024:.2f} KB", "message": "Word converted to PDF."}
+    finally:
+        safe_unlink(source)
+        await file.close()
+
+
+@app.post("/convert_powerpoint_to_pdf")
+async def convert_powerpoint_to_pdf(file: UploadFile = File(...)):
+    if not (file.filename or "").lower().endswith(".pptx"):
+        raise HTTPException(status_code=400, detail="Please upload a PPTX file.")
+    source = UPLOAD_DIR / new_filename("converted", "pptx")
+    output_name = new_filename("converted", "pdf")
+    output = UPLOAD_DIR / output_name
+    try:
+        content = await file.read(MAX_FILE_BYTES + 1)
+        if not content or len(content) > MAX_FILE_BYTES:
+            raise HTTPException(status_code=413, detail=f"File must be no larger than {MAX_FILE_MB} MB.")
+        source.write_bytes(content)
+        await run_in_threadpool(run_libreoffice, source, UPLOAD_DIR, "pdf")
+        generated = UPLOAD_DIR / f"{source.stem}.pdf"
+        generated.replace(output)
+        return {"filename": output_name, "size": f"{output.stat().st_size / 1024:.2f} KB", "message": "PowerPoint converted to PDF."}
+    finally:
+        safe_unlink(source)
+        await file.close()
+
+
+@app.post("/convert_powerpoint")
+async def convert_powerpoint(filename: str):
+    source = stored_path(filename, pdf_only=True)
+    output_name = new_filename("converted", "pptx")
+    output = UPLOAD_DIR / output_name
+    try:
+        await run_in_threadpool(pdf_to_powerpoint, source, output)
+        return {"filename": output_name, "size": f"{output.stat().st_size / 1024:.2f} KB", "message": "PDF pages exported to PowerPoint slides as images."}
+    except Exception:
+        safe_unlink(output)
+        raise
+
+
+# ========================================
 # Download
 # ========================================
 
@@ -1373,11 +1645,12 @@ async def download(
         media_type = "application/pdf"
     elif path.suffix == ".zip":
         media_type = "application/zip"
+    elif path.suffix == ".pptx":
+        media_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    elif path.suffix == ".docx":
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     else:
-        media_type = (
-            "application/vnd.openxmlformats-officedocument"
-            ".wordprocessingml.document"
-        )
+        media_type = "application/octet-stream"
 
     return FileResponse(
         str(path),
