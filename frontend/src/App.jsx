@@ -19,6 +19,8 @@ import Compress from "./pages/Compress"
 import Privacy from "./pages/Privacy"
 import About from "./pages/About"
 import Terms from "./pages/Terms"
+import Feedback from "./pages/Feedback"
+import FeedbackAdmin from "./pages/FeedbackAdmin"
 
 import "./styles/global.css"
 import "./styles/navbar.css"
@@ -62,6 +64,8 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about" element={<About />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/author/feedback" element={<FeedbackAdmin />} />
       </Routes>
 
       <Footer />

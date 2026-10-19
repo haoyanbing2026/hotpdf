@@ -24,6 +24,7 @@ function Convert() {
   const [imageFiles, setImageFiles] = useState([])
   const [imagePreviews, setImagePreviews] = useState([])
   const [imageFormat, setImageFormat] = useState("jpg")
+  const [officeFile, setOfficeFile] = useState(null)
   const [resultInfo, setResultInfo] = useState({})
   const [downloadUrl, setDownloadUrl] = useState("")
   const [downloadText, setDownloadText] = useState("Download File")
@@ -32,6 +33,8 @@ function Convert() {
   const [error, setError] = useState("")
 
   const isImagesToPdf = mode === "images-to-pdf"
+  const isOfficeUploadMode = mode === "word-to-pdf" || mode === "powerpoint-to-pdf"
+  const isPdfToPowerPoint = mode === "pdf-to-powerpoint"
 
   function clearResult() {
     setResultInfo({})
@@ -56,6 +59,7 @@ function Convert() {
   function handleModeChange(nextMode) {
     setMode(nextMode)
     setPreviewFile(null)
+    setOfficeFile(null)
     setImageFiles([])
     imagePreviews.forEach(url => URL.revokeObjectURL(url))
     setImagePreviews([])
@@ -95,6 +99,27 @@ function Convert() {
     clearResult()
     setError("")
 
+    if (isOfficeUploadMode) {
+      if (!officeFile) {
+        setError(`Please select a ${mode === "word-to-pdf" ? "Word DOCX" : "PowerPoint PPTX"} file.`)
+        return
+      }
+      setConverting(true)
+      try {
+        const formData = new FormData()
+        formData.append("file", officeFile)
+        const endpoint = mode === "word-to-pdf" ? "convert_word_to_pdf" : "convert_powerpoint_to_pdf"
+        const response = await fetch(`${API_URL}/${endpoint}`, { method: "POST", body: formData })
+        const result = await readResponse(response)
+        showResult(result, "Download PDF", mode === "word-to-pdf" ? "Your Word document has been converted to PDF." : "Your PowerPoint presentation has been converted to PDF.")
+      } catch (err) {
+        setError(err.message || "Conversion failed.")
+      } finally {
+        setConverting(false)
+      }
+      return
+    }
+
     const uploaded = await uploadPDF()
     if (!uploaded?.filename) return
 
@@ -111,6 +136,13 @@ function Convert() {
           "Download Word File",
           "Your PDF has been converted to a Word document."
         )
+      } else if (isPdfToPowerPoint) {
+        const response = await fetch(
+          `${API_URL}/convert_powerpoint?filename=${encodeURIComponent(uploaded.filename)}`,
+          { method: "POST" }
+        )
+        const result = await readResponse(response)
+        showResult(result, "Download PowerPoint", "Each PDF page has been placed on a PowerPoint slide as an image. The slide content is not individually editable.")
       } else {
         const response = await fetch(
           `${API_URL}/pdf_to_images?filename=${encodeURIComponent(uploaded.filename)}&image_format=${encodeURIComponent(imageFormat)}`,
@@ -190,17 +222,15 @@ function Convert() {
     }
   }
 
-  const pageTitle = isImagesToPdf
-    ? "Convert JPG / PNG to PDF"
-    : mode === "pdf-to-images"
-      ? "Convert PDF to JPG / PNG"
-      : "Convert PDF to Word"
-
-  const pageDescription = isImagesToPdf
-    ? "Combine multiple JPG or PNG images into one PDF document."
-    : mode === "pdf-to-images"
-      ? "Turn every page of a PDF into downloadable JPG or PNG images."
-      : "Turn PDF documents into editable Word files."
+  const modeDetails = {
+    "pdf-to-word": ["Convert PDF to Word", "Turn PDF documents into editable Word files."],
+    "pdf-to-images": ["Convert PDF to JPG / PNG", "Turn every page of a PDF into downloadable JPG or PNG images."],
+    "images-to-pdf": ["Convert JPG / PNG to PDF", "Combine multiple JPG or PNG images into one PDF document."],
+    "word-to-pdf": ["Convert Word to PDF", "Convert DOCX documents to PDF while retaining layout where supported."],
+    "powerpoint-to-pdf": ["Convert PowerPoint to PDF", "Convert PPTX presentations to PDF."],
+    "pdf-to-powerpoint": ["Convert PDF to PowerPoint", "Create a PowerPoint slide for each PDF page."]
+  }
+  const [pageTitle, pageDescription] = modeDetails[mode] || modeDetails["pdf-to-word"]
 
   return (
     <div className="page">
@@ -226,7 +256,10 @@ function Convert() {
           {[
             ["pdf-to-word", "PDF to Word"],
             ["pdf-to-images", "PDF to JPG / PNG"],
-            ["images-to-pdf", "JPG / PNG to PDF"]
+            ["images-to-pdf", "JPG / PNG to PDF"],
+            ["word-to-pdf", "Word to PDF"],
+            ["powerpoint-to-pdf", "PowerPoint to PDF"],
+            ["pdf-to-powerpoint", "PDF to PowerPoint"]
           ].map(([value, label]) => (
             <label key={value} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
               <input
@@ -242,7 +275,7 @@ function Convert() {
         </div>
       </section>
 
-      {!isImagesToPdf && (
+      {!isImagesToPdf && !isOfficeUploadMode && (
         <>
           <UploadBox onUpload={handleFile} />
 
@@ -292,6 +325,19 @@ function Convert() {
             </section>
           )}
         </>
+      )}
+
+      {isOfficeUploadMode && (
+        <section style={{ width: "min(100% - 32px, 720px)", margin: "24px auto", padding: 20, border: "1px dashed #9bbcff", borderRadius: 12, background: "#fff" }}>
+          <h3 style={{ marginTop: 0 }}>Choose {mode === "word-to-pdf" ? "a Word DOCX document" : "a PowerPoint PPTX presentation"}</h3>
+          <input
+            type="file"
+            accept={mode === "word-to-pdf" ? ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"}
+            onChange={event => { setOfficeFile(event.target.files?.[0] || null); clearResult(); setError("") }}
+          />
+          {officeFile && <p style={{ color: "#475569", overflowWrap: "anywhere" }}>Selected: {officeFile.name} · {(officeFile.size / 1024).toFixed(1)} KB</p>}
+          <p style={{ color: "#64748b", marginBottom: 0 }}>Maximum upload size: 20 MB. Conversion runs on the HotPDF server.</p>
+        </section>
       )}
 
       {isImagesToPdf && (
@@ -403,7 +449,7 @@ function Convert() {
         </section>
       )}
 
-      {progress > 0 && progress < 100 && !isImagesToPdf && (
+      {progress > 0 && progress < 100 && !isImagesToPdf && !isOfficeUploadMode && (
         <div className="upload-progress">
           <div className="progress-bar">
             <div className="progress-inner" style={{ width: `${progress}%` }} />
@@ -421,7 +467,9 @@ function Convert() {
           {loading ? "Uploading..." : converting ? "Converting..." :
             isImagesToPdf ? "Convert Images to PDF" :
               mode === "pdf-to-images" ? `Convert PDF to ${imageFormat.toUpperCase()}` :
-                "Convert to Word"}
+                mode === "word-to-pdf" ? "Convert Word to PDF" :
+                  mode === "powerpoint-to-pdf" ? "Convert PowerPoint to PDF" :
+                    mode === "pdf-to-powerpoint" ? "Convert PDF to PowerPoint" : "Convert to Word"}
         </button>
       </div>
 

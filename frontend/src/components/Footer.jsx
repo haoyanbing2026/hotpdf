@@ -21,6 +21,7 @@ function Footer() {
           <Link to="/about">About</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
+          <Link to="/feedback">Leave feedback</Link>
         </div>
       </div>
       <div className="footer-bottom">© 2026 HotPDF. All rights reserved.</div>
