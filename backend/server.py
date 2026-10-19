@@ -1255,6 +1255,7 @@ async def edit_pdf(
     filename: str,
     rotations: str = "{}",
     delete_pages: str = "",
+    page_order: str = "",
 ):
     """Rotate selected pages and/or delete pages, using 1-based page numbers."""
     source = stored_path(filename, pdf_only=True)
@@ -1273,6 +1274,14 @@ async def edit_pdf(
         deleted = [int(item.strip()) for item in delete_pages.split(",") if item.strip()] if delete_pages.strip() else []
         if len(deleted) != len(set(deleted)):
             raise ValueError("duplicate page numbers")
+        requested_order = None
+        if page_order.strip():
+            requested_order = json.loads(page_order)
+            if not isinstance(requested_order, list):
+                raise ValueError("page_order must be a list")
+            requested_order = [int(item) for item in requested_order]
+            if len(requested_order) != len(set(requested_order)):
+                raise ValueError("duplicate page order entries")
     except (ValueError, TypeError, json.JSONDecodeError):
         raise HTTPException(status_code=400, detail="Invalid page edits. Please refresh and try again.") from None
 
@@ -1294,8 +1303,15 @@ async def edit_pdf(
                     for page_number, degrees in normalized_rotations.items():
                         page = pdf[page_number - 1]
                         page.set_rotation((page.rotation + degrees) % 360)
-                    for page_number in sorted(deleted, reverse=True):
-                        pdf.delete_page(page_number - 1)
+                    expected_pages = valid_pages - set(deleted)
+                    final_order = requested_order if requested_order is not None else sorted(expected_pages)
+                    if len(final_order) != len(expected_pages) or set(final_order) != expected_pages:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Page order must include every kept page exactly once.",
+                        )
+                    # PyMuPDF select() both removes omitted pages and reorders the kept pages.
+                    pdf.select([page_number - 1 for page_number in final_order])
                     pdf.save(str(output), garbage=4, deflate=True, clean=True)
                     return pdf.page_count
 
