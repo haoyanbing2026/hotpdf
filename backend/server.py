@@ -1256,6 +1256,9 @@ async def edit_pdf(
     rotations: str = "{}",
     delete_pages: str = "",
     page_order: str = "",
+    insert_filename: str = "",
+    insert_pages: str = "",
+    insert_before: int = 1,
 ):
     """Rotate selected pages and/or delete pages, using 1-based page numbers."""
     source = stored_path(filename, pdf_only=True)
@@ -1282,8 +1285,21 @@ async def edit_pdf(
             requested_order = [int(item) for item in requested_order]
             if len(requested_order) != len(set(requested_order)):
                 raise ValueError("duplicate page order entries")
+        inserted_pages = [int(item.strip()) for item in insert_pages.split(",") if item.strip()] if insert_pages.strip() else []
+        if len(inserted_pages) != len(set(inserted_pages)):
+            raise ValueError("duplicate inserted page numbers")
+        if insert_before < 1:
+            raise ValueError("insert_before must be positive")
     except (ValueError, TypeError, json.JSONDecodeError):
         raise HTTPException(status_code=400, detail="Invalid page edits. Please refresh and try again.") from None
+
+    insert_source = None
+    if inserted_pages:
+        if not insert_filename:
+            raise HTTPException(status_code=400, detail="Choose a second PDF before inserting pages.")
+        insert_source = stored_path(insert_filename, pdf_only=True)
+        if insert_source.resolve() == source.resolve():
+            raise HTTPException(status_code=400, detail="Choose a different PDF to insert pages from.")
 
     output_name = new_filename("edited", "pdf")
     output = UPLOAD_DIR / output_name
@@ -1312,6 +1328,21 @@ async def edit_pdf(
                         )
                     # PyMuPDF select() both removes omitted pages and reorders the kept pages.
                     pdf.select([page_number - 1 for page_number in final_order])
+                    if inserted_pages:
+                        with fitz.open(str(insert_source)) as extra_pdf:
+                            if any(number < 1 or number > extra_pdf.page_count for number in inserted_pages):
+                                raise HTTPException(status_code=400, detail="An inserted page number is invalid.")
+                            if insert_before > pdf.page_count + 1:
+                                raise HTTPException(status_code=400, detail="The insertion position is invalid.")
+                            insertion_index = insert_before - 1
+                            for page_number in inserted_pages:
+                                pdf.insert_pdf(
+                                    extra_pdf,
+                                    from_page=page_number - 1,
+                                    to_page=page_number - 1,
+                                    start_at=insertion_index,
+                                )
+                                insertion_index += 1
                     pdf.save(str(output), garbage=4, deflate=True, clean=True)
                     return pdf.page_count
 

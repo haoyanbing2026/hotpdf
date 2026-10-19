@@ -12,6 +12,12 @@ function EditPDF() {
   const [deletedPages, setDeletedPages] = useState([])
   const [pageOrder, setPageOrder] = useState([])
   const [draggedPage, setDraggedPage] = useState(null)
+  const [insertFile, setInsertFile] = useState(null)
+  const [insertFilename, setInsertFilename] = useState("")
+  const [insertPages, setInsertPages] = useState([])
+  const [insertPageCount, setInsertPageCount] = useState(0)
+  const [insertBefore, setInsertBefore] = useState(1)
+  const [insertUploading, setInsertUploading] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [result, setResult] = useState(null)
@@ -28,6 +34,7 @@ function EditPDF() {
   function resetForFile(nextFile) {
     setFile(nextFile); setUploaded(false); setRotations({}); setDeletedPages([])
     setPageOrder([]); setDraggedPage(null)
+    setInsertFile(null); setInsertFilename(""); setInsertPages([]); setInsertPageCount(0); setInsertBefore(1); setInsertUploading(false)
     setBusy(false); setError(""); setResult(null)
   }
 
@@ -64,11 +71,54 @@ function EditPDF() {
     setError(""); setResult(null)
   }
 
+  async function handleInsertUpload(selectedFile) {
+    setInsertFile(selectedFile || null)
+    setInsertFilename("")
+    setInsertPages([])
+    setInsertPageCount(0)
+    setResult(null)
+    setError("")
+    if (!selectedFile) return
+    if (selectedFile.type !== "application/pdf" && !selectedFile.name.toLowerCase().endsWith(".pdf")) {
+      setError("Please choose a PDF file.")
+      return
+    }
+    const formData = new FormData()
+    formData.append("file", selectedFile)
+    setInsertUploading(true)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, { method: "POST", body: formData })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.detail || "Could not upload the second PDF.")
+      setInsertFilename(data.filename)
+      setInsertPageCount(Number(data.pages) || 0)
+      setInsertPages(Array.from({ length: Number(data.pages) || 0 }, (_, index) => index + 1))
+      setInsertBefore(remainingPages.length + 1)
+    } catch (err) {
+      setError(err.message || "Could not upload the second PDF.")
+      setInsertFile(null)
+    } finally {
+      setInsertUploading(false)
+    }
+  }
+
+  function toggleInsertPage(page) {
+    setInsertPages(current => current.includes(page) ? current.filter(item => item !== page) : [...current, page].sort((a, b) => a - b))
+    setError("")
+    setResult(null)
+  }
+
   async function applyEdits() {
     if (!uploaded || !filename) { setError("Please upload a PDF first."); return }
     if (remainingPages.length < 1) { setError("Keep at least one page in the PDF."); return }
-    if (Object.values(rotations).every(degrees => degrees === 0) && deletedPages.length === 0) {
-      setError("Rotate or delete at least one page before applying changes."); return
+    if (Object.values(rotations).every(degrees => degrees === 0) && deletedPages.length === 0 && insertPages.length === 0 && remainingPages.every((page, index) => pageOrder[index] === page)) {
+      setError("Rotate, delete, reorder, or insert at least one page before applying changes."); return
+    }
+    if (insertPages.length > 0 && !insertFilename) {
+      setError("Upload the second PDF before inserting pages."); return
+    }
+    if (insertPages.length > 0 && (insertBefore < 1 || insertBefore > remainingPages.length + 1)) {
+      setError("Choose a valid insertion position."); return
     }
     setBusy(true); setError(""); setResult(null)
     try {
@@ -76,7 +126,10 @@ function EditPDF() {
         filename,
         rotations: JSON.stringify(Object.fromEntries(Object.entries(rotations).filter(([, degrees]) => degrees !== 0))),
         delete_pages: deletedPages.join(","),
-        page_order: JSON.stringify(remainingPages)
+        page_order: JSON.stringify(remainingPages),
+        insert_filename: insertFilename,
+        insert_pages: insertPages.join(","),
+        insert_before: String(insertBefore)
       })
       const response = await fetch(`${import.meta.env.VITE_API_URL}/edit_pdf?${params}`, { method: "POST" })
       const data = await response.json()
@@ -92,7 +145,7 @@ function EditPDF() {
 
   return (
     <div className="page">
-      <ToolHeader icon="📝" title="Edit PDF" description="Rotate pages or remove unwanted pages, then download a new PDF." />
+      <ToolHeader icon="📝" title="Edit PDF" description="Reorder, rotate, remove, or insert pages from another PDF, then download a new PDF." />
       <UploadBox onUpload={resetForFile} />
       {file && <div style={{ textAlign: "center", margin: "16px 0" }}>
         <button className="primary-btn" onClick={handleUpload} disabled={loading || busy}>
@@ -106,9 +159,33 @@ function EditPDF() {
       {uploaded && filename && <section style={{ maxWidth: 1080, margin: "28px auto", padding: "0 16px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
           <div><h2 style={{ marginBottom: 6 }}>Organize your pages</h2>
-            <p style={{ margin: 0, color: "#64748b" }}>{remainingPages.length} of {pages.length} pages kept · Drag pages to reorder; rotations apply clockwise.</p></div>
+            <p style={{ margin: 0, color: "#64748b" }}>{remainingPages.length} of {pages.length} pages kept · Drag pages to reorder; insert pages from another PDF below. Rotations apply clockwise.</p></div>
           <button className="secondary-btn" onClick={() => { setRotations({}); setDeletedPages([]); setPageOrder(pages); setError(""); setResult(null) }} disabled={busy}>Reset Changes</button>
         </div>
+        <section style={{ border: "1px solid #dbeafe", background: "#f8fbff", borderRadius: 12, padding: 16, marginBottom: 22 }}>
+          <h3 style={{ margin: "0 0 8px" }}>Insert pages from another PDF</h3>
+          <p style={{ margin: "0 0 12px", color: "#64748b", fontSize: 14 }}>Upload a second PDF, select the pages you need, and choose where to insert them.</p>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 14px", borderRadius: 8, background: "#2563eb", color: "white", cursor: insertUploading || busy ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 600, opacity: insertUploading || busy ? 0.65 : 1 }}>
+            {insertUploading ? "Uploading PDF..." : insertFilename ? "Choose another PDF" : "Choose second PDF"}
+            <input type="file" accept="application/pdf,.pdf" disabled={insertUploading || busy} style={{ display: "none" }} onChange={event => { handleInsertUpload(event.target.files?.[0]); event.target.value = "" }} />
+          </label>
+          {insertFilename && <div style={{ marginTop: 12 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 13, color: "#334155" }}>{insertFile?.name || "Second PDF uploaded"} · {insertPageCount} pages</p>
+            <label style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, fontSize: 13, marginBottom: 12 }}>
+              Insert before page
+              <select value={insertBefore} onChange={event => { setInsertBefore(Number(event.target.value)); setResult(null) }} disabled={busy} style={{ border: "1px solid #cbd5e1", borderRadius: 7, padding: "7px 10px", background: "white" }}>
+                {Array.from({ length: remainingPages.length + 1 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1 <= remainingPages.length ? `Page ${index + 1}` : "End of document"}</option>)}
+              </select>
+            </label>
+            <p style={{ fontSize: 13, margin: "0 0 10px", color: "#334155" }}>Select pages to insert ({insertPages.length} selected)</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 10 }}>
+              {Array.from({ length: insertPageCount }, (_, index) => index + 1).map(page => <label key={page} style={{ border: insertPages.includes(page) ? "2px solid #2563eb" : "1px solid #e2e8f0", borderRadius: 9, background: "white", padding: 8, cursor: "pointer" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4, marginBottom: 6 }}><span style={{ fontSize: 12, fontWeight: 600 }}>Page {page}</span><input type="checkbox" checked={insertPages.includes(page)} onChange={() => toggleInsertPage(page)} disabled={busy} /></div>
+                <img src={`${import.meta.env.VITE_API_URL}/preview/${encodeURIComponent(insertFilename)}/${page}`} alt={`Source PDF page ${page}`} loading="lazy" style={{ display: "block", width: "100%", height: 120, objectFit: "contain", background: "#f1f5f9", borderRadius: 5 }} />
+              </label>)}
+            </div>
+          </div>}
+        </section>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 16 }}>
           {orderedPages.map(page => {
             const deleted = deletedPages.includes(page); const rotation = rotations[page] || 0
@@ -135,7 +212,7 @@ function EditPDF() {
       {(uploadError || error) && <div className="error-message" role="alert">⚠️ {uploadError || error}</div>}
       {result && <ResultCard title="PDF editing completed" message="Your edited PDF is ready. The original file has not been changed." info={result.info} downloadUrl={result.url} downloadText="Download Edited PDF" />}
       <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 16px 48px", lineHeight: 1.7 }}>
-        <h2>Edit PDF Pages Online</h2><p>Preview your PDF pages, rotate pages clockwise, or remove pages you no longer need. Download your changes as a new PDF while keeping your original file unchanged.</p>
+        <h2>Edit PDF Pages Online</h2><p>Preview, reorder, rotate, or remove PDF pages. You can also insert selected pages from another PDF. Download your changes as a new PDF while keeping your original file unchanged.</p>
       </section>
     </div>
   )
