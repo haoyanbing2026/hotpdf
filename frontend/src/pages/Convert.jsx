@@ -328,15 +328,44 @@ function Convert() {
       )}
 
       {isOfficeUploadMode && (
-        <section style={{ width: "min(100% - 32px, 720px)", margin: "24px auto", padding: 20, border: "1px dashed #9bbcff", borderRadius: 12, background: "#fff" }}>
-          <h3 style={{ marginTop: 0 }}>Choose {mode === "word-to-pdf" ? "a Word DOCX document" : "a PowerPoint PPTX presentation"}</h3>
+        <section style={{ width: "min(100% - 32px, 720px)", margin: "24px auto", padding: "28px 20px", border: "1px dashed #9bbcff", borderRadius: 12, background: "#fff", textAlign: "center" }}>
+          <h3 style={{ margin: "0 0 8px", color: "#0f2748" }}>
+            {mode === "word-to-pdf" ? "Upload Word Document" : "Upload PowerPoint Presentation"}
+          </h3>
+          <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 14 }}>
+            {mode === "word-to-pdf" ? "Choose a DOCX file to convert into PDF." : "Choose a PPTX file to convert into PDF."}
+          </p>
           <input
+            id="hotpdf-office-file"
+            key={mode}
             type="file"
             accept={mode === "word-to-pdf" ? ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"}
-            onChange={event => { setOfficeFile(event.target.files?.[0] || null); clearResult(); setError("") }}
+            style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0 }}
+            onChange={event => {
+              setOfficeFile(event.target.files?.[0] || null)
+              clearResult()
+              event.target.value = ""
+            }}
           />
-          {officeFile && <p style={{ color: "#475569", overflowWrap: "anywhere" }}>Selected: {officeFile.name} · {(officeFile.size / 1024).toFixed(1)} KB</p>}
-          <p style={{ color: "#64748b", marginBottom: 0 }}>Maximum upload size: 20 MB. Conversion runs on the HotPDF server.</p>
+          <label
+            htmlFor="hotpdf-office-file"
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 42, boxSizing: "border-box", padding: "11px 22px", border: "1px solid #2563eb", borderRadius: 8, background: "#2563eb", color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1.2, cursor: "pointer", boxShadow: "0 2px 5px rgba(37, 99, 235, 0.16)" }}
+          >
+            <span aria-hidden="true">＋</span>
+            {mode === "word-to-pdf" ? "Choose Word File" : "Choose PPTX File"}
+          </label>
+          {officeFile && (
+            <div role="status" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "20px auto 0", padding: "12px 14px", maxWidth: 520, border: "1px solid #e2e8f0", borderRadius: 10, background: "#f8fafc", textAlign: "left" }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ color: "#334155", fontWeight: 600, fontSize: 14, overflowWrap: "anywhere" }}>{officeFile.name}</div>
+                <div style={{ color: "#64748b", fontSize: 12, marginTop: 4 }}>{(officeFile.size / 1024).toFixed(1)} KB · Ready to convert</div>
+              </div>
+              <span aria-label="File selected" style={{ color: "#16a34a", fontSize: 20 }}>✓</span>
+            </div>
+          )}
+          <p style={{ color: "#64748b", fontSize: 13, margin: "20px 0 0" }}>
+            Maximum upload size: 20 MB · Conversion runs on the HotPDF server.
+          </p>
         </section>
       )}
 
