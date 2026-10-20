@@ -8,6 +8,9 @@ export default function FeedbackAdmin() {
   const [total, setTotal] = useState(0)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [replyDrafts, setReplyDrafts] = useState({})
+  const [sendingId, setSendingId] = useState(null)
+  const [replyNotice, setReplyNotice] = useState({})
 
   useEffect(() => {
     document.title = "Author Inbox | HotPDF"
@@ -45,6 +48,29 @@ export default function FeedbackAdmin() {
     } catch (err) { setError(err.message) }
   }
 
+  async function sendReply(item) {
+    const message = (replyDrafts[item.id] || "").trim()
+    if (!message || !item.email || item.reply_sent_at || sendingId !== null) return
+    if (!window.confirm(`Send this email reply to ${item.email}? This action cannot be undone.`)) return
+    setSendingId(item.id)
+    setError("")
+    setReplyNotice(current => ({ ...current, [item.id]: "" }))
+    try {
+      const data = await request(`/author/feedback/${item.id}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      })
+      setItems(current => current.map(entry => entry.id === item.id ? { ...entry, ...data } : entry))
+      setReplyNotice(current => ({ ...current, [item.id]: "Email accepted by provider. Delivery may take a moment." }))
+      setReplyDrafts(current => ({ ...current, [item.id]: "" }))
+    } catch (err) {
+      setError(err.message || "Could not send reply.")
+    } finally {
+      setSendingId(null)
+    }
+  }
+
   async function removeMessage(id) {
     if (!window.confirm("Permanently delete this message?")) return
     try {
@@ -71,6 +97,46 @@ export default function FeedbackAdmin() {
             </div>
             {item.email && <p style={{ margin: "8px 0" }}>Email: <a href={`mailto:${encodeURIComponent(item.email)}`}>{item.email}</a></p>}
             <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{item.message}</p>
+            <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: 14, marginTop: 16 }}>
+              <label htmlFor={`reply-${item.id}`} style={{ display: "block", fontWeight: 600, marginBottom: 8 }}>
+                Reply by email
+              </label>
+              {item.email ? (
+                <>
+                  <p style={{ margin: "0 0 8px", color: "#64748b", fontSize: 13 }}>Recipient: {item.email}</p>
+                  {item.reply_sent_at && (
+                    <div style={{ padding: 12, background: "#f0fdf4", borderRadius: 8, marginBottom: 10, color: "#166534" }}>
+                      <strong>Reply sent:</strong> {new Date(item.reply_sent_at).toLocaleString()}
+                      <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginBottom: 0 }}>{item.reply_text}</p>
+                    </div>
+                  )}
+                  {!item.reply_sent_at && <textarea
+                    id={`reply-${item.id}`}
+                    value={replyDrafts[item.id] || ""}
+                    onChange={event => setReplyDrafts(current => ({ ...current, [item.id]: event.target.value }))}
+                    placeholder="Write your reply to this visitor..."
+                    rows={4}
+                    maxLength={5000}
+                    style={{ width: "100%", boxSizing: "border-box", padding: 12, border: "1px solid #cbd5e1", borderRadius: 8, font: "inherit", resize: "vertical" }}
+                  />}
+                  {!item.reply_sent_at && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", margin: "10px 0 16px" }}>
+                      <button type="button" className="primary-btn"
+                        onClick={() => sendReply(item)}
+                        disabled={sendingId !== null || !(replyDrafts[item.id] || "").trim() || item.reply_send_state === "sending"}>
+                        {sendingId === item.id ? "Sending…" : "Send Reply"}
+                      </button>
+                      <small style={{ color: "#64748b" }}>A confirmation is required before sending.</small>
+                    </div>
+                  )}
+                  {item.reply_send_state === "sending" && <p role="status">Sending may be in progress. Check provider logs before retrying.</p>}
+                  {item.reply_send_state === "failed" && <p style={{ color: "#b45309" }}>Previous attempt was not confirmed. Check the Gmail Sent folder before retrying.</p>}
+                  {replyNotice[item.id] && <p role="status" style={{ color: "#166534" }}>{replyNotice[item.id]}</p>}
+                </>
+              ) : (
+                <p style={{ color: "#64748b", margin: "0 0 16px", fontSize: 14 }}>No email provided. Email replies are unavailable for this message.</p>
+              )}
+            </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <label>Status: <select value={item.status} onChange={event => updateStatus(item.id, event.target.value)} style={{ padding: 7, borderRadius: 6 }}>
                 <option value="new">New</option><option value="read">Read</option><option value="replied">Replied</option><option value="archived">Archived</option>

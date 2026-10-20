@@ -45,7 +45,10 @@ export default function Feedback() {
           <input name="name" value={form.name} onChange={update} required maxLength={80} autoComplete="name" style={fieldStyle} />
         </label>
         <label style={{ display: "grid", gap: 6 }}>Email (optional)
-          <input name="email" type="email" value={form.email} onChange={update} maxLength={254} autoComplete="email" style={fieldStyle} />
+          <input name="email" type="email" value={form.email} onChange={update} maxLength={254} autoComplete="email" style={fieldStyle} placeholder="yourname@example.com" aria-describedby="feedback-email-hint" />
+          <small id="feedback-email-hint" style={{ color: "#64748b", fontWeight: 400, lineHeight: 1.5 }}>
+            If you would like a reply from the HotPDF developer, please provide your email address.
+          </small>
         </label>
         <label style={{ display: "grid", gap: 6 }}>Message *
           <textarea name="message" value={form.message} onChange={update} required minLength={5} maxLength={5000} rows={7} style={{ ...fieldStyle, resize: "vertical" }} />

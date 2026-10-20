@@ -14,6 +14,9 @@ import tempfile
 import time
 import uuid
 import zipfile
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 from contextlib import asynccontextmanager, suppress, contextmanager
 from pathlib import Path
@@ -103,6 +106,10 @@ PDF_NAME_RE = re.compile(
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 USE_POSTGRES = bool(DATABASE_URL)
 ADMIN_TOKEN = os.getenv("FEEDBACK_ADMIN_TOKEN", "").strip()
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "").strip()
+SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD", "").strip()
 
 if not USE_POSTGRES:
     FEEDBACK_DB = Path(os.getenv("FEEDBACK_DB_PATH", "/data/hotpdf_feedback.sqlite3"))
@@ -154,6 +161,15 @@ def initialize_feedback_db():
             )
         """)
         connection.execute("CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC)")
+        columns = {
+            row["column_name"] if USE_POSTGRES else row["name"]
+            for row in (connection.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'feedback'"
+            ).fetchall() if USE_POSTGRES else connection.execute("PRAGMA table_info(feedback)").fetchall())
+        }
+        for column in ("reply_text", "reply_sent_at", "reply_email_id", "reply_send_state"):
+            if column not in columns:
+                connection.execute(f"ALTER TABLE feedback ADD COLUMN {column} TEXT")
 
 
 initialize_feedback_db()
@@ -168,6 +184,10 @@ class FeedbackSubmission(BaseModel):
 
 class FeedbackStatusUpdate(BaseModel):
     status: str = Field(pattern="^(new|read|replied|archived)$")
+
+
+class FeedbackEmailReply(BaseModel):
+    message: str = Field(min_length=1, max_length=5000)
 
 
 def require_feedback_admin(authorization: str | None):
@@ -1543,7 +1563,7 @@ def list_feedback(authorization: str | None = Header(default=None), limit: int =
     with feedback_connection() as connection:
         total = connection.execute("SELECT COUNT(*) AS total FROM feedback").fetchone()["total"]
         rows = feedback_execute(connection,
-            "SELECT id,name,email,message,created_at,status FROM feedback ORDER BY id DESC LIMIT ? OFFSET ?",
+            "SELECT id,name,email,message,created_at,status,reply_text,reply_sent_at,reply_email_id,reply_send_state FROM feedback ORDER BY id DESC LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
     return {"total": total, "items": [dict(row) for row in rows]}
@@ -1557,6 +1577,78 @@ def update_feedback_status(feedback_id: int, payload: FeedbackStatusUpdate, auth
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Feedback message not found.")
     return {"message": "Status updated."}
+
+
+def send_feedback_email(recipient: str, name: str, message: str):
+    if not SMTP_USER or not SMTP_APP_PASSWORD:
+        raise HTTPException(status_code=503, detail="Gmail SMTP is not configured.")
+    mail = EmailMessage()
+    mail["From"] = SMTP_USER
+    mail["To"] = recipient
+    mail["Subject"] = "A reply to your HotPDF feedback"
+    mail["Reply-To"] = SMTP_USER
+    mail.set_content(f"Hello {name},\n\nThank you for contacting HotPDF.\n\n{message}\n\nBest regards,\nHotPDF")
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
+            smtp.ehlo()
+            smtp.starttls(context=ssl.create_default_context())
+            smtp.ehlo()
+            smtp.login(SMTP_USER, SMTP_APP_PASSWORD)
+            smtp.send_message(mail)
+        return "smtp-accepted-" + uuid.uuid4().hex
+    except (smtplib.SMTPException, OSError, TimeoutError):
+        logger.warning("Gmail SMTP send not confirmed", exc_info=True)
+        raise HTTPException(status_code=502, detail="Gmail SMTP did not confirm sending. Check the Gmail Sent folder before retrying.") from None
+
+
+@app.post("/author/feedback/{feedback_id}/reply")
+async def reply_to_feedback(
+    feedback_id: int,
+    payload: FeedbackEmailReply,
+    authorization: str | None = Header(default=None),
+):
+    require_feedback_admin(authorization)
+    message = payload.message.strip()
+    if not message:
+        raise HTTPException(status_code=422, detail="Reply cannot be empty.")
+    if not SMTP_USER or not SMTP_APP_PASSWORD:
+        raise HTTPException(status_code=503, detail="Gmail SMTP is not configured.")
+
+    # Atomic claim prevents two simultaneous requests from sending twice.
+    with feedback_connection() as connection:
+        cursor = feedback_execute(connection, """
+            UPDATE feedback SET reply_send_state='sending'
+            WHERE id=? AND reply_sent_at IS NULL
+              AND (reply_send_state IS NULL OR reply_send_state='failed')
+              AND email IS NOT NULL AND email != ''
+        """, (feedback_id,))
+        if cursor.rowcount != 1:
+            row = feedback_execute(connection, "SELECT id,email,reply_sent_at,reply_send_state FROM feedback WHERE id=?", (feedback_id,)).fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Feedback message not found.")
+            if not row["email"]:
+                raise HTTPException(status_code=400, detail="This visitor did not provide an email address.")
+            raise HTTPException(status_code=409, detail="Reply already sent or sending. Check Gmail Sent folder before retrying.")
+        row = feedback_execute(connection, "SELECT name,email FROM feedback WHERE id=?", (feedback_id,)).fetchone()
+
+    try:
+        provider_id = await run_in_threadpool(send_feedback_email, row["email"], row["name"], message)
+    except HTTPException:
+        # Provider errors can be ambiguous; never retry automatically.
+        with feedback_connection() as connection:
+            feedback_execute(connection, "UPDATE feedback SET reply_send_state='failed' WHERE id=? AND reply_send_state='sending'", (feedback_id,))
+        raise
+
+    sent_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with feedback_connection() as connection:
+        feedback_execute(connection, """
+            UPDATE feedback SET reply_text=?, reply_sent_at=?, reply_email_id=?,
+                                reply_send_state='sent', status='replied'
+            WHERE id=? AND reply_send_state='sending'
+        """, (message, sent_at, provider_id, feedback_id))
+    return {"message": "Reply accepted by Gmail SMTP.", "status": "replied",
+            "reply_text": message, "reply_sent_at": sent_at, "reply_email_id": provider_id,
+            "reply_send_state": "sent"}
 
 
 @app.delete("/author/feedback/{feedback_id}")
