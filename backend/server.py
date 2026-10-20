@@ -14,9 +14,9 @@ import tempfile
 import time
 import uuid
 import zipfile
-import smtplib
-import ssl
+import base64
 from email.message import EmailMessage
+from urllib import request as urlrequest, parse as urlparse, error as urlerror
 
 from contextlib import asynccontextmanager, suppress, contextmanager
 from pathlib import Path
@@ -106,10 +106,13 @@ PDF_NAME_RE = re.compile(
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 USE_POSTGRES = bool(DATABASE_URL)
 ADMIN_TOKEN = os.getenv("FEEDBACK_ADMIN_TOKEN", "").strip()
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "").strip()
-SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD", "").strip()
+GMAIL_CLIENT_ID = os.getenv("GMAIL_CLIENT_ID", "").strip()
+GMAIL_CLIENT_SECRET = os.getenv("GMAIL_CLIENT_SECRET", "").strip()
+GMAIL_REFRESH_TOKEN = os.getenv("GMAIL_REFRESH_TOKEN", "").strip()
+GMAIL_SENDER = os.getenv("GMAIL_SENDER", "").strip()
+
+def gmail_api_configured():
+    return all((GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_SENDER))
 
 if not USE_POSTGRES:
     FEEDBACK_DB = Path(os.getenv("FEEDBACK_DB_PATH", "/data/hotpdf_feedback.sqlite3"))
@@ -1580,25 +1583,54 @@ def update_feedback_status(feedback_id: int, payload: FeedbackStatusUpdate, auth
 
 
 def send_feedback_email(recipient: str, name: str, message: str):
-    if not SMTP_USER or not SMTP_APP_PASSWORD:
-        raise HTTPException(status_code=503, detail="Gmail SMTP is not configured.")
+    """Send a reply through Gmail HTTPS API; return Gmail's message id."""
+    if not gmail_api_configured():
+        raise HTTPException(status_code=503, detail="Gmail API is not configured.")
+
     mail = EmailMessage()
-    mail["From"] = SMTP_USER
+    mail["From"] = GMAIL_SENDER
     mail["To"] = recipient
     mail["Subject"] = "A reply to your HotPDF feedback"
-    mail["Reply-To"] = SMTP_USER
+    mail["Reply-To"] = GMAIL_SENDER
     mail.set_content(f"Hello {name},\n\nThank you for contacting HotPDF.\n\n{message}\n\nBest regards,\nHotPDF")
+
+    token_data = urlparse.urlencode({
+        "client_id": GMAIL_CLIENT_ID,
+        "client_secret": GMAIL_CLIENT_SECRET,
+        "refresh_token": GMAIL_REFRESH_TOKEN,
+        "grant_type": "refresh_token",
+    }).encode("utf-8")
+    token_request = urlrequest.Request(
+        "https://oauth2.googleapis.com/token",
+        data=token_data,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
-            smtp.ehlo()
-            smtp.starttls(context=ssl.create_default_context())
-            smtp.ehlo()
-            smtp.login(SMTP_USER, SMTP_APP_PASSWORD)
-            smtp.send_message(mail)
-        return "smtp-accepted-" + uuid.uuid4().hex
-    except (smtplib.SMTPException, OSError, TimeoutError):
-        logger.warning("Gmail SMTP send not confirmed", exc_info=True)
-        raise HTTPException(status_code=502, detail="Gmail SMTP did not confirm sending. Check the Gmail Sent folder before retrying.") from None
+        with urlrequest.urlopen(token_request, timeout=20) as response:
+            access_token = json.load(response)["access_token"]
+        encoded_mail = base64.urlsafe_b64encode(mail.as_bytes()).decode("ascii")
+        api_request = urlrequest.Request(
+            "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+            data=json.dumps({"raw": encoded_mail}).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        with urlrequest.urlopen(api_request, timeout=25) as response:
+            result = json.load(response)
+        message_id = result.get("id")
+        if not message_id:
+            raise ValueError("Gmail API response missing message id")
+        return message_id
+    except (urlerror.HTTPError, urlerror.URLError, TimeoutError, OSError, ValueError, KeyError):
+        logger.warning("Gmail API send not confirmed", exc_info=True)
+        raise HTTPException(
+            status_code=502,
+            detail="Gmail API did not confirm sending. Check Gmail Sent folder before retrying.",
+        ) from None
 
 
 @app.post("/author/feedback/{feedback_id}/reply")
@@ -1611,8 +1643,8 @@ async def reply_to_feedback(
     message = payload.message.strip()
     if not message:
         raise HTTPException(status_code=422, detail="Reply cannot be empty.")
-    if not SMTP_USER or not SMTP_APP_PASSWORD:
-        raise HTTPException(status_code=503, detail="Gmail SMTP is not configured.")
+    if not gmail_api_configured():
+        raise HTTPException(status_code=503, detail="Gmail API is not configured.")
 
     # Atomic claim prevents two simultaneous requests from sending twice.
     with feedback_connection() as connection:
@@ -1646,7 +1678,7 @@ async def reply_to_feedback(
                                 reply_send_state='sent', status='replied'
             WHERE id=? AND reply_send_state='sending'
         """, (message, sent_at, provider_id, feedback_id))
-    return {"message": "Reply accepted by Gmail SMTP.", "status": "replied",
+    return {"message": "Reply accepted by Gmail API.", "status": "replied",
             "reply_text": message, "reply_sent_at": sent_at, "reply_email_id": provider_id,
             "reply_send_state": "sent"}
 
