@@ -155,7 +155,9 @@ async function compressPDF(){
   setCompressing(true)
   try {
     const data = await uploadPDF()
-    if (!data?.filename) return
+    if (!data?.filename) {
+      throw new Error("PDF upload failed. Please choose a PDF file and try again.")
+    }
 
     const params = new URLSearchParams({ filename: data.filename })
     if (targetBytes !== null) params.set("target_bytes", String(targetBytes))
@@ -175,11 +177,19 @@ async function compressPDF(){
       throw new Error(result?.detail || result?.message || "Compression failed.")
     }
 
+    // Do not display a saved-size value when compression did not reduce the file.
+    // parseFloat also handles values such as "0 MB" or "0.00%".
+    const savedValue = result.saved ?? ""
+    const savedNumber = Number.parseFloat(String(savedValue).replace(/,/g, ""))
+    const displaySaved = savedValue !== "" && !(Number.isFinite(savedNumber) && savedNumber === 0)
+      ? savedValue
+      : ""
+
     setResultInfo(createPDFResult({
       filename: result.filename,
       originalSize: result.original_size ?? "",
       compressedSize: result.compressed_size ?? "",
-      saved: result.saved ?? ""
+      saved: displaySaved
     }))
 
     if (compressionMode === "target") {
@@ -433,19 +443,10 @@ compressing
 
 
 {
-
-(uploadError || error) &&
-
-
-<div className="error-message">
-
-
-⚠️ {uploadError || error}
-
-
-</div>
-
-
+  (error || (!previewFile && uploadError)) &&
+  <div className="error-message" role="alert">
+    ⚠️ {error || uploadError}
+  </div>
 }
 
 
